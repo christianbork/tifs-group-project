@@ -1,0 +1,7 @@
+group,var,calm_coef,calm_t,stressed_coef,stressed_t,diff_t,pct_bars_stressed
+constrained,impact_roll_ewm_bps,0.018,0.434,0.023,0.575,0.113,46.177
+constrained,impact_prevday_bps,0.085,1.079,0.173,2.314,1.344,46.177
+constrained,log_vol_har,-0.068,-0.488,0.46,3.143,2.956,46.177
+unconstrained,impact_roll_ewm_bps,0.204,3.038,0.198,3.443,-0.088,48.359
+unconstrained,impact_prevday_bps,-0.207,-1.339,-0.086,-0.545,1.67,48.359
+unconstrained,log_vol_har,1.278,2.614,2.319,4.752,1.787,48.359
