@@ -1,0 +1,101 @@
+"""Volatility forecasts for 5-min bars from 1-min mid returns.
+
+Returns are deseasonalised by an in-sample time-of-day factor that follows the
+US open (15:30 CPH in-sample, 14:30 CPH on 26-30 Oct). Every forecast for a bar
+is made at the end of the previous bar, so it uses returns up to t-1 only.
+"""
+
+import numpy as np
+import pandas as pd
+import statsmodels.api as sm
+from arch import arch_model
+
+
+def seasonal_variance(
+    m1: pd.DataFrame, smooth: int = 5, us_window: int = 60
+) -> pd.Series:
+    """Expected squared 1-min return (bps^2) per row of one stock's 1-min bars.
+
+    v(m): in-sample mean of r^2 by minute of day, smoothed (centred `smooth`-min).
+    The US-open bump = v in the first `us_window` minutes after the in-sample US
+    open relative to the mean of the hour before it; outside that window the
+    pattern is clock time (e.g. the close). The bump is removed from the clock
+    pattern and re-applied at each day's own US open, so on in-sample days this
+    reproduces v(m) exactly.
+    """
+    m1 = m1.assign(us_min=m1["minute_of_day"] - m1["min_since_us_open"])
+    is_ = m1[m1["sample"] == "IS"]
+    v = (is_["ret_bps"] ** 2).groupby(is_["minute_of_day"]).mean()
+    v = (
+        v.reindex(range(m1["minute_of_day"].max() + 1))
+        .rolling(smooth, center=True, min_periods=1)
+        .mean()
+        .bfill()
+    )
+    us_is = int(is_["us_min"].mode().iloc[0])
+    assert (is_["us_min"] == us_is).all(), "in-sample days must share one US-open time"
+    base = v.iloc[us_is - 60 : us_is].mean()
+
+    def bump(k: np.ndarray) -> np.ndarray:
+        k = np.asarray(k)
+        inside = (k >= 0) & (k < us_window)
+        return np.where(
+            inside, v.to_numpy()[np.clip(us_is + k, 0, len(v) - 1)] / base, 1.0
+        )
+
+    m = m1["minute_of_day"].to_numpy()
+    clock = v.to_numpy()[m] / bump(m - us_is)
+    return pd.Series(clock * bump(m - m1["us_min"].to_numpy()), index=m1.index)
+
+
+def garch_variance_forecasts(
+    z: np.ndarray, n_is: int, gjr: bool, horizon: int = 5
+) -> tuple[np.ndarray, pd.Series]:
+    """Fit (GJR-)GARCH(1,1) on the first n_is obs; forecast 1..horizon steps from every origin.
+
+    Row t of the result = variance forecasts for t+1..t+horizon using data up to t,
+    with the parameters fixed at their in-sample estimates.
+    """
+    am = arch_model(
+        z, mean="Zero", vol="GARCH", p=1, o=int(gjr), q=1, dist="normal", rescale=False
+    )
+    res = am.fit(last_obs=n_is, disp="off")
+    fc = res.forecast(horizon=horizon, start=0, reindex=True, align="origin")
+    return fc.variance.to_numpy(), res.params
+
+
+def bar_forecast(m1: pd.DataFrame, f: np.ndarray) -> pd.Series:
+    """Sum minute-level variance forecasts into 5-min bar forecasts (bps^2).
+
+    m1 must hold only valid-return minutes in time order, with columns `bar_ts`
+    and `e` (seasonal variance). Origin = the last valid minute before the bar;
+    the bar's j-th valid minute uses horizon j from that origin.
+    """
+    pos = np.arange(len(m1))
+    origin = (
+        pd.Series(pos, index=m1.index).groupby(m1["bar_ts"]).transform("min").to_numpy()
+        - 1
+    )
+    j = pos - origin  # 1..5
+    ok = (origin >= 0) & (j <= f.shape[1])
+    contrib = np.full(len(m1), np.nan)
+    contrib[ok] = m1["e"].to_numpy()[ok] * f[origin[ok], j[ok] - 1]
+    return pd.Series(contrib, index=m1.index).groupby(m1["bar_ts"]).sum(min_count=1)
+
+
+def qlike(rv2: pd.Series, f2: pd.Series) -> float:
+    """QLIKE loss in the form log F + RV/F (defined when RV = 0; same ranking as Patton 2011)."""
+    return float((np.log(f2) + rv2 / f2).mean())
+
+
+def mincer_zarnowitz(rv2: pd.Series, f2: pd.Series, lags: int = 12) -> dict:
+    """RV^2 = a + b F^2 with Newey-West errors; Wald p-value for a = 0, b = 1."""
+    X = sm.add_constant(f2.to_numpy())
+    res = sm.OLS(rv2.to_numpy(), X).fit(cov_type="HAC", cov_kwds={"maxlags": lags})
+    w = res.wald_test("const = 0, x1 = 1", scalar=True)
+    return {
+        "mz_a": res.params[0],
+        "mz_b": res.params[1],
+        "mz_r2": res.rsquared,
+        "mz_p_unbiased": float(w.pvalue),
+    }

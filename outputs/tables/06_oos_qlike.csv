@@ -1,0 +1,15 @@
+subset,stock,garch,gjr,roll30,atr,har,best
+all days,All,6.52,6.512,6.583,6.909,6.48,har
+all days,DSV,6.542,6.542,6.655,6.667,6.545,gjr
+all days,GN,6.917,6.908,7.124,7.385,6.918,gjr
+all days,ISS,6.377,6.319,6.195,7.244,6.156,har
+all days,Novo,5.933,5.944,5.98,6.116,5.909,har
+all days,Pandora,6.6,6.602,6.747,6.966,6.617,garch
+all days,Vestas,6.754,6.757,6.801,7.078,6.736,har
+ex event days,All,6.441,6.446,6.543,6.774,6.443,garch
+ex event days,DSV,6.542,6.542,6.655,6.667,6.545,gjr
+ex event days,GN,6.917,6.908,7.124,7.385,6.918,gjr
+ex event days,ISS,5.812,5.835,5.854,6.373,5.845,garch
+ex event days,Novo,5.933,5.944,5.98,6.116,5.909,har
+ex event days,Pandora,6.6,6.602,6.747,6.966,6.617,garch
+ex event days,Vestas,6.754,6.757,6.801,7.078,6.736,har
