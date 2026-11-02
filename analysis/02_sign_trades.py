@@ -1,0 +1,90 @@
+# %% [markdown]
+# # 02 Trade signing and quote-timing test
+# 1. Which quote should a trade be compared with: the quote attached to the
+#    trade, the previous row's quote, or the quote before the trade's timestamp?
+# 2. Why do some trades print outside the quote? (orders walking the book)
+# 3. Sign every continuous lit trade (+1 buy / -1 sell): quote rule, then tick test.
+# 4. Validate against the ISS 30-Oct full quote stream.
+
+# %% Setup
+import numpy as np
+import pandas as pd
+
+from tifs_group_project import config
+from tifs_group_project.io import read_clean
+from tifs_group_project.signing import add_order_groups, quote_fit, rebuild_quotes, sign_trades
+
+# %% Quote timing and signing, per stock
+timing, walk, summary = [], [], []
+for stock in config.STOCKS:
+    d = read_clean(stock).sort_values("ts", kind="stable")
+    d = d[d["kind"] != "close"]
+    g = d.groupby("date")
+    d["bid_prev_row"], d["ask_prev_row"] = g["bid"].shift(), g["ask"].shift()
+    prev_ts = (d.groupby(["date", "ts"])[["bid", "ask"]].last().groupby(level=0).shift()
+               .rename(columns={"bid": "bid_prev_ts", "ask": "ask_prev_ts"}).reset_index())
+    d = d.merge(prev_ts, on=["date", "ts"], how="left")
+
+    c = d[d["continuous"] & d["quote_ok"]].copy()
+    for label, b, a in [("attached", "bid", "ask"), ("previous row", "bid_prev_row", "ask_prev_row"),
+                        ("before timestamp", "bid_prev_ts", "ask_prev_ts")]:
+        timing.append({"stock": stock, "quote": label, **quote_fit(c["price"], c[b], c[a])})
+
+    c = add_order_groups(c)
+    c["outside"] = (c["price"] > c["ask"]) | (c["price"] < c["bid"])
+    w = c.groupby(np.minimum(c["fill_pos"], 3))["outside"].mean().mul(100).round(1)
+    walk.append({"stock": stock, **{f"fill_{'4+' if k == 3 else k + 1}": v for k, v in w.items()}})
+
+    c = sign_trades(c)
+    multi = c[c["fills_in_order"] > 1].groupby("order_id")["side"].nunique()
+    summary.append({
+        "stock": stock,
+        "trades": len(c),
+        "orders": c["order_id"].nunique(),
+        "fills_per_order": round(len(c) / c["order_id"].nunique(), 2),
+        "pct_quote_rule": round(100 * (c["sign_rule"] == "quote").mean(), 1),
+        "pct_tick_test": round(100 * (c["sign_rule"] == "tick").mean(), 1),
+        "pct_unsigned": round(100 * (c["sign_rule"] == "unsigned").mean(), 2),
+        "pct_buy_volume": round(100 * c.loc[c["side"] == 1, "vol"].sum() / c.loc[c["side"] != 0, "vol"].sum(), 1),
+        "pct_multi_fill_orders_one_side": round(100 * (multi == 1).mean(), 1),
+    })
+    keep = ["ts", "date", "stock", "sample", "price", "vol", "bid", "ask", "bid_size", "ask_size", "mid",
+            "order_id", "fill_pos", "fills_in_order", "side", "sign_rule", "venue"]
+    c[keep].to_parquet(config.PROCESSED / f"signed_{stock}.parquet", index=False)
+
+timing = pd.DataFrame(timing).pivot(index="stock", columns="quote", values="pct_outside")[
+    ["attached", "previous row", "before timestamp"]]
+walk, summary = pd.DataFrame(walk).set_index("stock"), pd.DataFrame(summary).set_index("stock")
+timing.to_csv(config.TABLES / "02_quote_timing_pct_outside.csv")
+walk.to_csv(config.TABLES / "02_pct_outside_by_fill_position.csv")
+summary.to_csv(config.TABLES / "02_signing_summary.csv")
+print("% of trades outside the quote, by quote choice:\n", timing, "\n")
+print("% outside the quote by fill position within an order:\n", walk, "\n")
+print("Signing summary:\n", summary.to_string(), "\n")
+
+# %% Validation: ISS 30-Oct full L1 quote stream
+qfile = config.RAW / "quotes_sample" / "ISS-CSE-20261030-20261030-quotes.csv"
+quotes = rebuild_quotes(pd.read_csv(qfile, dtype={"Trade Cond": str, "Venue": str, "Exch Time": str}))
+iss = pd.read_parquet(config.PROCESSED / "signed_ISS.parquet")
+iss = iss[iss["date"] == "2026-10-30"].sort_values("ts")
+m = pd.merge_asof(iss, quotes.rename(columns={"bid": "bid_pv", "ask": "ask_pv"}), on="ts",
+                  allow_exact_matches=False)
+m["mid_pv"] = (m["bid_pv"] + m["ask_pv"]) / 2
+side_pv = np.select([m["price"] > m["mid_pv"], m["price"] < m["mid_pv"]], [1, -1], 0)
+
+cont = quotes[(quotes["ts"].dt.strftime("%H:%M:%S") > config.CONT_START) &
+              (quotes["ts"].dt.strftime("%H:%M:%S") < config.CONT_END)].copy()
+cont = cont[cont["ask"] > cont["bid"]]
+dt = cont["ts"].shift(-1).sub(cont["ts"]).dt.total_seconds()
+spr = (cont["ask"] - cont["bid"]) / ((cont["ask"] + cont["bid"]) / 2) * 1e4
+valid = {
+    "trades": len(m),
+    "pct_attached_quote_equals_prevailing": round(100 * ((m["bid"] == m["bid_pv"]) & (m["ask"] == m["ask_pv"])).mean(), 1),
+    "pct_outside_attached": quote_fit(m["price"], m["bid"], m["ask"])["pct_outside"],
+    "pct_outside_prevailing": quote_fit(m["price"], m["bid_pv"], m["ask_pv"])["pct_outside"],
+    "pct_sign_agreement": round(100 * (m["side"][side_pv != 0] == side_pv[side_pv != 0]).mean(), 1),
+    "spread_bps_time_weighted": round(np.average(spr[:-1], weights=dt[:-1]), 2),
+    "spread_bps_trade_weighted": round(((m["ask"] - m["bid"]) / m["mid"] * 1e4).mean(), 2),
+}
+pd.Series(valid).to_csv(config.TABLES / "02_iss_quote_validation.csv", header=["value"])
+print("ISS 30-Oct validation against the full quote stream:\n", pd.Series(valid).to_string())

@@ -9,3 +9,6 @@ ipykernel
 pytest
 ruff
 python-dotenv
+lightgbm
+shap
+hmmlearn
