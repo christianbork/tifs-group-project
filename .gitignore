@@ -1,0 +1,16 @@
+.venv/
+__pycache__/
+*.pyc
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+.env
+data/raw/
+data/processed/
+*.parquet
+*.h5
+.DS_Store
+Thumbs.db
+.vscode/
+outputs/*.png
