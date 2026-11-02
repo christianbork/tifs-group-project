@@ -28,10 +28,37 @@ What drives bid-ask spreads on Nasdaq Copenhagen stocks, **informed trading (adv
   - sign agreement 99.8%;
   - spread 11.95 bps time-weighted vs 11.33 bps trade-weighted (~5% sampling bias).
 
-## 4. Background analysis (next, `03_background.py`)
-- Intraday U-shapes (spread, volume, volatility by minute), daily series, event days.
-- **Tick-constraint check:** share of time the spread = 1 tick (Novo likely pinned).
-- Decides the interval length (5-min) and the treatment of the open/close.
+## 4. Background analysis (done, `03_background.py`)
+- **U-shape mainly at the open:** first 15 min spread 1.7–2.5× midday and 1-min vol 2.8–3.6× midday; both settle by ~10:00. After that, spreads stay flat even when vol moves (Novo at the US open: vol ~3×, spread ~1.2×). Last 15 min: spreads ~0.85× midday.
+- **Tick constraint (% of time spread = 1 tick):** ISS 62%, Novo 58%, DSV 53%, Vestas 22%, GN 8%, Pandora 4%. Tick size in bps: Novo 2.0, ISS 6.8, DSV 4.2, Vestas 2.6, GN 4.7, Pandora 2.4.
+- **US-open clock shift:** Novo turnover spike at 15:30 CPH on 1–23 Oct (3.4× normal) moves to **14:30** on 26–30 Oct (3.0×), because EU DST ended 25-Oct and US DST ends 1-Nov.
+- **Big vol days barely move spreads:** DSV 21-Oct earnings had RV z≈9.8 and turnover z≈32, but the spread rose only ~7%. ISS 29-Oct (OOS) had RV z≈15 and turnover z≈18 (news event? check).
+- **OOS drift:** spreads lower in the OOS period (Pandora ~9–10 → 6–7 bps; DSV and Vestas eased).
+- **Interval activity at 5 min:** Novo/DSV/Vestas ~0% empty; Pandora 6% with <5 trades; GN/ISS ~28% with <5 trades (~8% empty).
+
+## 4b. Design decisions after script 03 (agreed 2-Nov)
+1. **Tick constraint as a natural experiment:** constrained group = Novo, DSV, ISS; unconstrained = Vestas, Pandora, GN.
+   - Estimate the spread model by group (or with group interactions). Hypothesis: impact/vol effects show up mainly in the unconstrained group.
+   - For the constrained group, also model the effective half-spread and P(spread > 1 tick).
+2. **Time-of-day controls follow the US open:** Copenhagen clock-time dummies (open/close) PLUS a minutes-since-US-open variable/dummies keyed to the real US open (15:30 CPH up to 23-Oct, 14:30 CPH 26–30 Oct).
+3. **Intervals:** 5-min main; 15-min robustness (GN/ISS are thin at 5-min).
+4. **Keep the open, with time-of-day controls,** so the vol coefficient picks up unusual volatility, not the routine open pattern. Robustness: drop 09:00–09:15.
+5. **Benchmarks:** in-sample stock average AND yesterday's average spread (persistence). Beating yesterday's spread is the fairer test given the OOS drift.
+6. **Event flags:** DSV 21-Oct (IS, earnings), ISS 29-Oct (OOS, news; = OOS stress test).
+
+## 4c. Bars (next, `04_bars.py`)
+- 1-min and 5-min bars per stock (and 15-min for robustness), continuous session, saved to data/processed/bars_<freq>.parquet (all stocks, one file per frequency).
+- Columns:
+  - time-weighted quoted half-spread (bps, from trade-attached quotes carried forward within the day);
+  - trade-weighted effective half-spread (bps);
+  - % of time at 1 tick; mid at interval end;
+  - 1-min mid log returns and realised vol per interval;
+  - trade count, order count, volume, DKK turnover, signed volume and order-flow imbalance;
+  - clock time and minute-of-day;
+  - minutes since the US open (15:30 CPH up to 23-Oct, 14:30 CPH 26–30 Oct);
+  - group (constrained/unconstrained), sample (IS/OOS), event flag;
+  - number of trades (to flag thin intervals).
+- Reads from the signed_<stock>.parquet files. Scripts 05–08 read the bars.
 
 ## 5. Informed trading (`05_price_impact.py`)
 - **Hasbrouck (1991) VAR in trade/order time:** mid return + signed order flow (sign, signed volume); permanent impact = cumulative IRF after ~10–20 events.
@@ -48,9 +75,16 @@ What drives bid-ask spreads on Nasdaq Copenhagen stocks, **informed trading (adv
 - OOS evaluation vs realised 5-min volatility: RMSE, QLIKE, Mincer–Zarnowitz.
 
 ## 7. Spread model (`07_spread_model.py`)
-- Half-spread(bps, 5-min) = a + b·impact(t−1 day) + c·vol forecast + time-of-day + activity controls + stock fixed effects. Quoted and effective spreads; Newey–West SEs; estimated on in-sample days.
-- OOS race: average-spread benchmark / vol-only / impact-only / combined → RMSE + Diebold–Mariano.
-- Risk: **tick-constrained spreads** (Novo) → use the effective spread or treat as a case study (tick size mutes the risk response).
+- Half-spread(bps, 5-min) = a + b·impact(t−1 day) + c·vol forecast + Copenhagen time-of-day + US-open controls + activity controls + stock fixed effects. Newey–West SEs; estimated on in-sample days.
+- **Estimated separately for the constrained (Novo, DSV, ISS) and unconstrained (Vestas, Pandora, GN) groups**, or pooled with group interactions.
+- Dependent variables: quoted half-spread (main); effective half-spread; for the constrained group, also P(spread > 1 tick) (logit/probit).
+- OOS race:
+  - in-sample-average benchmark;
+  - yesterday's-average-spread benchmark;
+  - vol-only, impact-only, combined;
+
+  compared on RMSE + Diebold–Mariano, by group.
+- Robustness: 15-min intervals; drop 09:00–09:15; the event-day flags.
 
 ## 8. Refinement (`08_refine.py`)
 - Econometric options: GJR vs GARCH, HAR, trade-size effects, event-day flag, stock-specific slopes (large vs mid cap), open/close buffers.
@@ -83,5 +117,5 @@ Others: order-book depth / broker IDs for PIN; adding inventory.
 
 ## Open decisions
 - Main informed-trading measure: Hasbrouck VAR (recommended), with the decomposition as a cross-check.
-- Novo tick constraint: effective-spread model vs case study (decide after script 03).
+- Check what happened to ISS on 29-Oct (results/news?).
 - Due date: likely Fri 20-Nov-2026, 9pm → confirm. Convenor approval for the Appendix E angle.
