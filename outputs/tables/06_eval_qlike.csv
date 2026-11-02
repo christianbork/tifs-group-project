@@ -1,0 +1,22 @@
+subset,stock,garch,gjr,roll30,atr,har,best
+"IS (fit period, for reference)",All,6.289,6.288,6.454,6.57,6.29,gjr
+"IS (fit period, for reference)",DSV,6.49,6.489,6.574,6.633,6.498,gjr
+"IS (fit period, for reference)",GN,6.559,6.558,6.851,7.101,6.56,gjr
+"IS (fit period, for reference)",ISS,5.742,5.741,6.137,6.269,5.738,har
+"IS (fit period, for reference)",Novo,5.757,5.755,5.816,5.837,5.755,har
+"IS (fit period, for reference)",Pandora,6.692,6.691,6.791,6.983,6.699,gjr
+"IS (fit period, for reference)",Vestas,6.494,6.494,6.555,6.595,6.493,har
+OOS all days,All,6.52,6.512,6.583,6.909,6.48,har
+OOS all days,DSV,6.542,6.542,6.655,6.667,6.545,gjr
+OOS all days,GN,6.917,6.908,7.124,7.385,6.918,gjr
+OOS all days,ISS,6.377,6.319,6.195,7.244,6.156,har
+OOS all days,Novo,5.933,5.944,5.98,6.116,5.909,har
+OOS all days,Pandora,6.6,6.602,6.747,6.966,6.617,garch
+OOS all days,Vestas,6.754,6.757,6.801,7.078,6.736,har
+OOS ex event days,All,6.441,6.446,6.543,6.774,6.443,garch
+OOS ex event days,DSV,6.542,6.542,6.655,6.667,6.545,gjr
+OOS ex event days,GN,6.917,6.908,7.124,7.385,6.918,gjr
+OOS ex event days,ISS,5.812,5.835,5.854,6.373,5.845,garch
+OOS ex event days,Novo,5.933,5.944,5.98,6.116,5.909,har
+OOS ex event days,Pandora,6.6,6.602,6.747,6.966,6.617,garch
+OOS ex event days,Vestas,6.754,6.757,6.801,7.078,6.736,har

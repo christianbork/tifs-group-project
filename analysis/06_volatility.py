@@ -168,7 +168,12 @@ is_event = pd.Series(
     index=ev.index,
 )
 rows = []
-for subset, sub in [("all days", ev), ("ex event days", ev[~is_event])]:
+in_s = fc[fc["sample"] == "IS"].dropna(subset=[f"fc_{m}" for m in MODELS])
+for subset, sub in [
+    ("OOS all days", ev),
+    ("OOS ex event days", ev[~is_event]),
+    ("IS (fit period, for reference)", in_s),
+]:
     for stock in ["All", *config.STOCKS]:
         s = sub if stock == "All" else sub[sub["stock"] == stock]
         for mdl in MODELS:
@@ -187,7 +192,7 @@ for subset, sub in [("all days", ev), ("ex event days", ev[~is_event])]:
                 }
             )
 evaluation = pd.DataFrame(rows)
-evaluation.round(4).to_csv(config.TABLES / "06_oos_evaluation.csv", index=False)
+evaluation.round(4).to_csv(config.TABLES / "06_evaluation.csv", index=False)
 print(
     "OOS evaluation (5-min bars, 22-30 Oct):\n",
     evaluation.round(3).to_string(index=False),
@@ -198,7 +203,7 @@ for col, label in [("qlike", "QLIKE"), ("rmse_vol_bps", "RMSE (bps)")]:
         index=["subset", "stock"], columns="model", values=col
     )[MODELS]
     pivot["best"] = pivot.idxmin(axis=1)
-    pivot.round(3).to_csv(config.TABLES / f"06_oos_{col}.csv")
+    pivot.round(3).to_csv(config.TABLES / f"06_eval_{col}.csv")
     print(
         f"OOS {label} by model (lower is better):\n", pivot.round(3).to_string(), "\n"
     )
