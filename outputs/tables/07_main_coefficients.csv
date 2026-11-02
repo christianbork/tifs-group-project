@@ -1,0 +1,16 @@
+group,spec,var,coef,t,p,effect_1sd,n,r2
+constrained,quoted (main),impact_roll_ewm_bps,-0.0341,-0.7768,0.4373,-0.0290,3610,0.6859
+constrained,quoted (main),impact_prevday_bps,0.1215,1.3535,0.1759,0.0476,3610,0.6859
+constrained,quoted (main),log_vol_har,0.5043,3.6567,0.0003,0.0933,3610,0.6859
+constrained,effective,impact_roll_ewm_bps,-0.0457,-0.9767,0.3287,-0.0386,3528,0.5521
+constrained,effective,impact_prevday_bps,0.0609,0.6657,0.5056,0.0235,3528,0.5521
+constrained,effective,log_vol_har,1.4703,7.7884,0.0000,0.2743,3528,0.5521
+constrained,"P(spread > 1 tick), logit AME",impact_roll_ewm_bps,-0.0664,-1.5464,0.1220,-0.0128,3610,
+constrained,"P(spread > 1 tick), logit AME",impact_prevday_bps,0.0751,0.8637,0.3877,0.0067,3610,
+constrained,"P(spread > 1 tick), logit AME",log_vol_har,0.8959,5.7059,0.0000,0.0376,3610,
+unconstrained,quoted (main),impact_roll_ewm_bps,0.1276,2.4408,0.0147,0.1427,3230,0.6610
+unconstrained,quoted (main),impact_prevday_bps,-0.1783,-1.0828,0.2789,-0.0650,3230,0.6610
+unconstrained,quoted (main),log_vol_har,2.2434,5.5216,0.0000,0.2807,3230,0.6610
+unconstrained,effective,impact_roll_ewm_bps,0.1675,2.2007,0.0278,0.1866,3122,0.4926
+unconstrained,effective,impact_prevday_bps,-0.0174,-0.0856,0.9318,-0.0063,3122,0.4926
+unconstrained,effective,log_vol_har,4.1491,6.8067,0.0000,0.5235,3122,0.4926
