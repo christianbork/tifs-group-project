@@ -139,47 +139,34 @@ def windows(dates: list, days: int) -> list[tuple]:
 def rolling_impact(
     ev: pd.DataFrame,
     bar_starts: pd.Series,
+    n_orders: int = 300,
     p_var: int = 5,
-    dl_lags: int = 5,
-    window: str = "60min",
     h: int = 20,
-    min_reg: int = 50,
-    min_var: int = 100,
 ) -> pd.DataFrame:
-    """Intraday impact at each bar start tau from orders in [tau - window, tau), same day.
+    """Intraday impact at each bar start tau: Hasbrouck VAR(p_var) on the last `n_orders` orders.
 
-    An order is used only if its mid return is complete before tau, i.e. the next
-    order (whose mid ends the return) also arrived before tau. Lagged regressors
-    may reach back before the window start (still pre-tau, same day).
-    - reg: r_k = a + sum_{i=0..dl_lags} lambda_i sign_{k-i}; impact = sum of lambdas.
-    - var: Hasbrouck VAR(p_var) on the window, h-order cumulative IRF.
+    An order is eligible only if its mid return is complete before tau, i.e. the
+    next order (whose mid ends the return) also arrived before tau. The window may
+    span the previous day(s); returns and VAR lags never cross a day boundary.
+    NaN until `n_orders` eligible orders exist (start of the sample).
     """
     ev = ev.sort_values("ts", kind="stable").reset_index(drop=True)
-    next_ts = ev.groupby("date")["ts"].shift(-1)
-    sl = np.column_stack([ev["sign"].to_numpy(float), _lags(ev, "sign", dl_lags)])
-    Xg = np.column_stack([np.ones(len(ev)), sl])
-    rt = ev["r_bps"].to_numpy(float)
-    ok_reg = ~np.isnan(np.column_stack([Xg, rt])).any(axis=1)
-    Xr, _, Xx, xt, ok_var = var_design(ev, "sign", p_var)
-    ts, nts = ev["ts"].to_numpy(), next_ts.to_numpy()
-    span = pd.Timedelta(window).to_timedelta64()
+    next_ts = ev.groupby("date")["ts"].shift(-1).to_numpy()
+    Xr, rt, Xx, xt, ok = var_design(ev, "sign", p_var)
+    rows = np.flatnonzero(
+        ok
+    )  # complete rows, in time order; their next_ts is increasing
+    nts = next_ts[rows]
 
     out = []
     for tau in bar_starts.to_numpy():
-        inw = (ts >= tau - span) & (
-            nts < tau
-        )  # NaT next_ts (last order of day) compares False
-        m_reg, m_var = inw & ok_reg, inw & ok_var
-        reg = var = np.nan
-        if m_reg.sum() >= min_reg:
-            coef, *_ = np.linalg.lstsq(Xg[m_reg], rt[m_reg], rcond=None)
-            reg = coef[1:].sum()
-        if m_var.sum() >= min_var:
-            var = cum_irf(
-                fit_design(Xr[m_var], rt[m_var], Xx[m_var], xt[m_var], p_var), h
-            )[h]
-        out.append((tau, reg, var, int(m_reg.sum())))
-    return pd.DataFrame(
-        out,
-        columns=["ts", "impact_roll_reg_bps", "impact_roll_var_bps", "roll_n_orders"],
-    )
+        k = np.searchsorted(
+            nts, tau, side="left"
+        )  # eligible rows: next order strictly before tau
+        imp, span = np.nan, pd.NaT
+        if k >= n_orders:
+            w = rows[k - n_orders : k]
+            imp = cum_irf(fit_design(Xr[w], rt[w], Xx[w], xt[w], p_var), h)[h]
+            span = pd.Timestamp(tau) - ev["ts"].iloc[w[0]]
+        out.append((tau, imp, span))
+    return pd.DataFrame(out, columns=["ts", "impact_roll_var_bps", "roll_window_span"])

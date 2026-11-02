@@ -269,32 +269,46 @@ plt.close(fig)
 
 # %% [markdown]
 # ## Intraday rolling impact (joinable to bars_5min on stock + ts)
-# At each 5-min bar start tau, re-estimated from orders in [tau - 60 min, tau)
-# whose mid return is complete before tau (same day only; the 09:00 bar is NaN).
-# - reg: mid return on sign_t..sign_{t-5}, impact = sum of coefficients (>= 50 orders)
-# - var: Hasbrouck VAR(5), 20-order cumulative IRF (>= 100 orders)
+# At each 5-min bar start tau: Hasbrouck VAR(5) on the last N_ROLL orders whose
+# mid return is complete before tau (window may span the previous day; returns
+# and lags never cross a day), 20-order cumulative IRF. Smoothed with an EWMA
+# over bars (half-life EWM_HALFLIFE bars, fixed a priori), which uses only
+# current and past estimates.
 
 # %% Rolling estimates
+N_ROLL, EWM_HALFLIFE = 300, 6
 bars5 = pd.read_parquet(
     config.PROCESSED / "bars_5min.parquet", columns=["stock", "date", "ts", "sample"]
 )
 roll = []
 for stock in config.STOCKS:
     ev = order_events(pd.read_parquet(config.PROCESSED / f"signed_{stock}.parquet"))
-    starts = bars5.loc[bars5["stock"] == stock, "ts"]
-    roll.append(rolling_impact(ev, starts).assign(stock=stock))
+    r = rolling_impact(ev, bars5.loc[bars5["stock"] == stock, "ts"], n_orders=N_ROLL)
+    r["impact_roll_ewm_bps"] = (
+        r["impact_roll_var_bps"].ewm(halflife=EWM_HALFLIFE, ignore_na=True).mean()
+    )
+    roll.append(r.assign(stock=stock))
 roll = bars5.merge(pd.concat(roll, ignore_index=True), on=["stock", "ts"], how="left")
+roll["roll_window_min"] = roll["roll_window_span"].dt.total_seconds() / 60
 roll[
-    ["stock", "ts", "impact_roll_reg_bps", "impact_roll_var_bps", "roll_n_orders"]
+    ["stock", "ts", "impact_roll_var_bps", "impact_roll_ewm_bps", "roll_window_min"]
 ].to_parquet(config.PROCESSED / "impact_intraday_5min.parquet", index=False)
-cov = roll.groupby("stock")[["impact_roll_reg_bps", "impact_roll_var_bps"]].apply(
-    lambda x: 100 * x.notna().mean()
+cov = (
+    roll.groupby("stock")
+    .agg(
+        pct_bars_raw=("impact_roll_var_bps", lambda x: 100 * x.notna().mean()),
+        pct_bars_ewm=("impact_roll_ewm_bps", lambda x: 100 * x.notna().mean()),
+        first_estimate=(
+            "ts",
+            lambda x: x[roll.loc[x.index, "impact_roll_var_bps"].notna()].min(),
+        ),
+        median_window_min=("roll_window_min", "median"),
+        pct_windows_span_prev_day=("roll_window_min", lambda x: 100 * (x > 475).mean()),
+    )
+    .reindex(list(config.STOCKS))
 )
-print(
-    "Coverage, % of 5-min bars with an estimate:\n",
-    cov.reindex(list(config.STOCKS)).round(1).to_string(),
-    "\n",
-)
+cov.to_csv(config.TABLES / "05_intraday_impact_coverage.csv", float_format="%.1f")
+print(f"Coverage of the last-{N_ROLL}-orders impact:\n", cov.round(1).to_string(), "\n")
 
 # %% Within-stock variation and persistence vs the daily VAR (in-sample)
 r_is = roll[roll["sample"] == "IS"].copy()
@@ -311,18 +325,16 @@ for stock in config.STOCKS:
         "daily_var_sd_across_days": dv.std(),
         "daily_var_ar1": dv.autocorr(),
     }
-    for m in ["impact_roll_reg_bps", "impact_roll_var_bps"]:
+    for m, tag in [("impact_roll_var_bps", "raw"), ("impact_roll_ewm_bps", "ewm")]:
         x = s[m]
         within = x - s.groupby("date")[m].transform("mean")
-        g = s.groupby("date")[m]
-        day_mean = g.mean()
-        tag = "reg" if "reg" in m else "var"
+        day_mean = s.groupby("date")[m].mean()
         row |= {
             f"{tag}_mean": x.mean(),
             f"{tag}_sd": x.std(),
             f"{tag}_pct_var_within_day": 100 * within.var() / x.var(),
-            f"{tag}_ac_5min": x.corr(g.shift(1)),
-            f"{tag}_ac_60min": x.corr(g.shift(12)),  # non-overlapping windows
+            f"{tag}_ac_1bar": x.autocorr(1),
+            f"{tag}_ac_12bars": x.autocorr(12),
             f"{tag}_daymean_ar1": day_mean.autocorr(),
             f"{tag}_corr_daymean_vs_daily_var": day_mean.corr(
                 daily_var.loc[stock].reindex(day_mean.index)
@@ -337,9 +349,9 @@ print(
     "\n",
 )
 
-# %% Figure: intraday profile of the rolling impact (median by bar, in-sample)
+# %% Figure: intraday profile of the smoothed rolling impact (median by bar, in-sample)
 prof = r_is.assign(minute=(r_is["ts"] - r_is["date"]).dt.total_seconds() / 60 - 540)
-prof = prof.groupby(["stock", "minute"])["impact_roll_reg_bps"].median()
+prof = prof.groupby(["stock", "minute"])["impact_roll_ewm_bps"].median()
 fig, ax = plt.subplots(figsize=(9, 4))
 for stock in config.STOCKS:
     ax.plot(
@@ -349,7 +361,7 @@ ticks = np.arange(0, 481, 60)
 ax.set_xticks(ticks, [f"{9 + t // 60:02d}:00" for t in ticks])
 ax.set_ylabel("bps")
 ax.set_title(
-    "Rolling 60-min impact at each 5-min bar (median across in-sample days)",
+    f"Rolling impact, last {N_ROLL} orders, EWMA-smoothed (median across in-sample days)",
     loc="left",
     fontsize=11,
 )

@@ -55,34 +55,60 @@ def test_order_events_return_stops_at_day_end():
     )  # last order of each day
 
 
+def _sim_orders(days, n_per_day, seed=0):
+    rng = np.random.default_rng(seed)
+    frames = []
+    for day in days:
+        ts = (
+            pd.Timestamp(day)
+            + pd.Timedelta("09:00:00")
+            + pd.to_timedelta(np.sort(rng.uniform(0, 7200, n_per_day)), unit="s")
+        )
+        sign = rng.choice([-1, 1], n_per_day)
+        # pre-trade mid: order k moves the mid seen by order k+1
+        mid = 100 * np.exp(
+            np.r_[
+                0, np.cumsum(2e-4 * sign + 1e-4 * rng.standard_normal(n_per_day))[:-1]
+            ]
+        )
+        frames.append(
+            pd.DataFrame({"date": ts.normalize(), "ts": ts, "mid": mid, "sign": sign})
+        )
+    ev = pd.concat(frames, ignore_index=True)
+    ev["r_bps"] = np.log(ev.groupby("date")["mid"].shift(-1) / ev["mid"]) * 1e4
+    return ev
+
+
 def test_rolling_impact_uses_only_pre_bar_orders():
     from tifs_group_project.impact import rolling_impact
 
-    rng = np.random.default_rng(0)
-    n = 400
-    ts = pd.Timestamp("2026-10-01 09:00") + pd.to_timedelta(
-        np.sort(rng.uniform(0, 7200, n)), unit="s"
-    )
-    sign = rng.choice([-1, 1], n)
-    # pre-trade mid: order k moves the mid seen by order k+1
-    mid = 100 * np.exp(np.r_[0, np.cumsum(2e-4 * sign + 1e-4 * rng.standard_normal(n))[:-1]])
-    ev = pd.DataFrame({"date": ts.normalize(), "ts": ts, "mid": mid, "sign": sign})
-    ev["r_bps"] = np.log(ev["mid"].shift(-1) / ev["mid"]) * 1e4
+    ev = _sim_orders(["2026-10-01"], 400)
     tau = pd.Series([pd.Timestamp("2026-10-01 10:30")])
-    base = rolling_impact(ev, tau)
+    base = rolling_impact(ev, tau, n_orders=150)
 
     # scramble everything from tau onwards: the estimate at tau must not change
     later = ev["ts"] >= tau[0]
     ev2 = ev.copy()
     ev2.loc[later, "sign"] = -ev2.loc[later, "sign"]
     ev2.loc[later, "mid"] *= 1.01
-    ev2["r_bps"] = np.log(ev2["mid"].shift(-1) / ev2["mid"]) * 1e4
-    again = rolling_impact(ev2, tau)
-    assert base["roll_n_orders"].iloc[0] > 50
-    assert np.allclose(
-        base[["impact_roll_reg_bps", "impact_roll_var_bps"]],
-        again[["impact_roll_reg_bps", "impact_roll_var_bps"]],
+    ev2["r_bps"] = np.log(ev2.groupby("date")["mid"].shift(-1) / ev2["mid"]) * 1e4
+    again = rolling_impact(ev2, tau, n_orders=150)
+    assert np.isclose(
+        base["impact_roll_var_bps"].iloc[0], again["impact_roll_var_bps"].iloc[0]
     )
     assert (
-        base["impact_roll_reg_bps"].iloc[0] > 0
+        base["impact_roll_var_bps"].iloc[0] > 0
     )  # buys push the mid up in the simulated data
+
+
+def test_rolling_impact_window_spans_previous_day():
+    from tifs_group_project.impact import rolling_impact
+
+    ev = _sim_orders(["2026-10-01", "2026-10-02"], 200)
+    taus = pd.Series(pd.to_datetime(["2026-10-01 09:30", "2026-10-02 09:05"]))
+    out = rolling_impact(ev, taus, n_orders=150)
+    assert np.isnan(out["impact_roll_var_bps"].iloc[0])  # too few orders yet on day 1
+    assert (
+        out["impact_roll_var_bps"].notna().iloc[1]
+    )  # day 2 early: window reaches into day 1
+    assert out["roll_window_span"].iloc[1] > pd.Timedelta("1D") - pd.Timedelta("1h")
