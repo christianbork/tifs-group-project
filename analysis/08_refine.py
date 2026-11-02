@@ -78,6 +78,7 @@ oos = (
     .copy()
 )
 oos["pred_IS average"], oos["pred_yesterday"] = oos["bench_is_avg"], oos["bench_yday"]
+oos["pred_last bar"] = oos["lag_quoted_hs"]  # naive benchmark: the spread in bar t-1
 is_event = pd.Series(
     [
         (s, str(d.date())) in config.EVENT_DAYS
@@ -258,18 +259,21 @@ for grp, stocks in GROUPS.items():
         res, oos[idx], xv, stock_tod=True
     )
 
-# %% OOS race: original vs refined vs alternatives (second look at OOS for refinement 1)
+# %% OOS race: original vs refined vs alternatives
 print("=" * 100)
+print("NOTE on out-of-sample (22-30 Oct) use:")
+print("  1st evaluation: script 07 (original model).")
 print(
-    "NOTE: the out-of-sample period (22-30 Oct) is evaluated here a SECOND time, for refinement 1."
+    "  2nd evaluation: refinement 1 here (stock x time buckets; log spread with shared dummies)."
 )
 print(
-    "Script 07 was the first look. LightGBM's OOS forecasts are evaluated once (here)."
+    "  3rd evaluation: refinement 2 here (LightGBM, and the linear refined + lagged spread model)."
 )
 print("=" * 100, "\n")
 MODELS = [
     "IS average",
     "yesterday",
+    "last bar",
     *[f"{s}: {m}" for s in SPECS for m in RACE],
     "refined + lagged spread",
     "LightGBM",
@@ -294,6 +298,7 @@ rmse.to_csv(config.TABLES / "08_oos_rmse.csv", float_format="%.4f")
 show = [
     "IS average",
     "yesterday",
+    "last bar",
     "original: combined",
     "refined: combined",
     "log shared: combined",
@@ -320,6 +325,11 @@ pairs = [
     ("LightGBM", "refined: combined"),
     ("LightGBM", "refined + lagged spread"),
     ("LightGBM", "yesterday"),
+    ("original: combined", "last bar"),
+    ("refined: combined", "last bar"),
+    ("log shared: combined", "last bar"),
+    ("refined + lagged spread", "last bar"),
+    ("LightGBM", "last bar"),
 ]
 dm_rows = []
 for subset, sub in [("all OOS days", oos), ("ex event days", oos[~is_event])]:
