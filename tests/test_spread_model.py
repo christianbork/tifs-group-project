@@ -21,3 +21,25 @@ def test_dm_test_sign_and_null():
     )
     better = dm_test(e * 0.5, e, 5)
     assert better["dm_stat"] < -3 and better["p_value"] < 0.01
+
+
+def test_coarse_bucket_keyed_to_us_open():
+    from tifs_group_project.spread_model import coarse_bucket
+
+    m = pd.Series([0, 20, 45, 100, 385, 395, 430, 465])
+    assert coarse_bucket(m, m - 390).tolist() == [
+        "09:00",
+        "09:15",
+        "09:30",
+        "10:00-12:00",
+        "12:00-US",
+        "US+0-30",
+        "afternoon",
+        "last15",
+    ]
+    assert coarse_bucket(m, m - 330).tolist()[4:] == [
+        "afternoon",
+        "afternoon",
+        "afternoon",
+        "last15",
+    ]

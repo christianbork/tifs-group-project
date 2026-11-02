@@ -1,0 +1,13 @@
+,constrained,unconstrained
+lag_quoted_hs,0.827,0.9485
+stock,0.564,0.5377
+minute_of_day,0.1525,0.2027
+impact_prevday_bps,0.1219,0.1858
+impact_roll_ewm_bps,0.0855,0.0963
+min_since_us_open,0.0538,0.0736
+log_vol_har,0.0151,0.0224
+bucket,0.0124,0.0147
+lag_log_trades,0.0147,0.0102
+lag_log_turnover,0.003,0.0053
+lag_ofi,0.0025,0.0048
+lag_abs_ofi,0.001,0.002

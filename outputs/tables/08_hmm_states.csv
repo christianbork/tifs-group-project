@@ -1,0 +1,5 @@
+hmm,state,hmm_vol,stay_prob,hmm_turnover,hmm_spread
+vol only (main),calm,-0.4444,0.8176,,
+vol only (main),stressed,0.5007,0.7936,,
+"vol, turnover, spread",calm,-0.3160,0.7364,-0.4363,0.2318
+"vol, turnover, spread",stressed,0.1588,0.8678,0.2185,-0.1157

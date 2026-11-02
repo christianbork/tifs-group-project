@@ -102,8 +102,45 @@ def build_panel(freq: str = "5min") -> pd.DataFrame:
     return b.merge(yday, on=["stock", "date"], how="left")
 
 
-def design(df: pd.DataFrame, xvars: list[str]) -> pd.DataFrame:
-    """Regressors + time-of-day and stock dummies (reference: 12:00 bucket, first stock)."""
+def coarse_bucket(minute_of_day: pd.Series, min_since_us_open: pd.Series) -> pd.Series:
+    """Coarse time buckets for the stock x time refinement (script 08), keyed to the actual US open.
+
+    09:00-09:15, 09:15-09:30, 09:30-10:00, 10:00-12:00, 12:00-US open, US open +30 min,
+    rest of the afternoon, last 15 min of continuous trading (16:40-16:55).
+    """
+    m, u = minute_of_day.to_numpy(), min_since_us_open.to_numpy()
+    conds = [m < 15, m < 30, m < 60, m < 180, u < 0, u < 30, m < 460]
+    labels = [
+        "09:00",
+        "09:15",
+        "09:30",
+        "10:00-12:00",
+        "12:00-US",
+        "US+0-30",
+        "afternoon",
+    ]
+    return pd.Series(
+        np.select(conds, labels, default="last15"), index=minute_of_day.index
+    )
+
+
+def design(df: pd.DataFrame, xvars: list[str], stock_tod: bool = False) -> pd.DataFrame:
+    """Regressors + time-of-day and stock dummies.
+
+    Default (script 07): shared time-of-day dummies (reference 12:00) + stock fixed effects.
+    stock_tod=True (script 08): stock x coarse-bucket dummies, which also absorb the stock
+    fixed effects (reference: the first stock-bucket column).
+    """
+    if stock_tod:
+        cell = (
+            df["stock"].astype(str)
+            + "|"
+            + coarse_bucket(df["minute_of_day"], df["min_since_us_open"])
+        )
+        dummies = pd.get_dummies(cell, prefix="sxt", dtype=float).iloc[:, 1:]
+        return sm.add_constant(
+            pd.concat([df[xvars], dummies], axis=1), has_constant="add"
+        )
     tod = pd.get_dummies(df["tod"], prefix="tod", dtype=float).drop(
         columns="tod_12:00", errors="ignore"
     )
@@ -116,10 +153,12 @@ def nw_lags(t: int) -> int:
     return int(np.floor(4 * (t / 100) ** (2 / 9)))
 
 
-def fit_ols(df: pd.DataFrame, y: str, xvars: list[str], lags: int):
+def fit_ols(
+    df: pd.DataFrame, y: str, xvars: list[str], lags: int, stock_tod: bool = False
+):
     """OLS with panel Newey-West SEs (HAC within stock, rows sorted by stock then time)."""
     d = df.dropna(subset=[y, *xvars]).sort_values(["stock", "ts"])
-    X = design(d, xvars)
+    X = design(d, xvars, stock_tod)
     groups = pd.factorize(d["stock"])[0]
     res = sm.OLS(d[y], X).fit(
         cov_type="hac-panel", cov_kwds={"groups": groups, "maxlags": lags}
@@ -138,9 +177,13 @@ def fit_frac_logit(df: pd.DataFrame, y: str, xvars: list[str], lags: int):
     return res, d
 
 
-def predict(res, df: pd.DataFrame, xvars: list[str]) -> pd.Series:
+def predict(
+    res, df: pd.DataFrame, xvars: list[str], stock_tod: bool = False
+) -> pd.Series:
     """Predict with the in-sample design columns (missing dummy columns filled with 0)."""
-    X = design(df, xvars).reindex(columns=res.model.exog_names, fill_value=0.0)
+    X = design(df, xvars, stock_tod).reindex(
+        columns=res.model.exog_names, fill_value=0.0
+    )
     return pd.Series(np.asarray(res.predict(X)), index=df.index)
 
 
@@ -161,3 +204,25 @@ def dm_test(loss_a: pd.Series, loss_b: pd.Series, lags: int) -> dict:
         "p_value": 2 * stats.t.sf(abs(stat), df=t - 1),
         "n": t,
     }
+
+
+def key_table(
+    res, d: pd.DataFrame, label: str, xvars: list[str], logit: bool = False
+) -> pd.DataFrame:
+    """Key coefficients, NW t-stats, and the effect of a one within-stock-SD move (bps, or prob. for logit)."""
+    sd = d[xvars].sub(d.groupby("stock")[xvars].transform("mean")).std()
+    scale = (
+        (res.fittedvalues * (1 - res.fittedvalues)).mean() if logit else 1.0
+    )  # average marginal effect
+    return pd.DataFrame(
+        {
+            "spec": label,
+            "var": xvars,
+            "coef": res.params[xvars].values,
+            "t": res.tvalues[xvars].values,
+            "p": res.pvalues[xvars].values,
+            "effect_1sd": (res.params[xvars] * sd * scale).values,
+            "n": int(res.nobs),
+            "r2": getattr(res, "rsquared", np.nan),
+        }
+    )

@@ -1,0 +1,13 @@
+hmm,group,var,calm_coef,calm_t,stressed_coef,stressed_t,diff_t,pct_bars_stressed
+vol only (main),constrained,impact_roll_ewm_bps,0.0175,0.4343,0.0227,0.5752,0.1127,46.1773
+vol only (main),constrained,impact_prevday_bps,0.0847,1.0794,0.1729,2.3142,1.3437,46.1773
+vol only (main),constrained,log_vol_har,-0.0681,-0.4876,0.4598,3.1429,2.9555,46.1773
+vol only (main),unconstrained,impact_roll_ewm_bps,0.2045,3.0382,0.1983,3.4428,-0.0882,48.3591
+vol only (main),unconstrained,impact_prevday_bps,-0.2072,-1.3389,-0.0859,-0.5452,1.6701,48.3591
+vol only (main),unconstrained,log_vol_har,1.2784,2.6138,2.3187,4.7515,1.7868,48.3591
+"vol, turnover, spread",constrained,impact_roll_ewm_bps,0.0786,1.4175,-0.0010,-0.0305,-1.4786,68.8643
+"vol, turnover, spread",constrained,impact_prevday_bps,0.0795,0.9594,0.1376,1.9164,0.8591,68.8643
+"vol, turnover, spread",constrained,log_vol_har,-0.1333,-1.0086,0.5879,3.3256,3.6093,68.8643
+"vol, turnover, spread",unconstrained,impact_roll_ewm_bps,0.2602,3.2361,0.1912,3.6400,-0.8904,75.0155
+"vol, turnover, spread",unconstrained,impact_prevday_bps,-0.0692,-0.4549,-0.1615,-1.0639,-1.1660,75.0155
+"vol, turnover, spread",unconstrained,log_vol_har,1.5284,3.0507,1.8853,4.9638,0.7349,75.0155
