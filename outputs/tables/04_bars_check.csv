@@ -1,0 +1,4 @@
+freq,rows,stock_days,bars_per_day,pct_no_quote,pct_no_trades,pct_thin,pct_ret_missing,trades_total
+1min,62700,132,[475],0.01,26.55,50.57,0.22,719298
+5min,12540,132,[95],0.0,2.93,10.91,0.0,719298
+15min,4224,132,[32],0.0,0.02,0.62,0.0,719298
