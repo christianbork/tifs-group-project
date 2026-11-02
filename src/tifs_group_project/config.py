@@ -32,4 +32,10 @@ FIRST_EXPECTED = "08:45:01"  # files should start by 08:45
 LAST_EXPECTED = "17:20:00"  # official close print (CLS)
 EXPORT_CAP = 25_000  # FactSet export row cap; truncation drops the morning
 
-EVENT_DAYS = {("DSV", "2026-10-21"): "Q3 earnings"}
+EVENT_DAYS = {("DSV", "2026-10-21"): "Q3 earnings", ("ISS", "2026-10-29"): "news (check)"}
+
+CONSTRAINED = ["Novo", "DSV", "ISS"]      # spread at 1 tick >50% of the time
+UNCONSTRAINED = ["Vestas", "Pandora", "GN"]
+
+# US cash open (09:30 New York) in Copenhagen local time
+US_OPEN_CPH = {"default": "15:30", "2026-10-26": "14:30", "2026-10-27": "14:30", "2026-10-28": "14:30", "2026-10-29": "14:30", "2026-10-30": "14:30"}
