@@ -24,6 +24,7 @@ from tifs_group_project.impact import (
     decomposition,
     fit_var,
     order_events,
+    rolling_impact,
     windows,
 )
 
@@ -264,4 +265,97 @@ ax.set_title("Two impact measures per window (dashed = 45°)", loc="left", fonts
 ax.legend(frameon=False, fontsize=9)
 fig.tight_layout()
 fig.savefig(config.FIGURES / "05_var_vs_decomposition.png", dpi=150)
+plt.close(fig)
+
+# %% [markdown]
+# ## Intraday rolling impact (joinable to bars_5min on stock + ts)
+# At each 5-min bar start tau, re-estimated from orders in [tau - 60 min, tau)
+# whose mid return is complete before tau (same day only; the 09:00 bar is NaN).
+# - reg: mid return on sign_t..sign_{t-5}, impact = sum of coefficients (>= 50 orders)
+# - var: Hasbrouck VAR(5), 20-order cumulative IRF (>= 100 orders)
+
+# %% Rolling estimates
+bars5 = pd.read_parquet(
+    config.PROCESSED / "bars_5min.parquet", columns=["stock", "date", "ts", "sample"]
+)
+roll = []
+for stock in config.STOCKS:
+    ev = order_events(pd.read_parquet(config.PROCESSED / f"signed_{stock}.parquet"))
+    starts = bars5.loc[bars5["stock"] == stock, "ts"]
+    roll.append(rolling_impact(ev, starts).assign(stock=stock))
+roll = bars5.merge(pd.concat(roll, ignore_index=True), on=["stock", "ts"], how="left")
+roll[
+    ["stock", "ts", "impact_roll_reg_bps", "impact_roll_var_bps", "roll_n_orders"]
+].to_parquet(config.PROCESSED / "impact_intraday_5min.parquet", index=False)
+cov = roll.groupby("stock")[["impact_roll_reg_bps", "impact_roll_var_bps"]].apply(
+    lambda x: 100 * x.notna().mean()
+)
+print(
+    "Coverage, % of 5-min bars with an estimate:\n",
+    cov.reindex(list(config.STOCKS)).round(1).to_string(),
+    "\n",
+)
+
+# %% Within-stock variation and persistence vs the daily VAR (in-sample)
+r_is = roll[roll["sample"] == "IS"].copy()
+daily_var = imp.set_index(["stock", "date"])["var_impact_bps"]
+rows = []
+for stock in config.STOCKS:
+    s = r_is[r_is["stock"] == stock]
+    dv = imp[(imp["stock"] == stock) & (imp["sample"] == "IS")][
+        "var_impact_bps"
+    ].dropna()
+    row = {
+        "stock": stock,
+        "daily_var_mean": dv.mean(),
+        "daily_var_sd_across_days": dv.std(),
+        "daily_var_ar1": dv.autocorr(),
+    }
+    for m in ["impact_roll_reg_bps", "impact_roll_var_bps"]:
+        x = s[m]
+        within = x - s.groupby("date")[m].transform("mean")
+        g = s.groupby("date")[m]
+        day_mean = g.mean()
+        tag = "reg" if "reg" in m else "var"
+        row |= {
+            f"{tag}_mean": x.mean(),
+            f"{tag}_sd": x.std(),
+            f"{tag}_pct_var_within_day": 100 * within.var() / x.var(),
+            f"{tag}_ac_5min": x.corr(g.shift(1)),
+            f"{tag}_ac_60min": x.corr(g.shift(12)),  # non-overlapping windows
+            f"{tag}_daymean_ar1": day_mean.autocorr(),
+            f"{tag}_corr_daymean_vs_daily_var": day_mean.corr(
+                daily_var.loc[stock].reindex(day_mean.index)
+            ),
+        }
+    rows.append(row)
+persist = pd.DataFrame(rows).set_index("stock")
+persist.round(3).to_csv(config.TABLES / "05_intraday_impact_persistence.csv")
+print(
+    "Intraday rolling impact vs daily VAR (in-sample):\n",
+    persist.round(2).T.to_string(),
+    "\n",
+)
+
+# %% Figure: intraday profile of the rolling impact (median by bar, in-sample)
+prof = r_is.assign(minute=(r_is["ts"] - r_is["date"]).dt.total_seconds() / 60 - 540)
+prof = prof.groupby(["stock", "minute"])["impact_roll_reg_bps"].median()
+fig, ax = plt.subplots(figsize=(9, 4))
+for stock in config.STOCKS:
+    ax.plot(
+        prof.loc[stock].index, prof.loc[stock].values, color=COLORS[stock], label=stock
+    )
+ticks = np.arange(0, 481, 60)
+ax.set_xticks(ticks, [f"{9 + t // 60:02d}:00" for t in ticks])
+ax.set_ylabel("bps")
+ax.set_title(
+    "Rolling 60-min impact at each 5-min bar (median across in-sample days)",
+    loc="left",
+    fontsize=11,
+)
+ax.legend(
+    ncol=6, frameon=False, fontsize=9, loc="upper center", bbox_to_anchor=(0.5, -0.12)
+)
+fig.tight_layout()
+fig.savefig(config.FIGURES / "05_intraday_impact_profile.png", dpi=150)
 plt.close(fig)

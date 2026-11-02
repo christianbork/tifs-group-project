@@ -53,3 +53,36 @@ def test_order_events_return_stops_at_day_end():
     assert np.isnan(ev.loc[1, "r_bps"]) and np.isnan(
         ev.loc[2, "r_bps"]
     )  # last order of each day
+
+
+def test_rolling_impact_uses_only_pre_bar_orders():
+    from tifs_group_project.impact import rolling_impact
+
+    rng = np.random.default_rng(0)
+    n = 400
+    ts = pd.Timestamp("2026-10-01 09:00") + pd.to_timedelta(
+        np.sort(rng.uniform(0, 7200, n)), unit="s"
+    )
+    sign = rng.choice([-1, 1], n)
+    # pre-trade mid: order k moves the mid seen by order k+1
+    mid = 100 * np.exp(np.r_[0, np.cumsum(2e-4 * sign + 1e-4 * rng.standard_normal(n))[:-1]])
+    ev = pd.DataFrame({"date": ts.normalize(), "ts": ts, "mid": mid, "sign": sign})
+    ev["r_bps"] = np.log(ev["mid"].shift(-1) / ev["mid"]) * 1e4
+    tau = pd.Series([pd.Timestamp("2026-10-01 10:30")])
+    base = rolling_impact(ev, tau)
+
+    # scramble everything from tau onwards: the estimate at tau must not change
+    later = ev["ts"] >= tau[0]
+    ev2 = ev.copy()
+    ev2.loc[later, "sign"] = -ev2.loc[later, "sign"]
+    ev2.loc[later, "mid"] *= 1.01
+    ev2["r_bps"] = np.log(ev2["mid"].shift(-1) / ev2["mid"]) * 1e4
+    again = rolling_impact(ev2, tau)
+    assert base["roll_n_orders"].iloc[0] > 50
+    assert np.allclose(
+        base[["impact_roll_reg_bps", "impact_roll_var_bps"]],
+        again[["impact_roll_reg_bps", "impact_roll_var_bps"]],
+    )
+    assert (
+        base["impact_roll_reg_bps"].iloc[0] > 0
+    )  # buys push the mid up in the simulated data
