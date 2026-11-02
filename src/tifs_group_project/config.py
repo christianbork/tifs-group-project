@@ -25,8 +25,11 @@ IS_END = "2026-10-21"  # last in-sample day (inclusive)
 OPEN_AUCTION = "09:00:00"
 CONT_START = "09:00:00"
 CONT_END = "17:00:00"
+LAST_CONT_TRADE = (
+    "16:55:00"  # continuous trading stops here; 16:55-17:00 is the closing-auction call
+)
 FIRST_EXPECTED = "08:45:01"  # files should start by 08:45
-LAST_EXPECTED = "17:20:00"   # official close print (CLS)
-EXPORT_CAP = 25_000          # FactSet export row cap; truncation drops the morning
+LAST_EXPECTED = "17:20:00"  # official close print (CLS)
+EXPORT_CAP = 25_000  # FactSet export row cap; truncation drops the morning
 
 EVENT_DAYS = {("DSV", "2026-10-21"): "Q3 earnings"}
