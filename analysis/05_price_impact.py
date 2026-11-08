@@ -102,7 +102,7 @@ imp = pd.DataFrame(rows)
 imp["group"] = np.where(
     imp["stock"].isin(config.CONSTRAINED), "constrained", "unconstrained"
 )
-imp["sample"] = np.where(imp["date"] <= config.IS_END, "IS", "OOS")
+imp["sample"] = config.sample_label(imp["date"])
 # estimate through day t-1 -> predictor for day t: shift by one trading day within stock
 all_days = pd.DataFrame(
     [(s, t) for s in config.STOCKS for t in sorted(imp["date"].unique())],

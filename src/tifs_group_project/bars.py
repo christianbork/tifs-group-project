@@ -140,7 +140,7 @@ def aggregate(m: pd.DataFrame, minutes: int) -> pd.DataFrame:
     b["group"] = np.where(
         b["stock"].isin(config.CONSTRAINED), "constrained", "unconstrained"
     )
-    b["sample"] = np.where(b["date"] <= config.IS_END, "IS", "OOS")
+    b["sample"] = config.sample_label(b["date"])
     b["event"] = [
         config.EVENT_DAYS.get((s, str(d.date())), "")
         for s, d in zip(b["stock"], b["date"])

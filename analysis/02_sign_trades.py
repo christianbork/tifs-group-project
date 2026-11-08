@@ -62,29 +62,82 @@ print("% of trades outside the quote, by quote choice:\n", timing, "\n")
 print("% outside the quote by fill position within an order:\n", walk, "\n")
 print("Signing summary:\n", summary.to_string(), "\n")
 
-# %% Validation: ISS 30-Oct full L1 quote stream
-qfile = config.RAW / "quotes_sample" / "ISS-CSE-20261030-20261030-quotes.csv"
-quotes = rebuild_quotes(pd.read_csv(qfile, dtype={"Trade Cond": str, "Venue": str, "Exch Time": str}))
-iss = pd.read_parquet(config.PROCESSED / "signed_ISS.parquet")
-iss = iss[iss["date"] == "2026-10-30"].sort_values("ts")
-m = pd.merge_asof(iss, quotes.rename(columns={"bid": "bid_pv", "ask": "ask_pv"}), on="ts",
-                  allow_exact_matches=False)
-m["mid_pv"] = (m["bid_pv"] + m["ask_pv"]) / 2
-side_pv = np.select([m["price"] > m["mid_pv"], m["price"] < m["mid_pv"]], [1, -1], 0)
+# %% Validation against the full L1 quote streams in data/raw/quotes_sample/
+# One row per quote file: ISS 30-Oct (Christian), ISS 5-Nov, GN 5-Nov (event day, two parts)
+# and a one-hour Novo window on 6-Nov. Trades are compared with the prevailing quote
+# rebuilt from the stream; the Novo file only covers 10:00-11:00, so its trades are
+# restricted to the span of the quote file.
+import re
 
-cont = quotes[(quotes["ts"].dt.strftime("%H:%M:%S") > config.CONT_START) &
-              (quotes["ts"].dt.strftime("%H:%M:%S") < config.CONT_END)].copy()
-cont = cont[cont["ask"] > cont["bid"]]
-dt = cont["ts"].shift(-1).sub(cont["ts"]).dt.total_seconds()
-spr = (cont["ask"] - cont["bid"]) / ((cont["ask"] + cont["bid"]) / 2) * 1e4
-valid = {
-    "trades": len(m),
-    "pct_attached_quote_equals_prevailing": round(100 * ((m["bid"] == m["bid_pv"]) & (m["ask"] == m["ask_pv"])).mean(), 1),
-    "pct_outside_attached": quote_fit(m["price"], m["bid"], m["ask"])["pct_outside"],
-    "pct_outside_prevailing": quote_fit(m["price"], m["bid_pv"], m["ask_pv"])["pct_outside"],
-    "pct_sign_agreement": round(100 * (m["side"][side_pv != 0] == side_pv[side_pv != 0]).mean(), 1),
-    "spread_bps_time_weighted": round(np.average(spr[:-1], weights=dt[:-1]), 2),
-    "spread_bps_trade_weighted": round(((m["ask"] - m["bid"]) / m["mid"] * 1e4).mean(), 2),
-}
-pd.Series(valid).to_csv(config.TABLES / "02_iss_quote_validation.csv", header=["value"])
-print("ISS 30-Oct validation against the full quote stream:\n", pd.Series(valid).to_string())
+TICKER_TO_STOCK = {v: k for k, v in config.STOCKS.items()}
+qfiles = {}
+for f in sorted((config.RAW / "quotes_sample").glob("*-quotes*.csv")):
+    m = re.match(r"(.+?)-CSE-(\d{8})-\d{8}-quotes", f.name)
+    if m:
+        qfiles.setdefault((TICKER_TO_STOCK[m.group(1)], m.group(2)), []).append(f)
+
+valid_rows = []
+for (stock, day), files in qfiles.items():
+    raw = pd.concat(
+        [
+            pd.read_csv(f, dtype={"Trade Cond": str, "Venue": str, "Exch Time": str})
+            for f in files
+        ],
+        ignore_index=True,
+    )
+    quotes = rebuild_quotes(raw).drop_duplicates("ts", keep="last").sort_values("ts")
+    tr = pd.read_parquet(config.PROCESSED / f"signed_{stock}.parquet")
+    tr = tr[
+        (tr["date"] == pd.Timestamp(day))
+        & (tr["ts"] >= quotes["ts"].min())
+        & (tr["ts"] <= quotes["ts"].max())
+    ].sort_values("ts")
+    if tr.empty:
+        print(f"{stock} {day}: no signed trades for this day (not loaded), skipped")
+        continue
+    m = pd.merge_asof(
+        tr,
+        quotes.rename(columns={"bid": "bid_pv", "ask": "ask_pv"}),
+        on="ts",
+        allow_exact_matches=False,
+    )
+    m["mid_pv"] = (m["bid_pv"] + m["ask_pv"]) / 2
+    side_pv = np.select(
+        [m["price"] > m["mid_pv"], m["price"] < m["mid_pv"]], [1, -1], 0
+    )
+    cont = quotes[
+        (quotes["ts"].dt.strftime("%H:%M:%S") > config.CONT_START)
+        & (quotes["ts"].dt.strftime("%H:%M:%S") < config.CONT_END)
+    ].copy()
+    cont = cont[cont["ask"] > cont["bid"]]
+    dt = cont["ts"].shift(-1).sub(cont["ts"]).dt.total_seconds()
+    spr = (cont["ask"] - cont["bid"]) / ((cont["ask"] + cont["bid"]) / 2) * 1e4
+    valid_rows.append(
+        {
+            "stock": stock,
+            "date": day,
+            "span": f"{quotes['ts'].min():%H:%M}-{quotes['ts'].max():%H:%M}",
+            "files": len(files),
+            "quote_updates": len(quotes),
+            "trades": len(m),
+            "pct_attached_quote_equals_prevailing": round(
+                100 * ((m["bid"] == m["bid_pv"]) & (m["ask"] == m["ask_pv"])).mean(), 1
+            ),
+            "pct_outside_attached": quote_fit(m["price"], m["bid"], m["ask"])[
+                "pct_outside"
+            ],
+            "pct_outside_prevailing": quote_fit(m["price"], m["bid_pv"], m["ask_pv"])[
+                "pct_outside"
+            ],
+            "pct_sign_agreement": round(
+                100 * (m["side"][side_pv != 0] == side_pv[side_pv != 0]).mean(), 1
+            ),
+            "spread_bps_time_weighted": round(np.average(spr[:-1], weights=dt[:-1]), 2),
+            "spread_bps_trade_weighted": round(
+                ((m["ask"] - m["bid"]) / m["mid"] * 1e4).mean(), 2
+            ),
+        }
+    )
+valid = pd.DataFrame(valid_rows)
+valid.to_csv(config.TABLES / "02_quote_validation.csv", index=False)
+print("Validation against the full quote streams:\n", valid.to_string(index=False))

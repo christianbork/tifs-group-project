@@ -99,7 +99,11 @@ print("5-min bars, in-sample medians:\n", s.round(2).to_string(), "\n")
 
 # US-open alignment: bars around the US open, per date regime
 us = b5.assign(
-    us_open_cph=np.where(b5["date"] <= "2026-10-23", "15:30 CPH", "14:30 CPH")
+    us_open_cph=b5["date"]
+    .dt.strftime("%Y-%m-%d")
+    .map(config.US_OPEN_CPH)
+    .fillna(config.US_OPEN_CPH["default"])
+    + " CPH"
 )
 us = (
     us[us["min_since_us_open"].between(-30, 25)]

@@ -94,7 +94,7 @@ grid = (
     .rename_axis("minute")
     .reset_index()
 )
-grid["sample"] = np.where(grid["date"] <= config.IS_END, "IS", "OOS")
+grid["sample"] = config.sample_label(grid["date"])
 
 # %% Intraday U-shapes (in-sample), per minute
 d_is, g_is = d[d["sample"] == "IS"], grid[grid["sample"] == "IS"]
@@ -157,7 +157,7 @@ daily = d.groupby(["stock", "date"]).apply(
 )
 daily["rv_5min_bps"] = rv5
 daily = daily.reset_index()
-daily["sample"] = np.where(daily["date"] <= config.IS_END, "IS", "OOS")
+daily["sample"] = config.sample_label(daily["date"])
 daily["event"] = [
     config.EVENT_DAYS.get((s, str(t.date())), "")
     for s, t in zip(daily["stock"], daily["date"])

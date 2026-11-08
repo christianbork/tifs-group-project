@@ -52,6 +52,8 @@ def _stitch(parts: list[pd.DataFrame]) -> tuple[pd.DataFrame, int]:
 
     Duplicates are only removed inside the overlap, because files also contain
     genuinely repeated rows (same ms, price and size) that must be kept.
+    Missing trade conditions are filled with '' before the row key is built (pandas 3
+    keeps NaN through astype(str), which broke the join on the November part files).
     """
     key = ["ts", "Price", "Vol", "Bid", "Ask", "CVol", "Trade Cond"]
     out, dropped = parts[0], 0
@@ -60,9 +62,9 @@ def _stitch(parts: list[pd.DataFrame]) -> tuple[pd.DataFrame, int]:
         prev_ov = out[out["ts"] >= lo]
         in_ov = nxt["ts"] <= hi
         # multiset match: allow as many drops as copies in the previous part
-        prev_counts = prev_ov[key].astype(str).agg("|".join, axis=1).value_counts().to_dict()
+        prev_counts = prev_ov[key].fillna("").astype(str).agg("|".join, axis=1).value_counts().to_dict()
         keep = []
-        for is_ov, k in zip(in_ov, nxt[key].astype(str).agg("|".join, axis=1)):
+        for is_ov, k in zip(in_ov, nxt[key].fillna("").astype(str).agg("|".join, axis=1)):
             if is_ov and prev_counts.get(k, 0) > 0:
                 prev_counts[k] -= 1
                 keep.append(False)
@@ -107,7 +109,7 @@ def load_day(stock: str, files: list[Path]) -> tuple[pd.DataFrame, dict]:
     df["continuous"] = (df["kind"] == "lit") & (t > config.CONT_START) & (t < config.CONT_END)
     df["quote_ok"] = (df["bid"] > 0) & (df["ask"] > df["bid"])
     df["mid"] = np.where(df["quote_ok"], (df["bid"] + df["ask"]) / 2, np.nan)
-    df["sample"] = np.where(df["date"] <= config.IS_END, "IS", "OOS")
+    df["sample"] = config.sample_label(df["date"])
 
     first, last = df["ts"].min().strftime("%H:%M:%S.%f")[:12], df["ts"].max().strftime("%H:%M:%S.%f")[:12]
     lit = df[df["continuous"] & df["quote_ok"]]
