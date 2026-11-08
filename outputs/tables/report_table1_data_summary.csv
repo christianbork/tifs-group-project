@@ -1,5 +1,5 @@
 Stock,Group,Lit trades per day,Turnover (DKK m/day),Fills per order,Tick (bps),Median spread (bps),Time at 1 tick (%),Signed by quote rule (%)
-Novo,constrained,14738,542,2.27,2.0,2.0,58,96.1
+Novo,constrained,14746,542,2.27,2.0,2.0,58,96.1
 DSV,constrained,6519,290,2.39,4.2,7.4,53,94.0
 Vestas,unconstrained,6258,171,2.29,2.6,5.3,22,96.9
 Pandora,unconstrained,2769,70,2.26,2.4,9.6,4,98.3

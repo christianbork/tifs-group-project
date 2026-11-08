@@ -1,0 +1,10 @@
+rule,"realised bps, OOS, constrained","realised bps, OOS, unconstrained","realised bps, FWD, constrained","realised bps, FWD, unconstrained","daily P&L t vs controls only, OOS","daily P&L t vs controls only, FWD"
+constant,-0.63,-3.76,-1.29,-2.15,-0.42,-1.89
+yesterday,-0.63,-3.69,-1.22,-1.88,-2.21,-0.81
+last bar,-0.5,-3.78,-1.13,-2.78,-2.7,-0.73
+controls only,-0.6,-3.61,-1.04,-2.2,,
+vol rule,-0.51,-3.71,-1.11,-1.68,1.87,2.08
+impact rule,-0.59,-3.56,-1.08,-2.02,0.87,0.85
+vol + impact rule,-0.53,-3.63,-1.09,-1.73,2.32,2.48
+lagged spread + drivers,-0.46,-3.61,-1.1,-2.29,1.8,1.91
+LightGBM,-0.5,-3.37,-1.04,-1.94,-0.57,0.41

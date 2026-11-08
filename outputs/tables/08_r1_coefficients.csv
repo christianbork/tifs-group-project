@@ -1,19 +1,19 @@
 spec,var,coef,t,p,effect_1sd,n,r2,group
-original,impact_roll_ewm_bps,-0.0351,-0.8006,0.4233,-0.0299,3610,0.6860,constrained
-original,impact_prevday_bps,0.1214,1.3571,0.1747,0.0477,3610,0.6860,constrained
-original,log_vol_har,0.5127,3.7155,0.0002,0.0949,3610,0.6860,constrained
-refined,impact_roll_ewm_bps,0.0191,0.5819,0.5606,0.0163,3610,0.7725,constrained
-refined,impact_prevday_bps,0.1222,1.7539,0.0795,0.0480,3610,0.7725,constrained
-refined,log_vol_har,0.2319,2.1286,0.0333,0.0429,3610,0.7725,constrained
-log shared,impact_roll_ewm_bps,-0.0060,-0.8100,0.4180,-0.0051,3610,0.8577,constrained
-log shared,impact_prevday_bps,0.0284,1.8983,0.0577,0.0111,3610,0.8577,constrained
-log shared,log_vol_har,0.1206,4.5020,0.0000,0.0223,3610,0.8577,constrained
-original,impact_roll_ewm_bps,0.1266,2.4216,0.0155,0.1415,3230,0.6612,unconstrained
-original,impact_prevday_bps,-0.1774,-1.0785,0.2808,-0.0647,3230,0.6612,unconstrained
-original,log_vol_har,2.2707,5.6062,0.0000,0.2846,3230,0.6612,unconstrained
-refined,impact_roll_ewm_bps,0.2040,3.9139,0.0001,0.2280,3230,0.7049,unconstrained
-refined,impact_prevday_bps,-0.1534,-1.0000,0.3173,-0.0559,3230,0.7049,unconstrained
-refined,log_vol_har,1.8723,4.9638,0.0000,0.2347,3230,0.7049,unconstrained
-log shared,impact_roll_ewm_bps,0.0279,3.3824,0.0007,0.0311,3230,0.7212,unconstrained
-log shared,impact_prevday_bps,0.0302,1.0613,0.2886,0.0110,3230,0.7212,unconstrained
-log shared,log_vol_har,0.4872,6.6982,0.0000,0.0611,3230,0.7212,unconstrained
+original,impact_roll_ewm_bps,-0.0463,-1.0781,0.2810,-0.0393,3610,0.6877,constrained
+original,impact_prevday_bps,0.1081,1.3089,0.1906,0.0440,3610,0.6877,constrained
+original,log_vol_har,0.5870,4.0726,0.0000,0.1086,3610,0.6877,constrained
+refined,impact_roll_ewm_bps,0.0043,0.1295,0.8969,0.0037,3610,0.7723,constrained
+refined,impact_prevday_bps,0.1060,1.6460,0.0998,0.0432,3610,0.7723,constrained
+refined,log_vol_har,0.3273,3.1322,0.0017,0.0606,3610,0.7723,constrained
+log shared,impact_roll_ewm_bps,-0.0081,-1.1054,0.2690,-0.0069,3610,0.8577,constrained
+log shared,impact_prevday_bps,0.0223,1.5949,0.1107,0.0091,3610,0.8577,constrained
+log shared,log_vol_har,0.1276,4.7866,0.0000,0.0236,3610,0.8577,constrained
+original,impact_roll_ewm_bps,0.1314,2.4873,0.0129,0.1470,3230,0.6612,unconstrained
+original,impact_prevday_bps,-0.0043,-0.0307,0.9755,-0.0017,3230,0.6612,unconstrained
+original,log_vol_har,2.4127,5.7028,0.0000,0.3024,3230,0.6612,unconstrained
+refined,impact_roll_ewm_bps,0.2072,3.9238,0.0001,0.2316,3230,0.7041,unconstrained
+refined,impact_prevday_bps,0.0155,0.1189,0.9053,0.0062,3230,0.7041,unconstrained
+refined,log_vol_har,2.0099,5.1880,0.0000,0.2519,3230,0.7041,unconstrained
+log shared,impact_roll_ewm_bps,0.0290,3.5272,0.0004,0.0325,3230,0.7230,unconstrained
+log shared,impact_prevday_bps,0.0627,2.4844,0.0130,0.0253,3230,0.7230,unconstrained
+log shared,log_vol_har,0.4631,6.1669,0.0000,0.0580,3230,0.7230,unconstrained

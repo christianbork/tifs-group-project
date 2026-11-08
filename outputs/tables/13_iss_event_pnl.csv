@@ -1,0 +1,10 @@
+rule,fills,fill_rate_pct,avg_half_spread_bps,adverse_selection_bps,realised_bps,pnl_dkk_per_day
+constant,886,84.3,3.51,5.01,-1.5,-3974.8
+yesterday,722,68.7,5.42,2.25,3.17,4939.6
+last bar,624,59.37,8.87,4.93,3.95,5293.9
+controls only,876,83.35,3.65,4.98,-1.33,-3577.6
+vol rule,876,83.35,3.65,4.98,-1.33,-3577.6
+impact rule,873,83.06,3.63,4.97,-1.34,-3571.0
+vol + impact rule,873,83.06,3.63,4.97,-1.34,-3571.0
+lagged spread + drivers,826,78.59,5.41,3.29,2.11,3455.7
+LightGBM,809,76.97,6.11,2.9,3.2,5548.3

@@ -1,16 +1,16 @@
 group,spec,var,coef,t,p,effect_1sd,n,r2
-constrained,quoted (main),impact_roll_ewm_bps,-0.0351,-0.8006,0.4233,-0.0299,3610,0.6860
-constrained,quoted (main),impact_prevday_bps,0.1214,1.3571,0.1747,0.0477,3610,0.6860
-constrained,quoted (main),log_vol_har,0.5127,3.7155,0.0002,0.0949,3610,0.6860
-constrained,effective,impact_roll_ewm_bps,-0.0468,-1.0016,0.3165,-0.0396,3528,0.5523
-constrained,effective,impact_prevday_bps,0.0603,0.6629,0.5074,0.0233,3528,0.5523
-constrained,effective,log_vol_har,1.4813,7.8671,0.0000,0.2765,3528,0.5523
-constrained,"P(spread > 1 tick), logit AME",impact_roll_ewm_bps,-0.0676,-1.5736,0.1156,-0.0130,3610,
-constrained,"P(spread > 1 tick), logit AME",impact_prevday_bps,0.0754,0.8701,0.3842,0.0067,3610,
-constrained,"P(spread > 1 tick), logit AME",log_vol_har,0.8986,5.7422,0.0000,0.0378,3610,
-unconstrained,quoted (main),impact_roll_ewm_bps,0.1266,2.4216,0.0155,0.1415,3230,0.6612
-unconstrained,quoted (main),impact_prevday_bps,-0.1774,-1.0785,0.2808,-0.0647,3230,0.6612
-unconstrained,quoted (main),log_vol_har,2.2707,5.6062,0.0000,0.2846,3230,0.6612
-unconstrained,effective,impact_roll_ewm_bps,0.1665,2.1894,0.0286,0.1855,3122,0.4930
-unconstrained,effective,impact_prevday_bps,-0.0166,-0.0820,0.9346,-0.0060,3122,0.4930
-unconstrained,effective,log_vol_har,4.1732,6.8534,0.0000,0.5274,3122,0.4930
+constrained,quoted (main),impact_roll_ewm_bps,-0.0463,-1.0781,0.2810,-0.0393,3610,0.6877
+constrained,quoted (main),impact_prevday_bps,0.1081,1.3089,0.1906,0.0440,3610,0.6877
+constrained,quoted (main),log_vol_har,0.5870,4.0726,0.0000,0.1086,3610,0.6877
+constrained,effective,impact_roll_ewm_bps,-0.0578,-1.2623,0.2068,-0.0489,3528,0.5546
+constrained,effective,impact_prevday_bps,0.0915,1.0736,0.2830,0.0368,3528,0.5546
+constrained,effective,log_vol_har,1.6018,8.4180,0.0000,0.2990,3528,0.5546
+constrained,"P(spread > 1 tick), logit AME",impact_roll_ewm_bps,-0.0740,-1.7342,0.0829,-0.0143,3610,
+constrained,"P(spread > 1 tick), logit AME",impact_prevday_bps,0.0940,1.1575,0.2471,0.0087,3610,
+constrained,"P(spread > 1 tick), logit AME",log_vol_har,0.8848,5.6974,0.0000,0.0372,3610,
+unconstrained,quoted (main),impact_roll_ewm_bps,0.1314,2.4873,0.0129,0.1470,3230,0.6612
+unconstrained,quoted (main),impact_prevday_bps,-0.0043,-0.0307,0.9755,-0.0017,3230,0.6612
+unconstrained,quoted (main),log_vol_har,2.4127,5.7028,0.0000,0.3024,3230,0.6612
+unconstrained,effective,impact_roll_ewm_bps,0.1746,2.2741,0.0230,0.1944,3122,0.4930
+unconstrained,effective,impact_prevday_bps,0.2808,1.6102,0.1074,0.1133,3122,0.4930
+unconstrained,effective,log_vol_har,4.1870,6.6201,0.0000,0.5292,3122,0.4930

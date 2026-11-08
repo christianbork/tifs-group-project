@@ -1,7 +1,7 @@
 group,stock,own mean,original,refined,log shared
-constrained,Novo,0.3729,0.4929,0.2965,0.2961
-constrained,DSV,0.6775,0.6096,0.5648,0.5826
-constrained,ISS,2.1282,1.7335,1.4933,1.6634
-unconstrained,Vestas,0.9158,0.9487,0.7673,0.7611
-unconstrained,Pandora,1.7141,1.3462,1.3484,1.3082
-unconstrained,GN,3.0107,2.3942,2.2424,2.309
+constrained,Novo,0.3729,0.4924,0.2969,0.2952
+constrained,DSV,0.6775,0.6055,0.5587,0.5777
+constrained,ISS,2.1282,1.7297,1.4973,1.6592
+unconstrained,Vestas,0.9158,0.945,0.7658,0.7567
+unconstrained,Pandora,1.7141,1.3226,1.3258,1.2905
+unconstrained,GN,3.0107,2.4094,2.261,2.3324

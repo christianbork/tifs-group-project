@@ -1,0 +1,17 @@
+group,se,test,n,q,chi2,F,p_value
+constrained,NW L=7,impact (both) -> spread,3496,2,4.2772,2.1386,0.1178
+constrained,NW L=7,rolling impact -> spread,3496,1,0.1324,0.1324,0.7159
+constrained,NW L=7,vol forecast -> spread,3496,1,1.4117,1.4117,0.2348
+constrained,NW L=7,all drivers -> spread,3496,3,5.951,1.9837,0.114
+constrained,Driscoll-Kraay L=24,impact (both) -> spread,3496,2,4.3738,2.1869,0.1123
+constrained,Driscoll-Kraay L=24,rolling impact -> spread,3496,1,0.1361,0.1361,0.7122
+constrained,Driscoll-Kraay L=24,vol forecast -> spread,3496,1,1.2111,1.2111,0.2711
+constrained,Driscoll-Kraay L=24,all drivers -> spread,3496,3,6.3961,2.132,0.0939
+unconstrained,NW L=7,impact (both) -> spread,3128,2,8.4931,4.2465,0.0143
+unconstrained,NW L=7,rolling impact -> spread,3128,1,8.4531,8.4531,0.0036
+unconstrained,NW L=7,vol forecast -> spread,3128,1,10.0554,10.0554,0.0015
+unconstrained,NW L=7,all drivers -> spread,3128,3,26.6711,8.8904,0.0
+unconstrained,Driscoll-Kraay L=24,impact (both) -> spread,3128,2,6.9617,3.4809,0.0308
+unconstrained,Driscoll-Kraay L=24,rolling impact -> spread,3128,1,6.9234,6.9234,0.0085
+unconstrained,Driscoll-Kraay L=24,vol forecast -> spread,3128,1,7.6106,7.6106,0.0058
+unconstrained,Driscoll-Kraay L=24,all drivers -> spread,3128,3,20.0237,6.6746,0.0002

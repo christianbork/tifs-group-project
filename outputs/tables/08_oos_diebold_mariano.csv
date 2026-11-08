@@ -1,241 +1,241 @@
 subset,unit,model,vs,mean_loss_diff,dm_stat,p_value,n
-all OOS days,constrained,refined: combined,original: combined,-0.0494,-0.5357,0.5923,665
-all OOS days,constrained,log shared: combined,original: combined,-0.0935,-2.1615,0.0310,665
-all OOS days,constrained,refined: combined,IS average,-0.2385,-1.5071,0.1323,665
-all OOS days,constrained,refined: combined,yesterday,-0.2231,-1.5027,0.1334,665
-all OOS days,constrained,refined: combined,refined: controls only,0.0222,0.7504,0.4533,665
-all OOS days,constrained,refined: combined,refined: vol only,0.0562,2.9410,0.0034,665
-all OOS days,constrained,refined: combined,refined: impact only,-0.0238,-1.4646,0.1435,665
-all OOS days,constrained,LightGBM,refined: combined,-0.5205,-3.4976,0.0005,665
-all OOS days,constrained,LightGBM,refined + lagged spread,-0.3223,-3.5180,0.0005,665
-all OOS days,constrained,LightGBM,yesterday,-0.7436,-3.8088,0.0002,665
-all OOS days,constrained,original: combined,last bar,-0.0311,-0.1214,0.9034,665
-all OOS days,constrained,refined: combined,last bar,-0.0805,-0.2541,0.7995,665
-all OOS days,constrained,log shared: combined,last bar,-0.1247,-0.4410,0.6594,665
-all OOS days,constrained,refined + lagged spread,last bar,-0.2787,-1.0831,0.2792,665
-all OOS days,constrained,LightGBM,last bar,-0.6010,-2.1334,0.0333,665
-all OOS days,unconstrained,refined: combined,original: combined,-0.1157,-1.3752,0.1695,665
-all OOS days,unconstrained,log shared: combined,original: combined,-0.3563,-4.1183,0.0000,665
-all OOS days,unconstrained,refined: combined,IS average,-0.6606,-2.9246,0.0036,665
-all OOS days,unconstrained,refined: combined,yesterday,-0.6727,-2.3515,0.0190,665
-all OOS days,unconstrained,refined: combined,refined: controls only,-0.1250,-1.2830,0.1999,665
-all OOS days,unconstrained,refined: combined,refined: vol only,-0.0904,-1.3297,0.1841,665
-all OOS days,unconstrained,refined: combined,refined: impact only,0.0627,1.6130,0.1072,665
-all OOS days,unconstrained,LightGBM,refined: combined,-1.0037,-7.8697,0.0000,665
-all OOS days,unconstrained,LightGBM,refined + lagged spread,-0.3641,-3.2805,0.0011,665
-all OOS days,unconstrained,LightGBM,yesterday,-1.6764,-5.4142,0.0000,665
-all OOS days,unconstrained,original: combined,last bar,0.1185,0.4471,0.6549,665
-all OOS days,unconstrained,refined: combined,last bar,0.0029,0.0099,0.9921,665
-all OOS days,unconstrained,log shared: combined,last bar,-0.2378,-0.7905,0.4295,665
-all OOS days,unconstrained,refined + lagged spread,last bar,-0.6367,-2.7815,0.0056,665
-all OOS days,unconstrained,LightGBM,last bar,-1.0008,-3.4434,0.0006,665
-all OOS days,Novo,refined: combined,original: combined,-0.2383,-3.3271,0.0009,665
-all OOS days,Novo,log shared: combined,original: combined,-0.2293,-3.2954,0.0010,665
-all OOS days,Novo,refined: combined,IS average,-0.0088,-1.3061,0.1920,665
-all OOS days,Novo,refined: combined,yesterday,-0.0018,-0.2400,0.8104,665
-all OOS days,Novo,refined: combined,refined: controls only,0.0044,3.0490,0.0024,665
-all OOS days,Novo,refined: combined,refined: vol only,-0.0013,-1.6791,0.0936,665
-all OOS days,Novo,refined: combined,refined: impact only,0.0033,3.0490,0.0024,665
-all OOS days,Novo,LightGBM,refined: combined,0.0046,0.7190,0.4724,665
-all OOS days,Novo,LightGBM,refined + lagged spread,0.0128,2.1724,0.0302,665
-all OOS days,Novo,LightGBM,yesterday,0.0027,0.3144,0.7533,665
-all OOS days,Novo,original: combined,last bar,0.2348,3.3366,0.0009,665
-all OOS days,Novo,refined: combined,last bar,-0.0035,-0.4010,0.6885,665
-all OOS days,Novo,log shared: combined,last bar,0.0055,0.5874,0.5572,665
-all OOS days,Novo,refined + lagged spread,last bar,-0.0117,-1.5039,0.1331,665
-all OOS days,Novo,LightGBM,last bar,0.0011,0.1063,0.9154,665
-all OOS days,DSV,refined: combined,original: combined,-0.1316,-2.4512,0.0145,665
-all OOS days,DSV,log shared: combined,original: combined,-0.0252,-1.4208,0.1558,665
-all OOS days,DSV,refined: combined,IS average,-0.0340,-0.9570,0.3389,665
-all OOS days,DSV,refined: combined,yesterday,0.0373,1.0463,0.2958,665
-all OOS days,DSV,refined: combined,refined: controls only,0.0046,0.4666,0.6409,665
-all OOS days,DSV,refined: combined,refined: vol only,0.0151,2.6395,0.0085,665
-all OOS days,DSV,refined: combined,refined: impact only,0.0054,1.2800,0.2010,665
-all OOS days,DSV,LightGBM,refined: combined,-0.1387,-5.6796,0.0000,665
-all OOS days,DSV,LightGBM,refined + lagged spread,-0.0832,-3.8215,0.0001,665
-all OOS days,DSV,LightGBM,yesterday,-0.1014,-2.4643,0.0140,665
-all OOS days,DSV,original: combined,last bar,0.1772,2.3007,0.0217,665
-all OOS days,DSV,refined: combined,last bar,0.0457,0.9793,0.3278,665
-all OOS days,DSV,log shared: combined,last bar,0.1520,2.2835,0.0227,665
-all OOS days,DSV,refined + lagged spread,last bar,-0.0098,-0.2441,0.8073,665
-all OOS days,DSV,LightGBM,last bar,-0.0930,-1.9722,0.0490,665
-all OOS days,Vestas,refined: combined,original: combined,-0.4642,-2.7962,0.0053,665
-all OOS days,Vestas,log shared: combined,original: combined,-0.3443,-2.6017,0.0095,665
-all OOS days,Vestas,refined: combined,IS average,0.0025,0.0259,0.9794,665
-all OOS days,Vestas,refined: combined,yesterday,0.1708,1.6776,0.0939,665
-all OOS days,Vestas,refined: combined,refined: controls only,0.2069,2.9326,0.0035,665
-all OOS days,Vestas,refined: combined,refined: vol only,0.0516,1.3134,0.1895,665
-all OOS days,Vestas,refined: combined,refined: impact only,0.2552,4.0295,0.0001,665
-all OOS days,Vestas,LightGBM,refined: combined,-0.3211,-4.2187,0.0000,665
-all OOS days,Vestas,LightGBM,refined + lagged spread,-0.0951,-2.9727,0.0031,665
-all OOS days,Vestas,LightGBM,yesterday,-0.1503,-2.5253,0.0118,665
-all OOS days,Vestas,original: combined,last bar,0.5381,2.7199,0.0067,665
-all OOS days,Vestas,refined: combined,last bar,0.0739,0.5149,0.6068,665
-all OOS days,Vestas,log shared: combined,last bar,0.1938,1.2532,0.2106,665
-all OOS days,Vestas,refined + lagged spread,last bar,-0.1521,-1.5211,0.1287,665
-all OOS days,Vestas,LightGBM,last bar,-0.2473,-2.3950,0.0169,665
-all OOS days,Pandora,refined: combined,original: combined,-0.2457,-4.9819,0.0000,665
-all OOS days,Pandora,log shared: combined,original: combined,-0.8466,-8.1258,0.0000,665
-all OOS days,Pandora,refined: combined,IS average,-0.3822,-1.6699,0.0954,665
-all OOS days,Pandora,refined: combined,yesterday,0.7580,3.6087,0.0003,665
-all OOS days,Pandora,refined: combined,refined: controls only,-0.2866,-3.5779,0.0004,665
-all OOS days,Pandora,refined: combined,refined: vol only,-0.2195,-3.6062,0.0003,665
-all OOS days,Pandora,refined: combined,refined: impact only,0.0646,1.9412,0.0527,665
-all OOS days,Pandora,LightGBM,refined: combined,-1.1887,-6.4420,0.0000,665
-all OOS days,Pandora,LightGBM,refined + lagged spread,-0.4038,-3.0828,0.0021,665
-all OOS days,Pandora,LightGBM,yesterday,-0.4307,-2.4253,0.0156,665
-all OOS days,Pandora,original: combined,last bar,1.2453,5.7724,0.0000,665
-all OOS days,Pandora,refined: combined,last bar,0.9995,4.8522,0.0000,665
-all OOS days,Pandora,log shared: combined,last bar,0.3987,2.4863,0.0132,665
-all OOS days,Pandora,refined + lagged spread,last bar,0.2146,1.6457,0.1003,665
-all OOS days,Pandora,LightGBM,last bar,-0.1892,-1.1192,0.2635,665
-all OOS days,GN,refined: combined,original: combined,0.3630,1.3707,0.1709,665
-all OOS days,GN,log shared: combined,original: combined,0.1219,0.7029,0.4823,665
-all OOS days,GN,refined: combined,IS average,-1.6021,-2.4016,0.0166,665
-all OOS days,GN,refined: combined,yesterday,-2.9469,-3.8416,0.0001,665
-all OOS days,GN,refined: combined,refined: controls only,-0.2953,-1.0966,0.2732,665
-all OOS days,GN,refined: combined,refined: vol only,-0.1032,-0.5375,0.5911,665
-all OOS days,GN,refined: combined,refined: impact only,-0.1318,-1.5383,0.1244,665
-all OOS days,GN,LightGBM,refined: combined,-1.5011,-5.2074,0.0000,665
-all OOS days,GN,LightGBM,refined + lagged spread,-0.5935,-2.3540,0.0189,665
-all OOS days,GN,LightGBM,yesterday,-4.4480,-5.5251,0.0000,665
-all OOS days,GN,original: combined,last bar,-1.4277,-1.9006,0.0578,665
-all OOS days,GN,refined: combined,last bar,-1.0648,-1.3725,0.1704,665
-all OOS days,GN,log shared: combined,last bar,-1.3058,-1.6808,0.0933,665
-all OOS days,GN,refined + lagged spread,last bar,-1.9724,-3.2971,0.0010,665
-all OOS days,GN,LightGBM,last bar,-2.5659,-3.4845,0.0005,665
-all OOS days,ISS,refined: combined,original: combined,0.2217,0.8403,0.4011,665
-all OOS days,ISS,log shared: combined,original: combined,-0.0261,-0.3987,0.6902,665
-all OOS days,ISS,refined: combined,IS average,-0.6727,-1.4099,0.1590,665
-all OOS days,ISS,refined: combined,yesterday,-0.7046,-1.6077,0.1084,665
-all OOS days,ISS,refined: combined,refined: controls only,0.0577,0.6690,0.5037,665
-all OOS days,ISS,refined: combined,refined: vol only,0.1549,2.7439,0.0062,665
-all OOS days,ISS,refined: combined,refined: impact only,-0.0801,-1.6474,0.0999,665
-all OOS days,ISS,LightGBM,refined: combined,-1.4275,-3.2483,0.0012,665
-all OOS days,ISS,LightGBM,refined + lagged spread,-0.8967,-3.3570,0.0008,665
-all OOS days,ISS,LightGBM,yesterday,-2.1321,-3.7203,0.0002,665
-all OOS days,ISS,original: combined,last bar,-0.5055,-0.6181,0.5367,665
-all OOS days,ISS,refined: combined,last bar,-0.2837,-0.3017,0.7630,665
-all OOS days,ISS,log shared: combined,last bar,-0.5316,-0.6215,0.5345,665
-all OOS days,ISS,refined + lagged spread,last bar,-0.8145,-1.0694,0.2853,665
-all OOS days,ISS,LightGBM,last bar,-1.7112,-2.0638,0.0394,665
-ex event days,constrained,refined: combined,original: combined,-0.0430,-0.8104,0.4180,665
-ex event days,constrained,log shared: combined,original: combined,-0.0808,-1.9929,0.0467,665
-ex event days,constrained,refined: combined,IS average,-0.1090,-1.0932,0.2747,665
-ex event days,constrained,refined: combined,yesterday,-0.1066,-1.1759,0.2401,665
-ex event days,constrained,refined: combined,refined: controls only,0.0497,2.0880,0.0372,665
-ex event days,constrained,refined: combined,refined: vol only,0.0515,3.1385,0.0018,665
-ex event days,constrained,refined: combined,refined: impact only,-0.0026,-0.4162,0.6774,665
-ex event days,constrained,LightGBM,refined: combined,-0.3925,-3.0571,0.0023,665
-ex event days,constrained,LightGBM,refined + lagged spread,-0.2226,-3.1417,0.0018,665
-ex event days,constrained,LightGBM,yesterday,-0.4991,-3.8741,0.0001,665
-ex event days,constrained,original: combined,last bar,0.0870,0.4152,0.6781,665
-ex event days,constrained,refined: combined,last bar,0.0440,0.2013,0.8405,665
-ex event days,constrained,log shared: combined,last bar,0.0062,0.0278,0.9778,665
-ex event days,constrained,refined + lagged spread,last bar,-0.1259,-0.8003,0.4238,665
-ex event days,constrained,LightGBM,last bar,-0.3485,-2.2998,0.0218,665
-ex event days,unconstrained,refined: combined,original: combined,-0.1157,-1.3752,0.1695,665
-ex event days,unconstrained,log shared: combined,original: combined,-0.3563,-4.1183,0.0000,665
-ex event days,unconstrained,refined: combined,IS average,-0.6606,-2.9246,0.0036,665
-ex event days,unconstrained,refined: combined,yesterday,-0.6727,-2.3515,0.0190,665
-ex event days,unconstrained,refined: combined,refined: controls only,-0.1250,-1.2830,0.1999,665
-ex event days,unconstrained,refined: combined,refined: vol only,-0.0904,-1.3297,0.1841,665
-ex event days,unconstrained,refined: combined,refined: impact only,0.0627,1.6130,0.1072,665
-ex event days,unconstrained,LightGBM,refined: combined,-1.0037,-7.8697,0.0000,665
-ex event days,unconstrained,LightGBM,refined + lagged spread,-0.3641,-3.2805,0.0011,665
-ex event days,unconstrained,LightGBM,yesterday,-1.6764,-5.4142,0.0000,665
-ex event days,unconstrained,original: combined,last bar,0.1185,0.4471,0.6549,665
-ex event days,unconstrained,refined: combined,last bar,0.0029,0.0099,0.9921,665
-ex event days,unconstrained,log shared: combined,last bar,-0.2378,-0.7905,0.4295,665
-ex event days,unconstrained,refined + lagged spread,last bar,-0.6367,-2.7815,0.0056,665
-ex event days,unconstrained,LightGBM,last bar,-1.0008,-3.4434,0.0006,665
-ex event days,Novo,refined: combined,original: combined,-0.2383,-3.3271,0.0009,665
-ex event days,Novo,log shared: combined,original: combined,-0.2293,-3.2954,0.0010,665
-ex event days,Novo,refined: combined,IS average,-0.0088,-1.3061,0.1920,665
-ex event days,Novo,refined: combined,yesterday,-0.0018,-0.2400,0.8104,665
-ex event days,Novo,refined: combined,refined: controls only,0.0044,3.0490,0.0024,665
-ex event days,Novo,refined: combined,refined: vol only,-0.0013,-1.6791,0.0936,665
-ex event days,Novo,refined: combined,refined: impact only,0.0033,3.0490,0.0024,665
-ex event days,Novo,LightGBM,refined: combined,0.0046,0.7190,0.4724,665
-ex event days,Novo,LightGBM,refined + lagged spread,0.0128,2.1724,0.0302,665
-ex event days,Novo,LightGBM,yesterday,0.0027,0.3144,0.7533,665
-ex event days,Novo,original: combined,last bar,0.2348,3.3366,0.0009,665
-ex event days,Novo,refined: combined,last bar,-0.0035,-0.4010,0.6885,665
-ex event days,Novo,log shared: combined,last bar,0.0055,0.5874,0.5572,665
-ex event days,Novo,refined + lagged spread,last bar,-0.0117,-1.5039,0.1331,665
-ex event days,Novo,LightGBM,last bar,0.0011,0.1063,0.9154,665
-ex event days,DSV,refined: combined,original: combined,-0.1316,-2.4512,0.0145,665
-ex event days,DSV,log shared: combined,original: combined,-0.0252,-1.4208,0.1558,665
-ex event days,DSV,refined: combined,IS average,-0.0340,-0.9570,0.3389,665
-ex event days,DSV,refined: combined,yesterday,0.0373,1.0463,0.2958,665
-ex event days,DSV,refined: combined,refined: controls only,0.0046,0.4666,0.6409,665
-ex event days,DSV,refined: combined,refined: vol only,0.0151,2.6395,0.0085,665
-ex event days,DSV,refined: combined,refined: impact only,0.0054,1.2800,0.2010,665
-ex event days,DSV,LightGBM,refined: combined,-0.1387,-5.6796,0.0000,665
-ex event days,DSV,LightGBM,refined + lagged spread,-0.0832,-3.8215,0.0001,665
-ex event days,DSV,LightGBM,yesterday,-0.1014,-2.4643,0.0140,665
-ex event days,DSV,original: combined,last bar,0.1772,2.3007,0.0217,665
-ex event days,DSV,refined: combined,last bar,0.0457,0.9793,0.3278,665
-ex event days,DSV,log shared: combined,last bar,0.1520,2.2835,0.0227,665
-ex event days,DSV,refined + lagged spread,last bar,-0.0098,-0.2441,0.8073,665
-ex event days,DSV,LightGBM,last bar,-0.0930,-1.9722,0.0490,665
-ex event days,Vestas,refined: combined,original: combined,-0.4642,-2.7962,0.0053,665
-ex event days,Vestas,log shared: combined,original: combined,-0.3443,-2.6017,0.0095,665
-ex event days,Vestas,refined: combined,IS average,0.0025,0.0259,0.9794,665
-ex event days,Vestas,refined: combined,yesterday,0.1708,1.6776,0.0939,665
-ex event days,Vestas,refined: combined,refined: controls only,0.2069,2.9326,0.0035,665
-ex event days,Vestas,refined: combined,refined: vol only,0.0516,1.3134,0.1895,665
-ex event days,Vestas,refined: combined,refined: impact only,0.2552,4.0295,0.0001,665
-ex event days,Vestas,LightGBM,refined: combined,-0.3211,-4.2187,0.0000,665
-ex event days,Vestas,LightGBM,refined + lagged spread,-0.0951,-2.9727,0.0031,665
-ex event days,Vestas,LightGBM,yesterday,-0.1503,-2.5253,0.0118,665
-ex event days,Vestas,original: combined,last bar,0.5381,2.7199,0.0067,665
-ex event days,Vestas,refined: combined,last bar,0.0739,0.5149,0.6068,665
-ex event days,Vestas,log shared: combined,last bar,0.1938,1.2532,0.2106,665
-ex event days,Vestas,refined + lagged spread,last bar,-0.1521,-1.5211,0.1287,665
-ex event days,Vestas,LightGBM,last bar,-0.2473,-2.3950,0.0169,665
-ex event days,Pandora,refined: combined,original: combined,-0.2457,-4.9819,0.0000,665
-ex event days,Pandora,log shared: combined,original: combined,-0.8466,-8.1258,0.0000,665
-ex event days,Pandora,refined: combined,IS average,-0.3822,-1.6699,0.0954,665
-ex event days,Pandora,refined: combined,yesterday,0.7580,3.6087,0.0003,665
-ex event days,Pandora,refined: combined,refined: controls only,-0.2866,-3.5779,0.0004,665
-ex event days,Pandora,refined: combined,refined: vol only,-0.2195,-3.6062,0.0003,665
-ex event days,Pandora,refined: combined,refined: impact only,0.0646,1.9412,0.0527,665
-ex event days,Pandora,LightGBM,refined: combined,-1.1887,-6.4420,0.0000,665
-ex event days,Pandora,LightGBM,refined + lagged spread,-0.4038,-3.0828,0.0021,665
-ex event days,Pandora,LightGBM,yesterday,-0.4307,-2.4253,0.0156,665
-ex event days,Pandora,original: combined,last bar,1.2453,5.7724,0.0000,665
-ex event days,Pandora,refined: combined,last bar,0.9995,4.8522,0.0000,665
-ex event days,Pandora,log shared: combined,last bar,0.3987,2.4863,0.0132,665
-ex event days,Pandora,refined + lagged spread,last bar,0.2146,1.6457,0.1003,665
-ex event days,Pandora,LightGBM,last bar,-0.1892,-1.1192,0.2635,665
-ex event days,GN,refined: combined,original: combined,0.3630,1.3707,0.1709,665
-ex event days,GN,log shared: combined,original: combined,0.1219,0.7029,0.4823,665
-ex event days,GN,refined: combined,IS average,-1.6021,-2.4016,0.0166,665
-ex event days,GN,refined: combined,yesterday,-2.9469,-3.8416,0.0001,665
-ex event days,GN,refined: combined,refined: controls only,-0.2953,-1.0966,0.2732,665
-ex event days,GN,refined: combined,refined: vol only,-0.1032,-0.5375,0.5911,665
-ex event days,GN,refined: combined,refined: impact only,-0.1318,-1.5383,0.1244,665
-ex event days,GN,LightGBM,refined: combined,-1.5011,-5.2074,0.0000,665
-ex event days,GN,LightGBM,refined + lagged spread,-0.5935,-2.3540,0.0189,665
-ex event days,GN,LightGBM,yesterday,-4.4480,-5.5251,0.0000,665
-ex event days,GN,original: combined,last bar,-1.4277,-1.9006,0.0578,665
-ex event days,GN,refined: combined,last bar,-1.0648,-1.3725,0.1704,665
-ex event days,GN,log shared: combined,last bar,-1.3058,-1.6808,0.0933,665
-ex event days,GN,refined + lagged spread,last bar,-1.9724,-3.2971,0.0010,665
-ex event days,GN,LightGBM,last bar,-2.5659,-3.4845,0.0005,665
-ex event days,ISS,refined: combined,original: combined,0.3185,1.5722,0.1165,570
-ex event days,ISS,log shared: combined,original: combined,0.0417,0.7133,0.4760,570
-ex event days,ISS,refined: combined,IS average,-0.3323,-0.9780,0.3285,570
-ex event days,ISS,refined: combined,yesterday,-0.4214,-1.4064,0.1602,570
-ex event days,ISS,refined: combined,refined: controls only,0.1634,2.0706,0.0388,570
-ex event days,ISS,refined: combined,refined: vol only,0.1646,2.9528,0.0033,570
-ex event days,ISS,refined: combined,refined: impact only,-0.0201,-0.9709,0.3320,570
-ex event days,ISS,LightGBM,refined: combined,-1.2085,-2.7552,0.0061,570
-ex event days,ISS,LightGBM,refined + lagged spread,-0.6930,-2.9090,0.0038,570
-ex event days,ISS,LightGBM,yesterday,-1.6299,-3.8069,0.0002,570
-ex event days,ISS,original: combined,last bar,-0.2142,-0.2841,0.7764,570
-ex event days,ISS,refined: combined,last bar,0.1044,0.1395,0.8891,570
-ex event days,ISS,log shared: combined,last bar,-0.1725,-0.2208,0.8253,570
-ex event days,ISS,refined + lagged spread,last bar,-0.4111,-0.7702,0.4415,570
-ex event days,ISS,LightGBM,last bar,-1.1041,-2.1731,0.0302,570
+all OOS days,constrained,refined: combined,original: combined,-0.0507,-0.5608,0.5751,665
+all OOS days,constrained,log shared: combined,original: combined,-0.0960,-2.2589,0.0242,665
+all OOS days,constrained,refined: combined,IS average,-0.2347,-1.4751,0.1407,665
+all OOS days,constrained,refined: combined,yesterday,-0.2193,-1.4662,0.1431,665
+all OOS days,constrained,refined: combined,refined: controls only,0.0131,0.4180,0.6761,665
+all OOS days,constrained,refined: combined,refined: vol only,0.0637,3.1915,0.0015,665
+all OOS days,constrained,refined: combined,refined: impact only,-0.0322,-1.4232,0.1551,665
+all OOS days,constrained,LightGBM,refined: combined,-0.5170,-3.4268,0.0006,665
+all OOS days,constrained,LightGBM,refined + lagged spread,-0.3111,-3.1472,0.0017,665
+all OOS days,constrained,LightGBM,yesterday,-0.7364,-3.5825,0.0004,665
+all OOS days,constrained,original: combined,last bar,-0.0260,-0.1005,0.9200,665
+all OOS days,constrained,refined: combined,last bar,-0.0768,-0.2412,0.8095,665
+all OOS days,constrained,log shared: combined,last bar,-0.1220,-0.4270,0.6695,665
+all OOS days,constrained,refined + lagged spread,last bar,-0.2827,-1.0976,0.2728,665
+all OOS days,constrained,LightGBM,last bar,-0.5938,-2.0044,0.0454,665
+all OOS days,unconstrained,refined: combined,original: combined,-0.1022,-1.2429,0.2143,665
+all OOS days,unconstrained,log shared: combined,original: combined,-0.2331,-2.4728,0.0137,665
+all OOS days,unconstrained,refined: combined,IS average,-0.7253,-3.1705,0.0016,665
+all OOS days,unconstrained,refined: combined,yesterday,-0.7374,-2.5693,0.0104,665
+all OOS days,unconstrained,refined: combined,refined: controls only,-0.2260,-2.1973,0.0283,665
+all OOS days,unconstrained,refined: combined,refined: vol only,-0.1684,-2.4803,0.0134,665
+all OOS days,unconstrained,refined: combined,refined: impact only,0.0851,2.0215,0.0436,665
+all OOS days,unconstrained,LightGBM,refined: combined,-0.9476,-8.0319,0.0000,665
+all OOS days,unconstrained,LightGBM,refined + lagged spread,-0.3575,-3.3465,0.0009,665
+all OOS days,unconstrained,LightGBM,yesterday,-1.6850,-5.4176,0.0000,665
+all OOS days,unconstrained,original: combined,last bar,0.0404,0.1507,0.8802,665
+all OOS days,unconstrained,refined: combined,last bar,-0.0618,-0.2123,0.8320,665
+all OOS days,unconstrained,log shared: combined,last bar,-0.1927,-0.6211,0.5348,665
+all OOS days,unconstrained,refined + lagged spread,last bar,-0.6519,-2.8411,0.0046,665
+all OOS days,unconstrained,LightGBM,last bar,-1.0094,-3.3965,0.0007,665
+all OOS days,Novo,refined: combined,original: combined,-0.2403,-3.4300,0.0006,665
+all OOS days,Novo,log shared: combined,original: combined,-0.2342,-3.4252,0.0007,665
+all OOS days,Novo,refined: combined,IS average,-0.0063,-0.9014,0.3677,665
+all OOS days,Novo,refined: combined,yesterday,0.0006,0.0767,0.9389,665
+all OOS days,Novo,refined: combined,refined: controls only,0.0044,2.1456,0.0323,665
+all OOS days,Novo,refined: combined,refined: vol only,-0.0031,-4.0624,0.0001,665
+all OOS days,Novo,refined: combined,refined: impact only,0.0055,3.5455,0.0004,665
+all OOS days,Novo,LightGBM,refined: combined,-0.0003,-0.0622,0.9504,665
+all OOS days,Novo,LightGBM,refined + lagged spread,0.0074,1.5501,0.1216,665
+all OOS days,Novo,LightGBM,yesterday,0.0003,0.0390,0.9689,665
+all OOS days,Novo,original: combined,last bar,0.2393,3.4697,0.0006,665
+all OOS days,Novo,refined: combined,last bar,-0.0010,-0.1148,0.9086,665
+all OOS days,Novo,log shared: combined,last bar,0.0050,0.5359,0.5922,665
+all OOS days,Novo,refined + lagged spread,last bar,-0.0087,-1.0846,0.2785,665
+all OOS days,Novo,LightGBM,last bar,-0.0013,-0.1512,0.8799,665
+all OOS days,DSV,refined: combined,original: combined,-0.1316,-2.4873,0.0131,665
+all OOS days,DSV,log shared: combined,original: combined,-0.0347,-1.9706,0.0492,665
+all OOS days,DSV,refined: combined,IS average,-0.0251,-0.7269,0.4676,665
+all OOS days,DSV,refined: combined,yesterday,0.0461,1.3038,0.1927,665
+all OOS days,DSV,refined: combined,refined: controls only,0.0052,0.4601,0.6456,665
+all OOS days,DSV,refined: combined,refined: vol only,0.0213,3.2212,0.0013,665
+all OOS days,DSV,refined: combined,refined: impact only,0.0033,0.6139,0.5395,665
+all OOS days,DSV,LightGBM,refined: combined,-0.1581,-7.0056,0.0000,665
+all OOS days,DSV,LightGBM,refined + lagged spread,-0.1001,-5.4874,0.0000,665
+all OOS days,DSV,LightGBM,yesterday,-0.1120,-2.9679,0.0031,665
+all OOS days,DSV,original: combined,last bar,0.1861,2.4656,0.0139,665
+all OOS days,DSV,refined: combined,last bar,0.0545,1.1746,0.2406,665
+all OOS days,DSV,log shared: combined,last bar,0.1514,2.3406,0.0195,665
+all OOS days,DSV,refined + lagged spread,last bar,-0.0035,-0.0868,0.9309,665
+all OOS days,DSV,LightGBM,last bar,-0.1036,-2.4036,0.0165,665
+all OOS days,Vestas,refined: combined,original: combined,-0.4670,-2.7522,0.0061,665
+all OOS days,Vestas,log shared: combined,original: combined,-0.4268,-3.1506,0.0017,665
+all OOS days,Vestas,refined: combined,IS average,0.1154,1.0546,0.2920,665
+all OOS days,Vestas,refined: combined,yesterday,0.2837,2.5221,0.0119,665
+all OOS days,Vestas,refined: combined,refined: controls only,0.2967,3.4961,0.0005,665
+all OOS days,Vestas,refined: combined,refined: vol only,0.0944,2.3519,0.0190,665
+all OOS days,Vestas,refined: combined,refined: impact only,0.3034,4.0706,0.0001,665
+all OOS days,Vestas,LightGBM,refined: combined,-0.5020,-5.6611,0.0000,665
+all OOS days,Vestas,LightGBM,refined + lagged spread,-0.2440,-4.7535,0.0000,665
+all OOS days,Vestas,LightGBM,yesterday,-0.2183,-2.6702,0.0078,665
+all OOS days,Vestas,original: combined,last bar,0.6537,3.0920,0.0021,665
+all OOS days,Vestas,refined: combined,last bar,0.1868,1.2231,0.2217,665
+all OOS days,Vestas,log shared: combined,last bar,0.2269,1.4501,0.1475,665
+all OOS days,Vestas,refined + lagged spread,last bar,-0.0712,-0.6707,0.5027,665
+all OOS days,Vestas,LightGBM,last bar,-0.3152,-2.4779,0.0135,665
+all OOS days,Pandora,refined: combined,original: combined,-0.2013,-4.4871,0.0000,665
+all OOS days,Pandora,log shared: combined,original: combined,-0.6854,-6.8762,0.0000,665
+all OOS days,Pandora,refined: combined,IS average,-0.6802,-3.1520,0.0017,665
+all OOS days,Pandora,refined: combined,yesterday,0.4600,2.3959,0.0169,665
+all OOS days,Pandora,refined: combined,refined: controls only,-0.6739,-6.8790,0.0000,665
+all OOS days,Pandora,refined: combined,refined: vol only,-0.5506,-8.3331,0.0000,665
+all OOS days,Pandora,refined: combined,refined: impact only,0.1285,4.0310,0.0001,665
+all OOS days,Pandora,LightGBM,refined: combined,-0.8759,-6.0956,0.0000,665
+all OOS days,Pandora,LightGBM,refined + lagged spread,-0.2767,-2.6758,0.0076,665
+all OOS days,Pandora,LightGBM,yesterday,-0.4159,-2.4452,0.0147,665
+all OOS days,Pandora,original: combined,last bar,0.9028,4.5898,0.0000,665
+all OOS days,Pandora,refined: combined,last bar,0.7015,3.7311,0.0002,665
+all OOS days,Pandora,log shared: combined,last bar,0.2174,1.4430,0.1495,665
+all OOS days,Pandora,refined + lagged spread,last bar,0.1023,0.8390,0.4017,665
+all OOS days,Pandora,LightGBM,last bar,-0.1744,-1.0727,0.2838,665
+all OOS days,GN,refined: combined,original: combined,0.3618,1.3638,0.1731,665
+all OOS days,GN,log shared: combined,original: combined,0.4129,1.7289,0.0843,665
+all OOS days,GN,refined: combined,IS average,-1.6111,-2.4062,0.0164,665
+all OOS days,GN,refined: combined,yesterday,-2.9559,-3.8464,0.0001,665
+all OOS days,GN,refined: combined,refined: controls only,-0.3006,-1.0822,0.2796,665
+all OOS days,GN,refined: combined,refined: vol only,-0.0490,-0.2556,0.7983,665
+all OOS days,GN,refined: combined,refined: impact only,-0.1766,-1.9954,0.0464,665
+all OOS days,GN,LightGBM,refined: combined,-1.4649,-5.2455,0.0000,665
+all OOS days,GN,LightGBM,refined + lagged spread,-0.5518,-2.0232,0.0435,665
+all OOS days,GN,LightGBM,yesterday,-4.4208,-5.3825,0.0000,665
+all OOS days,GN,original: combined,last bar,-1.4355,-1.9072,0.0569,665
+all OOS days,GN,refined: combined,last bar,-1.0737,-1.3906,0.1648,665
+all OOS days,GN,log shared: combined,last bar,-1.0226,-1.2822,0.2002,665
+all OOS days,GN,refined + lagged spread,last bar,-1.9869,-3.3401,0.0009,665
+all OOS days,GN,LightGBM,last bar,-2.5387,-3.2707,0.0011,665
+all OOS days,ISS,refined: combined,original: combined,0.2196,0.8453,0.3982,665
+all OOS days,ISS,log shared: combined,original: combined,-0.0190,-0.2963,0.7671,665
+all OOS days,ISS,refined: combined,IS average,-0.6728,-1.4001,0.1620,665
+all OOS days,ISS,refined: combined,yesterday,-0.7048,-1.5934,0.1115,665
+all OOS days,ISS,refined: combined,refined: controls only,0.0296,0.3202,0.7490,665
+all OOS days,ISS,refined: combined,refined: vol only,0.1728,2.9152,0.0037,665
+all OOS days,ISS,refined: combined,refined: impact only,-0.1055,-1.5502,0.1216,665
+all OOS days,ISS,LightGBM,refined: combined,-1.3926,-3.1285,0.0018,665
+all OOS days,ISS,LightGBM,refined + lagged spread,-0.8407,-2.8959,0.0039,665
+all OOS days,ISS,LightGBM,yesterday,-2.0974,-3.4453,0.0006,665
+all OOS days,ISS,original: combined,last bar,-0.5035,-0.6097,0.5423,665
+all OOS days,ISS,refined: combined,last bar,-0.2839,-0.3003,0.7640,665
+all OOS days,ISS,log shared: combined,last bar,-0.5225,-0.6047,0.5456,665
+all OOS days,ISS,refined + lagged spread,last bar,-0.8358,-1.0965,0.2733,665
+all OOS days,ISS,LightGBM,last bar,-1.6765,-1.9099,0.0566,665
+ex event days,constrained,refined: combined,original: combined,-0.0453,-0.8540,0.3934,665
+ex event days,constrained,log shared: combined,original: combined,-0.0853,-2.1488,0.0320,665
+ex event days,constrained,refined: combined,IS average,-0.1073,-1.0703,0.2849,665
+ex event days,constrained,refined: combined,yesterday,-0.1048,-1.1508,0.2502,665
+ex event days,constrained,refined: combined,refined: controls only,0.0460,2.0218,0.0436,665
+ex event days,constrained,refined: combined,refined: vol only,0.0546,3.4577,0.0006,665
+ex event days,constrained,refined: combined,refined: impact only,-0.0024,-0.3117,0.7554,665
+ex event days,constrained,LightGBM,refined: combined,-0.3733,-2.9348,0.0035,665
+ex event days,constrained,LightGBM,refined + lagged spread,-0.1982,-2.7639,0.0059,665
+ex event days,constrained,LightGBM,yesterday,-0.4781,-3.7174,0.0002,665
+ex event days,constrained,original: combined,last bar,0.0911,0.4331,0.6651,665
+ex event days,constrained,refined: combined,last bar,0.0457,0.2088,0.8346,665
+ex event days,constrained,log shared: combined,last bar,0.0058,0.0258,0.9794,665
+ex event days,constrained,refined + lagged spread,last bar,-0.1293,-0.8245,0.4099,665
+ex event days,constrained,LightGBM,last bar,-0.3275,-2.1141,0.0349,665
+ex event days,unconstrained,refined: combined,original: combined,-0.1022,-1.2429,0.2143,665
+ex event days,unconstrained,log shared: combined,original: combined,-0.2331,-2.4728,0.0137,665
+ex event days,unconstrained,refined: combined,IS average,-0.7253,-3.1705,0.0016,665
+ex event days,unconstrained,refined: combined,yesterday,-0.7374,-2.5693,0.0104,665
+ex event days,unconstrained,refined: combined,refined: controls only,-0.2260,-2.1973,0.0283,665
+ex event days,unconstrained,refined: combined,refined: vol only,-0.1684,-2.4803,0.0134,665
+ex event days,unconstrained,refined: combined,refined: impact only,0.0851,2.0215,0.0436,665
+ex event days,unconstrained,LightGBM,refined: combined,-0.9476,-8.0319,0.0000,665
+ex event days,unconstrained,LightGBM,refined + lagged spread,-0.3575,-3.3465,0.0009,665
+ex event days,unconstrained,LightGBM,yesterday,-1.6850,-5.4176,0.0000,665
+ex event days,unconstrained,original: combined,last bar,0.0404,0.1507,0.8802,665
+ex event days,unconstrained,refined: combined,last bar,-0.0618,-0.2123,0.8320,665
+ex event days,unconstrained,log shared: combined,last bar,-0.1927,-0.6211,0.5348,665
+ex event days,unconstrained,refined + lagged spread,last bar,-0.6519,-2.8411,0.0046,665
+ex event days,unconstrained,LightGBM,last bar,-1.0094,-3.3965,0.0007,665
+ex event days,Novo,refined: combined,original: combined,-0.2403,-3.4300,0.0006,665
+ex event days,Novo,log shared: combined,original: combined,-0.2342,-3.4252,0.0007,665
+ex event days,Novo,refined: combined,IS average,-0.0063,-0.9014,0.3677,665
+ex event days,Novo,refined: combined,yesterday,0.0006,0.0767,0.9389,665
+ex event days,Novo,refined: combined,refined: controls only,0.0044,2.1456,0.0323,665
+ex event days,Novo,refined: combined,refined: vol only,-0.0031,-4.0624,0.0001,665
+ex event days,Novo,refined: combined,refined: impact only,0.0055,3.5455,0.0004,665
+ex event days,Novo,LightGBM,refined: combined,-0.0003,-0.0622,0.9504,665
+ex event days,Novo,LightGBM,refined + lagged spread,0.0074,1.5501,0.1216,665
+ex event days,Novo,LightGBM,yesterday,0.0003,0.0390,0.9689,665
+ex event days,Novo,original: combined,last bar,0.2393,3.4697,0.0006,665
+ex event days,Novo,refined: combined,last bar,-0.0010,-0.1148,0.9086,665
+ex event days,Novo,log shared: combined,last bar,0.0050,0.5359,0.5922,665
+ex event days,Novo,refined + lagged spread,last bar,-0.0087,-1.0846,0.2785,665
+ex event days,Novo,LightGBM,last bar,-0.0013,-0.1512,0.8799,665
+ex event days,DSV,refined: combined,original: combined,-0.1316,-2.4873,0.0131,665
+ex event days,DSV,log shared: combined,original: combined,-0.0347,-1.9706,0.0492,665
+ex event days,DSV,refined: combined,IS average,-0.0251,-0.7269,0.4676,665
+ex event days,DSV,refined: combined,yesterday,0.0461,1.3038,0.1927,665
+ex event days,DSV,refined: combined,refined: controls only,0.0052,0.4601,0.6456,665
+ex event days,DSV,refined: combined,refined: vol only,0.0213,3.2212,0.0013,665
+ex event days,DSV,refined: combined,refined: impact only,0.0033,0.6139,0.5395,665
+ex event days,DSV,LightGBM,refined: combined,-0.1581,-7.0056,0.0000,665
+ex event days,DSV,LightGBM,refined + lagged spread,-0.1001,-5.4874,0.0000,665
+ex event days,DSV,LightGBM,yesterday,-0.1120,-2.9679,0.0031,665
+ex event days,DSV,original: combined,last bar,0.1861,2.4656,0.0139,665
+ex event days,DSV,refined: combined,last bar,0.0545,1.1746,0.2406,665
+ex event days,DSV,log shared: combined,last bar,0.1514,2.3406,0.0195,665
+ex event days,DSV,refined + lagged spread,last bar,-0.0035,-0.0868,0.9309,665
+ex event days,DSV,LightGBM,last bar,-0.1036,-2.4036,0.0165,665
+ex event days,Vestas,refined: combined,original: combined,-0.4670,-2.7522,0.0061,665
+ex event days,Vestas,log shared: combined,original: combined,-0.4268,-3.1506,0.0017,665
+ex event days,Vestas,refined: combined,IS average,0.1154,1.0546,0.2920,665
+ex event days,Vestas,refined: combined,yesterday,0.2837,2.5221,0.0119,665
+ex event days,Vestas,refined: combined,refined: controls only,0.2967,3.4961,0.0005,665
+ex event days,Vestas,refined: combined,refined: vol only,0.0944,2.3519,0.0190,665
+ex event days,Vestas,refined: combined,refined: impact only,0.3034,4.0706,0.0001,665
+ex event days,Vestas,LightGBM,refined: combined,-0.5020,-5.6611,0.0000,665
+ex event days,Vestas,LightGBM,refined + lagged spread,-0.2440,-4.7535,0.0000,665
+ex event days,Vestas,LightGBM,yesterday,-0.2183,-2.6702,0.0078,665
+ex event days,Vestas,original: combined,last bar,0.6537,3.0920,0.0021,665
+ex event days,Vestas,refined: combined,last bar,0.1868,1.2231,0.2217,665
+ex event days,Vestas,log shared: combined,last bar,0.2269,1.4501,0.1475,665
+ex event days,Vestas,refined + lagged spread,last bar,-0.0712,-0.6707,0.5027,665
+ex event days,Vestas,LightGBM,last bar,-0.3152,-2.4779,0.0135,665
+ex event days,Pandora,refined: combined,original: combined,-0.2013,-4.4871,0.0000,665
+ex event days,Pandora,log shared: combined,original: combined,-0.6854,-6.8762,0.0000,665
+ex event days,Pandora,refined: combined,IS average,-0.6802,-3.1520,0.0017,665
+ex event days,Pandora,refined: combined,yesterday,0.4600,2.3959,0.0169,665
+ex event days,Pandora,refined: combined,refined: controls only,-0.6739,-6.8790,0.0000,665
+ex event days,Pandora,refined: combined,refined: vol only,-0.5506,-8.3331,0.0000,665
+ex event days,Pandora,refined: combined,refined: impact only,0.1285,4.0310,0.0001,665
+ex event days,Pandora,LightGBM,refined: combined,-0.8759,-6.0956,0.0000,665
+ex event days,Pandora,LightGBM,refined + lagged spread,-0.2767,-2.6758,0.0076,665
+ex event days,Pandora,LightGBM,yesterday,-0.4159,-2.4452,0.0147,665
+ex event days,Pandora,original: combined,last bar,0.9028,4.5898,0.0000,665
+ex event days,Pandora,refined: combined,last bar,0.7015,3.7311,0.0002,665
+ex event days,Pandora,log shared: combined,last bar,0.2174,1.4430,0.1495,665
+ex event days,Pandora,refined + lagged spread,last bar,0.1023,0.8390,0.4017,665
+ex event days,Pandora,LightGBM,last bar,-0.1744,-1.0727,0.2838,665
+ex event days,GN,refined: combined,original: combined,0.3618,1.3638,0.1731,665
+ex event days,GN,log shared: combined,original: combined,0.4129,1.7289,0.0843,665
+ex event days,GN,refined: combined,IS average,-1.6111,-2.4062,0.0164,665
+ex event days,GN,refined: combined,yesterday,-2.9559,-3.8464,0.0001,665
+ex event days,GN,refined: combined,refined: controls only,-0.3006,-1.0822,0.2796,665
+ex event days,GN,refined: combined,refined: vol only,-0.0490,-0.2556,0.7983,665
+ex event days,GN,refined: combined,refined: impact only,-0.1766,-1.9954,0.0464,665
+ex event days,GN,LightGBM,refined: combined,-1.4649,-5.2455,0.0000,665
+ex event days,GN,LightGBM,refined + lagged spread,-0.5518,-2.0232,0.0435,665
+ex event days,GN,LightGBM,yesterday,-4.4208,-5.3825,0.0000,665
+ex event days,GN,original: combined,last bar,-1.4355,-1.9072,0.0569,665
+ex event days,GN,refined: combined,last bar,-1.0737,-1.3906,0.1648,665
+ex event days,GN,log shared: combined,last bar,-1.0226,-1.2822,0.2002,665
+ex event days,GN,refined + lagged spread,last bar,-1.9869,-3.3401,0.0009,665
+ex event days,GN,LightGBM,last bar,-2.5387,-3.2707,0.0011,665
+ex event days,ISS,refined: combined,original: combined,0.3119,1.5351,0.1253,570
+ex event days,ISS,log shared: combined,original: combined,0.0436,0.7630,0.4458,570
+ex event days,ISS,refined: combined,IS average,-0.3417,-0.9977,0.3188,570
+ex event days,ISS,refined: combined,yesterday,-0.4308,-1.4272,0.1541,570
+ex event days,ISS,refined: combined,refined: controls only,0.1495,1.9416,0.0527,570
+ex event days,ISS,refined: combined,refined: vol only,0.1695,3.1524,0.0017,570
+ex event days,ISS,refined: combined,refined: impact only,-0.0195,-0.7807,0.4353,570
+ex event days,ISS,LightGBM,refined: combined,-1.1119,-2.5666,0.0105,570
+ex event days,ISS,LightGBM,refined + lagged spread,-0.5808,-2.4256,0.0156,570
+ex event days,ISS,LightGBM,yesterday,-1.5426,-3.6079,0.0003,570
+ex event days,ISS,original: combined,last bar,-0.2169,-0.2867,0.7744,570
+ex event days,ISS,refined: combined,last bar,0.0950,0.1265,0.8993,570
+ex event days,ISS,log shared: combined,last bar,-0.1733,-0.2210,0.8252,570
+ex event days,ISS,refined + lagged spread,last bar,-0.4361,-0.8198,0.4127,570
+ex event days,ISS,LightGBM,last bar,-1.0169,-1.9568,0.0509,570

@@ -1,8 +1,8 @@
 dropped,cv_rmse,increase_bps,increase_pct
-lagged spread,1.2352,0.1574,14.6013
-time of day,1.1212,0.0433,4.0213
-"impact, previous day",1.086,0.0082,0.7595
-vol forecast,1.0796,0.0017,0.1614
-activity,1.0756,-0.0022,-0.2039
-impact (both),1.0748,-0.003,-0.2824
-"impact, rolling",1.0747,-0.0031,-0.2885
+lagged spread,1.235,0.1573,14.5916
+time of day,1.1181,0.0404,3.7505
+"impact, previous day",1.0859,0.0082,0.7613
+vol forecast,1.0801,0.0024,0.2246
+impact (both),1.0745,-0.0032,-0.2943
+activity,1.0743,-0.0034,-0.3146
+"impact, rolling",1.0738,-0.004,-0.3678

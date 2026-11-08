@@ -2,16 +2,16 @@ group,model,OOS 22-30 Oct,FWD 2-6 Nov,FWD / OOS
 constrained,IS average,1.3832,1.3924,1.0067
 constrained,yesterday,1.3776,1.3922,1.0106
 constrained,last bar,1.3248,1.4198,1.0717
-constrained,original: combined,1.3130,1.2092,0.9210
-constrained,refined: combined,1.2941,1.0066,0.7779
-constrained,log shared: combined,1.2769,1.1048,0.8652
-constrained,refined + lagged spread,1.2151,0.9996,0.8226
-constrained,LightGBM,1.0743,0.9427,0.8775
+constrained,original: combined,1.3150,1.2095,0.9198
+constrained,refined: combined,1.2955,1.0084,0.7784
+constrained,log shared: combined,1.2779,1.1037,0.8637
+constrained,refined + lagged spread,1.2135,1.0022,0.8259
+constrained,LightGBM,1.0777,0.9276,0.8607
 unconstrained,IS average,1.8465,2.1568,1.1680
 unconstrained,yesterday,1.8497,2.3802,1.2868
 unconstrained,last bar,1.6571,1.8532,1.1183
-unconstrained,original: combined,1.6925,1.8095,1.0691
-unconstrained,refined: combined,1.6580,1.7721,1.0688
-unconstrained,log shared: combined,1.5837,1.9489,1.2306
-unconstrained,refined + lagged spread,1.4523,1.5760,1.0852
-unconstrained,LightGBM,1.3210,1.4596,1.1049
+unconstrained,original: combined,1.6692,1.8063,1.0822
+unconstrained,refined: combined,1.6383,1.7744,1.0831
+unconstrained,log shared: combined,1.5979,1.9632,1.2286
+unconstrained,refined + lagged spread,1.4471,1.5742,1.0878
+unconstrained,LightGBM,1.3178,1.4931,1.1330

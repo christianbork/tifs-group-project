@@ -1,0 +1,97 @@
+sample,unit,rule,vs,mean_diff_dkk,t,n_stock_days,share_days_better
+OOS,all,constant,controls only,-150.0292,-0.4175,42,0.2381
+OOS,all,yesterday,constant,-970.1548,-1.9942,42,0.1905
+OOS,all,yesterday,controls only,-1120.1839,-2.21,42,0.2143
+OOS,all,last bar,constant,-1113.7738,-2.4118,42,0.4048
+OOS,all,last bar,controls only,-1263.803,-2.6969,42,0.4048
+OOS,all,controls only,constant,150.0292,0.4175,42,0.7619
+OOS,all,vol rule,constant,665.3685,1.5599,42,0.7619
+OOS,all,vol rule,controls only,515.3393,1.8689,42,0.5
+OOS,all,impact rule,constant,237.1714,0.6348,42,0.7381
+OOS,all,impact rule,controls only,87.1423,0.8737,42,0.5
+OOS,all,vol + impact rule,constant,719.3399,1.7484,42,0.7857
+OOS,all,vol + impact rule,controls only,569.3107,2.3248,42,0.6429
+OOS,all,lagged spread + drivers,constant,632.2429,1.5156,42,0.7619
+OOS,all,lagged spread + drivers,controls only,482.2137,1.7968,42,0.5238
+OOS,all,LightGBM,constant,-34.9643,-0.0758,42,0.6905
+OOS,all,LightGBM,controls only,-184.9935,-0.5696,42,0.5
+OOS,constrained,constant,controls only,392.2381,0.5911,21,0.2857
+OOS,constrained,yesterday,constant,-1482.3036,-1.6411,21,0.2381
+OOS,constrained,yesterday,controls only,-1090.0655,-1.1433,21,0.2381
+OOS,constrained,last bar,constant,-1311.2845,-1.5426,21,0.4286
+OOS,constrained,last bar,controls only,-919.0464,-1.0717,21,0.5714
+OOS,constrained,controls only,constant,-392.2381,-0.5911,21,0.7143
+OOS,constrained,vol rule,constant,273.7821,0.3449,21,0.7619
+OOS,constrained,vol rule,controls only,666.0202,1.3088,21,0.3333
+OOS,constrained,impact rule,constant,-338.5131,-0.5089,21,0.7143
+OOS,constrained,impact rule,controls only,53.725,0.9559,21,0.5238
+OOS,constrained,vol + impact rule,constant,135.4952,0.1854,21,0.7619
+OOS,constrained,vol + impact rule,controls only,527.7333,1.3353,21,0.5714
+OOS,constrained,lagged spread + drivers,constant,411.0536,0.5236,21,0.7619
+OOS,constrained,lagged spread + drivers,controls only,803.2917,1.6411,21,0.5238
+OOS,constrained,LightGBM,constant,-582.8179,-0.6601,21,0.5238
+OOS,constrained,LightGBM,controls only,-190.5798,-0.3079,21,0.619
+OOS,unconstrained,constant,controls only,-692.2964,-2.8356,21,0.1905
+OOS,unconstrained,yesterday,constant,-458.006,-1.2789,21,0.1429
+OOS,unconstrained,yesterday,controls only,-1150.3024,-3.0298,21,0.1905
+OOS,unconstrained,last bar,constant,-916.2631,-2.382,21,0.381
+OOS,unconstrained,last bar,controls only,-1608.5595,-4.1123,21,0.2381
+OOS,unconstrained,controls only,constant,692.2964,2.8356,21,0.8095
+OOS,unconstrained,vol rule,constant,1056.9548,3.3369,21,0.7619
+OOS,unconstrained,vol rule,controls only,364.6583,1.6227,21,0.6667
+OOS,unconstrained,impact rule,constant,812.856,2.6136,21,0.7619
+OOS,unconstrained,impact rule,controls only,120.5595,0.6224,21,0.4762
+OOS,unconstrained,vol + impact rule,constant,1303.1845,3.6721,21,0.8095
+OOS,unconstrained,vol + impact rule,controls only,610.8881,2.042,21,0.7143
+OOS,unconstrained,lagged spread + drivers,constant,853.4321,2.8094,21,0.7619
+OOS,unconstrained,lagged spread + drivers,controls only,161.1357,0.7563,21,0.5238
+OOS,unconstrained,LightGBM,constant,512.8893,2.0429,21,0.8571
+OOS,unconstrained,LightGBM,controls only,-179.4071,-0.8073,21,0.381
+FWD,all,constant,controls only,-1223.5575,-1.888,30,0.2333
+FWD,all,yesterday,constant,594.8142,0.9579,30,0.2667
+FWD,all,yesterday,controls only,-628.7433,-0.8121,30,0.3333
+FWD,all,last bar,constant,546.91,0.3828,30,0.6
+FWD,all,last bar,controls only,-676.6475,-0.7334,30,0.4
+FWD,all,controls only,constant,1223.5575,1.888,30,0.7667
+FWD,all,vol rule,constant,2133.295,3.5556,30,0.9333
+FWD,all,vol rule,controls only,909.7375,2.0842,30,0.5333
+FWD,all,impact rule,constant,1443.025,2.2357,30,0.7333
+FWD,all,impact rule,controls only,219.4675,0.8511,30,0.4667
+FWD,all,vol + impact rule,constant,2255.8125,4.036,30,0.9667
+FWD,all,vol + impact rule,controls only,1032.255,2.4828,30,0.5
+FWD,all,lagged spread + drivers,constant,1772.7342,2.0947,30,0.8333
+FWD,all,lagged spread + drivers,controls only,549.1767,1.9111,30,0.5333
+FWD,all,LightGBM,constant,1397.9167,1.5792,30,0.6
+FWD,all,LightGBM,controls only,174.3592,0.4093,30,0.6333
+FWD,constrained,constant,controls only,-1017.95,-1.6419,15,0.3333
+FWD,constrained,yesterday,constant,-133.4017,-0.2025,15,0.2667
+FWD,constrained,yesterday,controls only,-1151.3517,-1.4799,15,0.4
+FWD,constrained,last bar,constant,-156.1383,-0.1374,15,0.5333
+FWD,constrained,last bar,controls only,-1174.0883,-1.4065,15,0.4667
+FWD,constrained,controls only,constant,1017.95,1.6419,15,0.6667
+FWD,constrained,vol rule,constant,1205.7517,1.9219,15,0.8667
+FWD,constrained,vol rule,controls only,187.8017,0.605,15,0.3333
+FWD,constrained,impact rule,constant,1145.435,1.4118,15,0.6667
+FWD,constrained,impact rule,controls only,127.485,0.309,15,0.4667
+FWD,constrained,vol + impact rule,constant,1520.925,2.7766,15,0.9333
+FWD,constrained,vol + impact rule,controls only,502.975,2.0976,15,0.5333
+FWD,constrained,lagged spread + drivers,constant,1411.3117,2.3637,15,0.8
+FWD,constrained,lagged spread + drivers,controls only,393.3617,1.6398,15,0.5333
+FWD,constrained,LightGBM,constant,570.62,0.49,15,0.4
+FWD,constrained,LightGBM,controls only,-447.33,-0.6343,15,0.5333
+FWD,unconstrained,constant,controls only,-1429.165,-1.2303,15,0.1333
+FWD,unconstrained,yesterday,constant,1323.03,1.2685,15,0.2667
+FWD,unconstrained,yesterday,controls only,-106.135,-0.0783,15,0.2667
+FWD,unconstrained,last bar,constant,1249.9583,0.4693,15,0.6667
+FWD,unconstrained,last bar,controls only,-179.2067,-0.1072,15,0.3333
+FWD,unconstrained,controls only,constant,1429.165,1.2303,15,0.8667
+FWD,unconstrained,vol rule,constant,3060.8383,3.1001,15,1.0
+FWD,unconstrained,vol rule,controls only,1631.6733,2.0747,15,0.7333
+FWD,unconstrained,impact rule,constant,1740.615,1.6947,15,0.8
+FWD,unconstrained,impact rule,controls only,311.45,0.9657,15,0.4667
+FWD,unconstrained,vol + impact rule,constant,2990.7,3.1231,15,1.0
+FWD,unconstrained,vol + impact rule,controls only,1561.535,1.9854,15,0.4667
+FWD,unconstrained,lagged spread + drivers,constant,2134.1567,1.3256,15,0.8667
+FWD,unconstrained,lagged spread + drivers,controls only,704.9917,1.3297,15,0.5333
+FWD,unconstrained,LightGBM,constant,2225.2133,1.6622,15,0.8
+FWD,unconstrained,LightGBM,controls only,796.0483,1.7832,15,0.7333
