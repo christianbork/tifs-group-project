@@ -1,5 +1,42 @@
 # Changelog
 
+## v2.1 (8-Nov-2026): v2 merged with the forward test, quoting simulation and volatility surface
+`main` had moved on from `v1-draft` in parallel (Emanuel: forward test on 2-6 Nov, quoting simulation,
+volatility surface, code-review fixes, data in git, report drafts 1-5). v2 was merged into it, then:
+
+- **Renumbered:** v2's `09_ae_diagnostics.py` -> `12_ae_diagnostics.py`, `10_quote_rule.py` -> `13_quote_timing.py`
+  (Emanuel's 09 forward test, 10 quoting simulation and 11 volatility surface keep their numbers).
+- **One fill model:** v2's separate quote simulation (`quote_rule.py`, fills at the deepest level reached) was
+  dropped; script 13 now runs Emanuel's engine (`quoting.py`: per order, first fill, half-tick grid, quote size
+  = median order) with every rule scaled to the same in-sample average width, plus paired stock-day tests, for
+  both 22-30 Oct and 2-6 Nov. Helpers `scale_to_is_width` and `paired_daily_test` moved into `quoting.py`.
+- **Consistency:** `09_forward_holdout.py` uses `build_panel`'s lags (within-day `lag_ofi`, as 07/08); QLR in 12 uses
+  the October days only; ISS 29-Oct labelled "intraday sell-off 15:20".
+- **Full re-run** of 01-13 on the committed data and the report notebook; 01-04 reproduce `main` exactly (only the
+  ISS event label changes). Tests: 28 passing.
+- **Report (draft 6):** numbers re-read from the regenerated tables; Section 4.2 now states the standard-error
+  robustness (volatility robust; rolling impact only with the lagged spread / Granger); 5.1 corrected (a 1-SD
+  volatility shock is about 3% / 6% of the average half-spread, not 9% / 10%); 5.2 adds the equal-width
+  timing result (Table 6); HMM states renamed low/high volatility; 7.2 drops the fixed BIC limitation and
+  discloses the second scoring of the forward week; Appendix C (Applied Econometrics checks, Table C1); Figure 8
+  (ISS sell-off); Christian's AI-statement paragraph drafted (to confirm); 2,384 words in sections 1-7.
+
+### Key numbers after the merge
+| Result | Value |
+|---|---|
+| Volatility, lowest t over 6 SE choices (constrained / unconstrained) | 3.14 / 2.49 |
+| Rolling impact, unconstrained: NW 7 / lowest / dynamic DK | 2.49 / 1.85 / 2.20 |
+| Granger-style p, unconstrained (impact / vol, DK) | 0.031 / 0.006 |
+| LightGBM vs last bar, OOS RMSE (C / U) | 1.08 vs 1.32 / 1.32 vs 1.66 (DM -2.0 / -3.4) |
+| LightGBM vs last bar, forward week (C / U) | 0.93 vs 1.42 / 1.49 vs 1.85 (DM -2.8 / -2.5) |
+| Equal-width quote timing, vol + impact vs controls-only, paired t (OOS / FWD) | 2.32 / 2.48 |
+| Same for LightGBM (OOS / FWD) | -0.57 / 0.41 |
+| Quoting at the market's spread, realised per fill OOS (C / U) | -0.5 to -0.6 / -3.2 to -3.8 bps |
+
+### Disclosed
+The forward week has now been scored with the v1 specification (Emanuel, before and after his bug fixes) and
+with the merged v2 specification; the v2 changes were decided on 8-Nov without access to the November data.
+
 ## v2 (8-Nov-2026): review and improvement round
 Branch `v2`, starting from tag `v1-draft` (commit f4c9b9d). The review that drove these changes is
 `docs/REVIEW_V1.md`. v1 outputs remain available at the `v1-draft` tag

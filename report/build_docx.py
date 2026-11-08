@@ -59,12 +59,22 @@ def table2() -> tuple[pd.DataFrame, str]:
             r[f"{spec}: +1 SD (bps)"] = ""
         rows.append(r)
     d = pd.DataFrame(rows)
+    # robustness of the original spec: lowest |t| over six SE choices (07_se_robustness) and the dynamic spec
+    se = pd.read_csv(T / "07_se_robustness.csv")
+    min_t = se.assign(a=se["t"].abs()).groupby(["group", "var"])["a"].min()
+    dyn = pd.read_csv(T / "07_dynamic.csv").query("spec == 'dynamic, Driscoll-Kraay L=24'").set_index(["group", "var"])["t"]
+    inv = {lab: v for v, lab in names.items()}
+    grp_col = d["Group"].copy()
+    d["min |t|, 6 SE choices"] = [f"{min_t[(g, inv[x])]:.1f}" if x in inv else "" for g, x in zip(grp_col, d["Driver"])]
+    d["dynamic spec t (DK)"] = [f"{dyn[(g, inv[x])]:.1f}" if x in inv else "" for g, x in zip(grp_col, d["Driver"])]
     d.loc[d["Group"].duplicated(), "Group"] = ""
     return d, ("Table 3. In-sample (1 to 21 Oct) regressions of the 5-minute quoted half-spread (bps) by group. "
-               "Cells: coefficient [Newey-West t] and the effect of a one within-stock SD increase in bps. "
+               "Cells: coefficient [Newey-West t, 7 lags] and the effect of a one within-stock SD increase in bps. "
                "Original = shared time-of-day dummies and stock fixed effects; refined = stock-by-time-bucket dummies (Section 6.1). "
-               "All specifications include lagged trades, turnover and |order imbalance|. *** p<0.01, ** p<0.05, * p<0.1. "
-               "Source: 08_r1_coefficients.csv.")
+               "All specifications include lagged trades, turnover and |order imbalance| (lagged within the day). "
+               "min |t| = lowest |t| of the original specification across Newey-West with 7, 24 and 95 lags, Driscoll-Kraay, and "
+               "stock-day and day clusters; dynamic spec = original plus the last observed spread, Driscoll-Kraay t. "
+               "*** p<0.01, ** p<0.05, * p<0.1. Source: 08_r1_coefficients.csv, 07_se_robustness.csv, 07_dynamic.csv.")
 
 
 RACE = ["IS average", "yesterday", "last bar", "original: combined", "refined: combined", "refined + lagged spread", "LightGBM"]
@@ -102,7 +112,7 @@ def race_combined() -> tuple[pd.DataFrame, str]:
         rows.append(r)
     d = pd.DataFrame(rows)[["Rule", "OOS RMSE C", "FWD RMSE C", "DM vs last bar C (OOS / FWD)", "OOS RMSE U", "FWD RMSE U", "DM vs last bar U (OOS / FWD)"]]
     return d, ("Table 4. Forecast race for the 5-minute quoted half-spread (RMSE, bps): out-of-sample window 22 to 30 October "
-               "(used three times) and forward week 2 to 6 November (used once, all parameters frozen on 1 to 21 October). "
+               "(used three times) and forward week 2 to 6 November (never used for fitting or tuning; all parameters frozen on 1 to 21 October). "
                "C = constrained group, U = unconstrained. DM = Diebold-Mariano statistic against the last bar's spread, "
                "negative favours the model. Per-stock rows: 08_oos_rmse.csv, 09_fwd_rmse.csv.")
 
@@ -116,7 +126,7 @@ def table3() -> tuple[pd.DataFrame, str]:
 
 def table4() -> tuple[pd.DataFrame, str]:
     return race_table("09_fwd_rmse.csv", "09_fwd_diebold_mariano.csv", "all FWD days",
-                      "Table 4. Forward test, 2 to 6 November (used once): RMSE of the quoted half-spread (bps per 5-minute bar) "
+                      "Table 4. Forward test, 2 to 6 November: RMSE of the quoted half-spread (bps per 5-minute bar) "
                       "with every parameter frozen on 1 to 21 October. Same layout as Table 3. "
                       "Source: 09_fwd_rmse.csv, 09_fwd_diebold_mariano.csv.")
 
@@ -144,6 +154,35 @@ def table5() -> tuple[pd.DataFrame, str]:
                "Source: 10_quoting_oos.csv, 10_quoting_fwd.csv.")
 
 
+def table7() -> tuple[pd.DataFrame, str]:
+    """Quote timing at equal in-sample average width (script 13)."""
+    res = pd.read_csv(T / "13_quote_timing.csv")
+    tst = pd.read_csv(T / "13_quote_timing_tests.csv").query("vs == 'controls only' and unit == 'all'")
+    rules = ["constant", "last bar", "controls only", "vol rule", "impact rule", "vol + impact rule", "LightGBM"]
+    rows = []
+    for rule in rules:
+        r = {"Rule (equal average width)": rule}
+        for smp, lab in [("OOS", "OOS"), ("FWD", "FWD")]:
+            for grp, g in [("constrained", "C"), ("unconstrained", "U")]:
+                x = res[(res["sample"] == smp) & (res["unit"] == grp) & (res["rule"] == rule)]
+                r[f"{lab} realised {g} (bps)"] = f"{x['realised_bps'].iloc[0]:.2f}" if len(x) else ""
+            t = tst[(tst["sample"] == smp) & (tst["rule"] == rule)]["t"]
+            r[f"{lab} t vs controls only"] = f"{t.iloc[0]:.1f}" if len(t) else ""
+        rows.append(r)
+    return pd.DataFrame(rows), (
+        "Table 6. Quote timing: every rule scaled so its in-sample average quote equals the in-sample average spread, so rules "
+        "differ only in when they widen; fills and P&L from the same engine as Table 5. Realised = half-spread earned minus "
+        "the 5-minute mid move, per filled order. t = paired t-test across stock-days of daily DKK P&L against the rule with "
+        "only time-of-day and activity controls (all six stocks). Source: 13_quote_timing.csv, 13_quote_timing_tests.csv.")
+
+
+def table8() -> tuple[pd.DataFrame, str]:
+    a = pd.read_csv(T / "12_ae_appendix.csv")
+    a.columns = ["Applied Econometrics check", "Script", "Result", "Implication"]
+    return a, ("Table C1. Applied Econometrics checks (Newey-West lag rule, SE robustness, ADF, Granger, QLR, VAR lag choice, "
+               "IRF bootstrap, ARCH-LM and standardised GARCH residuals). Source: 12_ae_appendix.csv.")
+
+
 def table6() -> tuple[pd.DataFrame, str]:
     d = pd.read_csv(T / "11_vol_signature.csv").set_index("stock")
     out = pd.DataFrame({
@@ -161,22 +200,25 @@ def table6() -> tuple[pd.DataFrame, str]:
                  "Source: 11_vol_signature.csv.")
 
 
-TABLES = {1: table1, 2: table6, 3: table2, 4: race_combined, 5: table5}
+TABLES = {1: table1, 2: table6, 3: table2, 4: race_combined, 5: table5, 6: table7, 7: table8}
 FIGURES = {  # number: (file, caption, width in cm)
     1: ("report_fig1_intraday_tick.png", "Figure 1. Intraday pattern of spread, turnover and volatility (in-sample days, indexed to each "
                                          "stock's daily mean) and the share of time the spread sits at one tick.", 15),
     2: ("11_vol_surface.png", "Figure 2. Intraday volatility surface: realised volatility per √minute by sampling interval (5 seconds to "
                               "30 minutes) and hour of day, in-sample days, relative to each stock's whole-day 15-minute level. "
-                              "Short intervals and the opening hour carry the transitory (bid-ask bounce) part.", 16),
+                              "Short intervals and the opening hour carry the transitory part (quote flicker and tick discreteness in the mid).", 16),
     3: ("report_fig2_impact_by_stock.png", "Figure 3. Permanent price impact (Hasbrouck VAR) against the five-minute impact from the spread "
                                            "decomposition and the effective half-spread, medians across days.", 13),
     4: ("09_fwd_rmse.png", "Figure 4. Forecast error by rule: out-of-sample window (grey, used three times) against the forward week "
-                           "(colour, used once).", 15),
+                           "(colour, never used for fitting or tuning).", 15),
     5: ("10_quoting_frontier.png", "Figure 5. Quoting rules: fill rate against realised half-spread per fill, net of five-minute adverse "
                                    "selection. No rule is above zero.", 13.5),
-    6: ("report_fig4_shap.png", "Figure 6. Mean |SHAP| of the LightGBM forecast on in-sample bars, by group.", 12),
-    7: ("report_fig5_hmm_regimes.png", "Figure 7. Driver coefficients by volatility regime (two-state HMM, forward-filtered), with 95% "
-                                       "Newey-West intervals.", 15),
+    6: ("report_fig4_shap.png", "Figure 6. What the LightGBM forecast relies on: mean |SHAP| on in-sample bars by group (left) and the "
+                                "increase in cross-validated error when a feature group is dropped (right).", 15),
+    7: ("report_fig5_hmm_regimes.png", "Figure 7. Driver coefficients in the low- and high-volatility states (two-state HMM, "
+                                       "forward-filtered), with 95% Newey-West intervals.", 15),
+    8: ("13_iss_event.png", "Figure 8. ISS, 29 October: the 15:20 to 15:35 sell-off, the market half-spread and the quotes of three "
+                            "rules set at the start of each 5-minute bar.", 13.5),
 }
 
 

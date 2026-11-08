@@ -154,11 +154,12 @@ Review: `docs/REVIEW_V1.md`; full list of changes and before/after numbers: `CHA
   - Volatility is the robust driver in both groups (min |t| 3.1 constrained, 2.5 unconstrained).
   - Informed trading (rolling impact) matters only in the unconstrained group, and only robustly once spread
     persistence is modelled (dynamic spec, DK t = 2.2; Granger p = 0.03); nothing in the tick-constrained group.
-  - Forecasting power is mostly persistence and time of day (drop-column); LightGBM beats last bar's spread for
-    4 of 6 stocks.
-  - As a quoting rule, conditioning on volatility reduces a market maker's adverse-selection losses
-    (paired t = 2.3 vs the no-driver rule), but at a 5-min markout passive quoting loses money in every rule:
-    realised spreads ≈ 0, consistent with HFT competition (Week 8).
+  - Forecasting power is mostly persistence and time of day (drop-column); LightGBM beats last bar's spread in
+    both test weeks (significantly for DSV, Vestas, GN; ISS borderline; ties for Novo and Pandora out of sample).
+  - As a quoting rule (script 13, equal average width, script 10's engine), the volatility + impact forecasts beat
+    the no-driver rule in both weeks (paired t = 2.3 OOS, 2.5 forward); LightGBM does not. Every rule still loses
+    at a 5-min markout: realised spreads ≈ 0, consistent with HFT competition (Week 8).
+- **Merged with the forward test (8-Nov, v2.1):** see CHANGELOG; scripts 12 (AE checks) and 13 (quote timing).
 - **Still open:** source of the ISS 29-Oct sell-off (FactSet news ~15:20 CPH / 10:20 ET); due date and
   Convenor approval; report write-up (≤ 2,500 words), AI transparency statement, team roles.
 
