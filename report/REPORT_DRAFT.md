@@ -3,7 +3,7 @@
 **FINS5566 Trading in Financial Securities, T3 2026. Group project.**
 Christian Bork, Emanuel Annvik, Mathilde Sørensen.
 
-> Draft 5 (8 Nov 2026, after the code review, pipeline re-run and the volatility-surface addition). Sections 1 to 7 are 2,391 words, counted without headings, tables, figures, captions, appendices and references (the Student Guide limit is 2,500 words excluding charts, tables and diagrams). Every number comes from a table in `outputs/tables/`, named in the caption notes.
+> Draft 5 (8 Nov 2026, after the code review, pipeline re-run and the volatility-surface addition). Sections 1 to 7 are 2,402 words, counted without headings, tables, figures, captions, appendices and references (the Student Guide limit is 2,500 words excluding charts, tables and diagrams). Every number comes from a table in `outputs/tables/`, named in the caption notes.
 
 ---
 
@@ -25,7 +25,7 @@ The data are FactSet Time and Sales exports for NOVO.B, DSV, VWS, PNDORA, GN and
 
 ### 2.2 Trade signing
 
-Trades are signed with the quote rule against the attached mid, then the tick test. Between 94 and 98% are signed by the quote rule and none are left unsigned. Fills that share a timestamp are treated as one aggressive order walking the book (2.3 fills per order; 98% of multi-fill orders are one-sided). Against four full quote streams the attached quote equals the prevailing quote 92 to 95% of the time and the sign agrees in at least 98.6% of cases.
+Trades are signed with the quote rule against the attached mid, then the tick test. Between 94 and 98% are signed by the quote rule. Fills that share a timestamp are treated as one aggressive order walking the book (2.3 fills per order; 98% of multi-fill orders are one-sided). Against four full quote streams the attached quote equals the prevailing quote 92 to 95% of the time and the sign agrees in at least 98.6% of cases.
 
 ### 2.3 Intraday patterns and the tick constraint
 
@@ -33,9 +33,9 @@ Spreads in the first fifteen minutes are 1.7 to 2.5 times the midday level and v
 
 ### 2.4 Volatility surface: how much of the volatility is noise
 
-Realised volatility from intraday mid returns depends on the sampling interval: the bid-ask bounce adds variance at short horizons that is not there at longer ones (Andersen et al., 2000). Computed for every in-sample day and hour it gives a surface (Figure 8, Table 6). It flattens between 2 and 15 minutes. At the 1-minute horizon our volatility models use, 20 to 27% of the variance in Novo, Vestas, Pandora and ISS is this transitory part, 12% in DSV and none in GN, whose spread is wide relative to its tick. For Novo the excess per 5-second sample is 1.1 bps, its half-spread, so the noise is the bounce itself. The open is noisier at every horizon: 5-second volatility is 2.1 to 2.8 times the midday level, 15-minute volatility 1.3 to 2.2 times. Part of the opening volatility a market maker reacts to is spread, not information.
+Realised volatility from intraday mid returns depends on the sampling interval: the bid-ask bounce adds variance at short horizons that is not there at longer ones (Andersen et al., 2000). Computed for every in-sample day and hour it gives a surface (Figure 2, Table 2). It flattens between 2 and 15 minutes. At the 1-minute horizon our volatility models use, 20 to 27% of the variance in Novo, Vestas, Pandora and ISS is this transitory part, 12% in DSV and none in GN. For Novo the excess per 5-second sample is 1.1 bps, its half-spread, so the noise is the bounce itself. The open is noisier at every horizon: 5-second volatility is 2.1 to 2.8 times the midday level, 15-minute volatility 1.3 to 2.2 times. Part of the opening volatility a market maker reacts to is spread, not information.
 
-*[Table 6 / Figure 8: 11_vol_signature.csv, 11_vol_surface.png.]*
+*[Table 2 / Figure 2: 11_vol_signature.csv, 11_vol_surface.png.]*
 
 ### 2.5 Event days
 
@@ -57,7 +57,7 @@ where r_k is the log mid return from order k to k+1 and x_k the sign of order k.
 
 ### 3.2 Volatility forecasts
 
-One-minute mid returns are deseasonalised with an in-sample time-of-day factor. On that series we fit GARCH(1,1) and GJR-GARCH with in-sample parameters, two rolling benchmarks, and a HAR model on realised variance over the last bar, hour and day (Corsi, 2009). The forecast for bar t is made at the end of bar t−1 and expressed relative to the seasonal level.
+One-minute mid returns are deseasonalised with an in-sample time-of-day factor. On that series we fit GARCH(1,1) and GJR-GARCH with in-sample parameters, two rolling benchmarks, and a HAR model on realised variance over the last bar, hour and day (Corsi, 2009). HAR has the lowest out-of-sample QLIKE of the five and is the main volatility input. The forecast for bar t is made at the end of bar t−1 and expressed relative to the seasonal level.
 
 ### 3.3 Spread model
 
@@ -65,7 +65,7 @@ For 5-minute bar t of stock i we estimate
 
 HalfSpread_{it} = α_{i} + β_{1} Impact_{roll,it} + β_{2} Impact_{prevday,it} + γ log(VolForecast_{it} / Seasonal_{it}) + time-of-day + activity controls + ε_{it},
 
-separately for the two groups, on in-sample days only, with panel Newey-West standard errors. The dependent variable is the time-weighted quoted half-spread in basis points. We also estimate it for the effective half-spread and, for the constrained group, a fractional logit for the share of time the spread is wider than one tick. Lags run across the overnight gap, so the first bar of a day uses the last bar of the previous day.
+separately for the two groups, on in-sample days only, with panel Newey-West standard errors. The dependent variable is the time-weighted quoted half-spread in basis points. We also estimate it for the effective half-spread and, for the constrained group, a fractional logit for the share of time the spread is wider than one tick. Lags run across the overnight gap.
 
 ### 3.4 Quoting rule
 
@@ -75,31 +75,29 @@ At the start of each bar the simulated market maker posts a half-spread h_t equa
 
 Lag lengths, hyper-parameters, seasonal factors and coefficients are chosen on in-sample days. The out-of-sample window was used once by the original model and twice more by the refinements in Section 6, hence the once-used week in Section 4.4.
 
-*[Figure 2: report_fig2_impact_by_stock.png.]*
+*[Figure 3: report_fig2_impact_by_stock.png.]*
 
 ## 4. Testing and validation
 
 ### 4.1 Adverse selection takes most of the spread
 
-The price impact five minutes after a trade is 91 to 115% of the effective half-spread in every stock. The realised half-spread, what is left for the liquidity provider, is at most 0.6 bps and negative for Pandora and ISS. The VAR impact runs from 1.4 bps (Novo) to 7.2 bps (GN) and agrees with the decomposition. The spread is mostly a payment to informed traders.
+The price impact five minutes after a trade is 91 to 115% of the effective half-spread in every stock. The realised half-spread, what is left for the liquidity provider, is at most 0.6 bps and negative for Pandora and ISS. The VAR impact runs from 1.4 bps (Novo) to 7.2 bps (GN) and agrees with the decomposition (Figure 3). The spread is mostly a payment to informed traders.
 
 ### 4.2 In-sample: volatility is the stronger driver, impact matters only where the tick does not bind
 
-In the unconstrained group a one within-stock standard deviation increase in the volatility forecast widens the half-spread by 0.29 bps (t = 5.6) and the same increase in rolling impact by 0.14 bps (t = 2.4). In the constrained group only volatility is significant (0.09 bps, t = 3.7), and it works through the probability of a two-tick spread (fractional logit, t = 5.7). The results hold with 15-minute bars, log spreads, GJR volatility, longer Newey-West lags and without the first fifteen minutes.
+In the unconstrained group (Table 3) a one within-stock standard deviation increase in the volatility forecast widens the half-spread by 0.29 bps (t = 5.6) and the same increase in rolling impact by 0.14 bps (t = 2.4). In the constrained group only volatility is significant (0.09 bps, t = 3.7), and it works through the probability of a two-tick spread (fractional logit, t = 5.7). The results hold with 15-minute bars, log spreads, GJR volatility, longer Newey-West lags and without the first fifteen minutes.
 
-*[Table 2: report_table2_spread_regressions.csv.]*
+*[Table 3: report_table2_spread_regressions.csv.]*
 
 ### 4.3 Out of sample (22 to 30 Oct): the drivers do not beat persistence
 
-The linear models beat the in-sample average and yesterday's spread (Diebold-Mariano between −2.4 and −3.3 in the unconstrained group) but not the last bar's spread (DM −0.25 and 0.01). The LightGBM refinement is the only model that does: RMSE 1.07 against 1.32 bps in the constrained group and 1.32 against 1.66 in the unconstrained group, DM −2.1 and −3.4.
-
-*[Figure 3 / Table 3: report_fig3_oos_race.png, report_table3_oos_race.csv.]*
+The linear models beat the in-sample average and yesterday's spread (Diebold-Mariano between −2.4 and −3.3 in the unconstrained group) but not the last bar's spread (DM −0.25 and 0.01). The LightGBM refinement is the only model that does: RMSE 1.07 against 1.32 bps in the constrained group and 1.32 against 1.66 in the unconstrained group, DM −2.1 and −3.4 (Table 4, Figure 4).
 
 ### 4.4 Forward test (2 to 6 Nov): used once
 
 The week contained the Q3 reports of Novo and Pandora (4 Nov) and GN (5 Nov). In the constrained group every model beat the last bar: RMSE 1.01 bps with stock-by-time controls, 1.00 with the lagged spread added and 0.94 for LightGBM, against 1.42, DM −2.6 to −2.8. In the unconstrained group the ranking from 4.3 repeated: the linear driver models did not beat the last bar (1.77 to 1.81 against 1.85 bps, DM −0.4 to −0.7), the lagged-spread model did (1.58, DM −2.4) and LightGBM did best (1.46, DM −2.7). Unconstrained errors were 7 to 29% higher than in October because two of its three stocks reported; constrained errors were lower. Direction-of-change hit rates are 61 to 67% for every model, including the in-sample average, a mean-reversion bet, so the gain is in the size of the move, not its sign. On the report days the models failed together: every rule had an RMSE near 3 bps for Pandora, and for Novo the linear model was worse than the last bar.
 
-*[Table 4 / Figure 6: 09_fwd_rmse.csv, 09_fwd_rmse.png.]*
+*[Table 4 / Figure 4: 08_oos_rmse.csv, 09_fwd_rmse.csv, 09_fwd_rmse.png.]*
 
 ## 5. Evaluation of results
 
@@ -109,11 +107,11 @@ A one standard deviation volatility shock adds about 9% to the half-spread of a 
 
 ### 5.2 What the quoting simulation says
 
-None of the quoting rules make money. Quoting the market's own half-spread (yesterday's, the last bar's or the realised one) fills 75 to 79% of aggressive orders in the constrained group and loses 0.5 to 0.6 bps per fill out of sample; in the unconstrained group it fills 58 to 63% and loses 3.2 to 3.8 bps. In the forward week the losses are 1.0 to 1.2 and 1.3 to 2.8 bps. The reason is 4.1: adverse selection costs more than the half-spread earns, so a quote at the market's spread cannot pay however well it is forecast.
+None of the quoting rules make money (Table 5, Figure 5). Quoting the market's own half-spread (yesterday's, the last bar's or the realised one) fills 75 to 79% of aggressive orders in the constrained group and loses 0.5 to 0.6 bps per fill out of sample; in the unconstrained group it fills 58 to 63% and loses 3.2 to 3.8 bps. In the forward week the losses are 1.0 to 1.2 and 1.3 to 2.8 bps. The reason is 4.1: adverse selection costs more than the half-spread earns, so a quote at the market's spread cannot pay however well it is forecast.
 
-The model-based rules change this at the margin. In the constrained group out of sample, LightGBM quotes 2.3 bps against 1.5 for the last bar, fills 47% of orders instead of 75%, and loses 0.27 bps per fill instead of 0.49; the only rule positive on more than half of the days. In the unconstrained group the forward-week loss falls from 2.8 bps per fill (last bar) to 1.7 to 1.8 bps for the linear models, again by quoting wider (5.2 to 5.4 against 5.0 bps) and filling fewer orders (52 to 54% against 56%). A profitable quote would have to be wider still, or skewed away from the flow.
+The model-based rules change this at the margin. In the constrained group out of sample, LightGBM quotes 2.3 bps against 1.5 for the last bar, fills 47% of orders instead of 75%, and loses 0.27 bps per fill instead of 0.49; the only rule positive on more than half of the days. In the unconstrained group the forward-week loss falls from 2.8 bps per fill (last bar) to 1.7 to 1.8 bps for the linear models, again by quoting wider (5.2 to 5.4 against 5.0 bps) and filling fewer orders (52 to 54% against 56%).
 
-*[Table 5 / Figure 7: 10_quoting_fwd.csv, 10_quoting_frontier.png.]*
+*[Table 5 / Figure 5: 10_quoting_fwd.csv, 10_quoting_frontier.png.]*
 
 ### 5.3 Stability and event days
 
@@ -127,19 +125,19 @@ Stock-by-time-bucket dummies instead of shared time dummies and stock fixed effe
 
 ### 6.2 LightGBM with SHAP
 
-A gradient-boosted model on the same features plus the lagged spread, tuned by forward-chaining cross-validation on in-sample days, is the only model that beats the last bar. The lagged spread has 0.82 to 0.95 bps of mean absolute attribution, the stock 0.55, time of day and the previous day's impact 0.1 to 0.2 each, rolling impact about 0.1, and the volatility forecast only 0.02 (Figure 4). The improvement comes from modelling persistence more flexibly, not from reading the drivers better.
+A gradient-boosted model on the same features plus the lagged spread, tuned by forward-chaining cross-validation on in-sample days, is the only model that beats the last bar. The lagged spread has 0.82 to 0.95 bps of mean absolute attribution, the stock 0.55, time of day and the previous day's impact 0.1 to 0.2 each, rolling impact about 0.1, and the volatility forecast only 0.02 (Figure 6). The improvement comes from modelling persistence more flexibly, not from reading the drivers better.
 
 ### 6.3 Regimes
 
-A two-state Gaussian HMM on deseasonalised volatility, forward-filtered, splits the bars into calm and stressed. In the constrained group volatility widens spreads only in the stressed state (0.47 bps per unit, t = 3.2, against −0.07 in the calm state; the difference has t = 3.0). In the unconstrained group the effect is present in both states and larger under stress (Figure 5).
+A two-state Gaussian HMM on deseasonalised volatility, forward-filtered, splits the bars into calm and stressed. In the constrained group volatility widens spreads only in the stressed state (0.47 bps per unit, t = 3.2, against −0.07 in the calm state; the difference has t = 3.0). In the unconstrained group the effect is present in both states and larger under stress (Figure 7).
 
-*[Figures 4 and 5: report_fig4_shap.png, report_fig5_hmm_regimes.png.]*
+*[Figures 6 and 7: report_fig4_shap.png, report_fig5_hmm_regimes.png.]*
 
 ## 7. Critical reflection and recommendations
 
 ### 7.1 What we think holds up
 
-The trade signing is validated against full quote streams. Every regressor is known before the bar starts. There is an out-of-sample window and a week that was used only once. We report the negative result as it is: the drivers are real, but they do not forecast five minutes ahead better than the spread itself.
+The trade signing is validated against full quote streams. There is an out-of-sample window and a week that was used only once. We report the negative result as it is: the drivers are real, but they do not forecast five minutes ahead better than the spread itself.
 
 ### 7.2 Limitations
 
@@ -147,9 +145,9 @@ Quotes are only observed at trades, so time-weighted spreads carry a sampling bi
 
 ### 7.3 Recommendations for a real implementation
 
-1. Subscribe to the full L1 quote stream instead of trade-attached quotes. The bias is small in the thin stocks and large in the most liquid one.
-2. Consolidate quotes across venues. The primary venue alone understates competition for the quote.
-3. Run the quoting rule live for some weeks without executing, and use the regime state to decide when to widen: volatility matters in stress, and quoting at the touch loses to informed flow even in calm markets.
+1. Replace trade-attached quotes with the full L1 stream. The sampling bias is 5% on ISS and 18% on Novo, largest where a market maker trades most, and a tick-level fill model needs it.
+2. Measure volatility at the 15-minute plateau for the spread decision. 20 to 27% of 1-minute variance is bid-ask bounce (Section 2.4), so the 1-minute input is partly the spread itself.
+3. Quote wider than the touch and condition on the regime. Every rule at the market's spread loses, and volatility widens constrained spreads only in the stressed state; the wider model rules cut the forward-week loss per fill by a third. Run it live without executing before committing capital.
 
 ---
 
@@ -167,11 +165,13 @@ The research question, the tick-constraint design, the model specifications, the
 
 ## Appendix B. Contribution statement (not counted)
 
-| Member | Main responsibility | Deliverables | Evidence |
+Roles follow the Student Guide. The work was coordinated through a shared private GitHub repository: numbered pipeline scripts with unit tests, pull requests reviewed before merging, and a plan file (`docs/PLAN.md`) that records every design decision and who made it.
+
+| Member | Role (Student Guide) | Deliverables | Evidence |
 |---|---|---|---|
-| Christian Bork | Pipeline design and estimation | Data loader and stitching, Lee-Ready signing, bars, Hasbrouck VAR and spread decomposition, volatility models, spread regressions, out-of-sample race, refinements (stock-by-time controls, LightGBM and SHAP, HMM), report figures 1 to 5 | `analysis/01` to `08`, `src/tifs_group_project/`, `notebooks/report_figures.ipynb`, 16 commits |
-| Emanuel Annvik | Data, forward test, quoting simulation, report | FactSet exports for October and November, forward-test holdout (script 09), market-maker quoting simulation (script 10), quote-stream validation on four streams, code review and fixes, report drafts 1 to 4, Word and PDF build | `analysis/09`, `analysis/10`, `src/tifs_group_project/quoting.py`, `data/README.md`, `report/`, 6 commits |
-| Mathilde Sørensen | [role] | [deliverables] | [evidence] |
+| Christian Bork | Quantitative Analysis and Technology | Repository and pipeline design, data loader and stitching, Lee-Ready signing, bars, Hasbrouck VAR and spread decomposition, volatility models, spread regressions, out-of-sample race, refinements (stock-by-time controls, LightGBM and SHAP, HMM), figures notebook | `analysis/01` to `08`, `src/tifs_group_project/`, `notebooks/`, 16 commits |
+| Emanuel Annvik | Risk and Sales (evaluation, refinement, report) | FactSet data exports (October re-export and November forward week), forward-test holdout (09), market-maker quoting simulation (10), volatility surface (11), quote-stream validation, code review and fixes, report drafts 1 to 5, Word and PDF build | `analysis/09` to `11`, `src/tifs_group_project/quoting.py`, `data/README.md`, `report/`, 9 commits |
+| Mathilde Sørensen | [Trading, or as agreed] | [deliverables] | [evidence] |
 
 ## References
 Andersen, T. G., Bollerslev, T., Diebold, F. X. and Labys, P. (2000). Great realizations. *Risk*, 13(3), 105–108.

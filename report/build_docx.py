@@ -23,7 +23,7 @@ ROOT = Path(__file__).resolve().parents[1]
 T, F = ROOT / "outputs" / "tables", ROOT / "outputs" / "figures"
 SRC, OUT = ROOT / "report" / "REPORT_DRAFT.md", ROOT / "report" / "Group_Report.docx"
 
-BODY_FONT, BODY_PT = "Calibri", 11
+BODY_FONT, BODY_PT = "Calibri", 10.5
 GREY = RGBColor(0x55, 0x55, 0x55)
 
 
@@ -60,7 +60,7 @@ def table2() -> tuple[pd.DataFrame, str]:
         rows.append(r)
     d = pd.DataFrame(rows)
     d.loc[d["Group"].duplicated(), "Group"] = ""
-    return d, ("Table 2. In-sample (1 to 21 Oct) regressions of the 5-minute quoted half-spread (bps) by group. "
+    return d, ("Table 3. In-sample (1 to 21 Oct) regressions of the 5-minute quoted half-spread (bps) by group. "
                "Cells: coefficient [Newey-West t] and the effect of a one within-stock SD increase in bps. "
                "Original = shared time-of-day dummies and stock fixed effects; refined = stock-by-time-bucket dummies (Section 6.1). "
                "All specifications include lagged trades, turnover and |order imbalance|. *** p<0.01, ** p<0.05, * p<0.1. "
@@ -82,6 +82,29 @@ def race_table(rmse_file: str, dm_file: str, subset: str, title: str) -> tuple[p
         d[lab] = x.reindex(units).round(1)
     d.index.name = "Unit"
     return d.reset_index(), title
+
+
+def race_combined() -> tuple[pd.DataFrame, str]:
+    """One table for the OOS window and the forward week, group rows only (per-stock rows are in the CSVs)."""
+    oos = pd.read_csv(T / "08_oos_rmse.csv").query("subset == 'all OOS days'").set_index("unit")
+    fwd = pd.read_csv(T / "09_fwd_rmse.csv").query("subset == 'all FWD days'").set_index("unit")
+    dmo = pd.read_csv(T / "08_oos_diebold_mariano.csv").query("subset == 'all OOS days' and vs == 'last bar'")
+    dmf = pd.read_csv(T / "09_fwd_diebold_mariano.csv").query("subset == 'all FWD days' and vs == 'last bar'")
+    rows = []
+    for rule in RACE:
+        r = {"Rule": RACE_LABELS.get(rule, rule)}
+        for grp, g in [("constrained", "C"), ("unconstrained", "U")]:
+            r[f"OOS RMSE {g}"] = f"{oos.loc[grp, rule]:.2f}"
+            r[f"FWD RMSE {g}"] = f"{fwd.loc[grp, rule]:.2f}"
+            do = dmo[(dmo.unit == grp) & (dmo.model == rule)]["dm_stat"]
+            df_ = dmf[(dmf.unit == grp) & (dmf.model == rule)]["dm_stat"]
+            r[f"DM vs last bar {g} (OOS / FWD)"] = (f"{do.iloc[0]:.1f}" if len(do) else "") + " / " + (f"{df_.iloc[0]:.1f}" if len(df_) else "") if (len(do) or len(df_)) else ""
+        rows.append(r)
+    d = pd.DataFrame(rows)[["Rule", "OOS RMSE C", "FWD RMSE C", "DM vs last bar C (OOS / FWD)", "OOS RMSE U", "FWD RMSE U", "DM vs last bar U (OOS / FWD)"]]
+    return d, ("Table 4. Forecast race for the 5-minute quoted half-spread (RMSE, bps): out-of-sample window 22 to 30 October "
+               "(used three times) and forward week 2 to 6 November (used once, all parameters frozen on 1 to 21 October). "
+               "C = constrained group, U = unconstrained. DM = Diebold-Mariano statistic against the last bar's spread, "
+               "negative favours the model. Per-stock rows: 08_oos_rmse.csv, 09_fwd_rmse.csv.")
 
 
 def table3() -> tuple[pd.DataFrame, str]:
@@ -132,29 +155,28 @@ def table6() -> tuple[pd.DataFrame, str]:
         "Excess per 5s sample (bps)": d["excess_rms_5s_bps"].round(2).values,
         "Half-spread (bps)": d["half_spread_bps"].round(2).values,
     })
-    return out, ("Table 6. Volatility signature, in-sample days: realised volatility of mid returns in bps per √minute by sampling "
+    return out, ("Table 2. Volatility signature, in-sample days: realised volatility of mid returns in bps per √minute by sampling "
                  "interval. Noise share = 1 − σ²(15min)/σ²(1min). 'Flattens at' = first interval within 5% of the 15-minute level. "
                  "Excess per 5-second sample = RMS of the variance above the 15-minute level, to compare with the median half-spread. "
                  "Source: 11_vol_signature.csv.")
 
 
-TABLES = {1: table1, 2: table2, 3: table3, 4: table4, 5: table5, 6: table6}
-FIGURES = {
+TABLES = {1: table1, 2: table6, 3: table2, 4: race_combined, 5: table5}
+FIGURES = {  # number: (file, caption, width in cm)
     1: ("report_fig1_intraday_tick.png", "Figure 1. Intraday pattern of spread, turnover and volatility (in-sample days, indexed to each "
-                                         "stock's daily mean) and the share of time the spread sits at one tick."),
-    2: ("report_fig2_impact_by_stock.png", "Figure 2. Permanent price impact (Hasbrouck VAR) against the five-minute impact from the spread "
-                                           "decomposition and the effective half-spread, medians across days."),
-    3: ("report_fig3_oos_race.png", "Figure 3. Out-of-sample RMSE of the quoted half-spread, 22 to 30 October (grey = benchmarks)."),
-    4: ("report_fig4_shap.png", "Figure 4. Mean |SHAP| of the LightGBM forecast on in-sample bars, by group."),
-    5: ("report_fig5_hmm_regimes.png", "Figure 5. Driver coefficients by volatility regime (two-state HMM, forward-filtered), with 95% "
-                                       "Newey-West intervals."),
-    6: ("09_fwd_rmse.png", "Figure 6. Forecast error in the out-of-sample window (grey, used three times) against the forward week "
-                           "(colour, used once)."),
-    7: ("10_quoting_frontier.png", "Figure 7. Quoting rules: fill rate against realised half-spread per fill, net of five-minute adverse "
-                                   "selection. No rule is above zero."),
-    8: ("11_vol_surface.png", "Figure 8. Intraday volatility surface: realised volatility per √minute by sampling interval (5 seconds to "
+                                         "stock's daily mean) and the share of time the spread sits at one tick.", 15),
+    2: ("11_vol_surface.png", "Figure 2. Intraday volatility surface: realised volatility per √minute by sampling interval (5 seconds to "
                               "30 minutes) and hour of day, in-sample days, relative to each stock's whole-day 15-minute level. "
-                              "Short intervals and the opening hour carry the transitory (bid-ask bounce) part."),
+                              "Short intervals and the opening hour carry the transitory (bid-ask bounce) part.", 16),
+    3: ("report_fig2_impact_by_stock.png", "Figure 3. Permanent price impact (Hasbrouck VAR) against the five-minute impact from the spread "
+                                           "decomposition and the effective half-spread, medians across days.", 13),
+    4: ("09_fwd_rmse.png", "Figure 4. Forecast error by rule: out-of-sample window (grey, used three times) against the forward week "
+                           "(colour, used once).", 15),
+    5: ("10_quoting_frontier.png", "Figure 5. Quoting rules: fill rate against realised half-spread per fill, net of five-minute adverse "
+                                   "selection. No rule is above zero.", 13.5),
+    6: ("report_fig4_shap.png", "Figure 6. Mean |SHAP| of the LightGBM forecast on in-sample bars, by group.", 12),
+    7: ("report_fig5_hmm_regimes.png", "Figure 7. Driver coefficients by volatility regime (two-state HMM, forward-filtered), with 95% "
+                                       "Newey-West intervals.", 15),
 }
 
 
@@ -171,7 +193,7 @@ def set_cell_shading(cell, hex_fill: str) -> None:
 def add_caption(doc: Document, text: str) -> None:
     p = doc.add_paragraph()
     run = p.add_run(text)
-    run.font.size, run.font.color.rgb, run.italic = Pt(9), GREY, False
+    run.font.size, run.font.color.rgb, run.italic = Pt(8.5), GREY, False
     p.paragraph_format.space_after = Pt(10)
 
 
@@ -233,8 +255,8 @@ def add_table(doc: Document, df: pd.DataFrame, caption: str) -> None:
     doc.add_paragraph().paragraph_format.space_after = Pt(2)
 
 
-def add_figure(doc: Document, file: str, caption: str) -> None:
-    doc.add_picture(str(F / file), width=Cm(16))
+def add_figure(doc: Document, file: str, caption: str, width_cm: float = 15) -> None:
+    doc.add_picture(str(F / file), width=Cm(width_cm))
     doc.paragraphs[-1].alignment = WD_ALIGN_PARAGRAPH.CENTER
     add_caption(doc, caption)
 
@@ -260,12 +282,12 @@ def build() -> Path:
     doc = Document()
     sec = doc.sections[0]
     sec.page_height, sec.page_width = Cm(29.7), Cm(21.0)
-    sec.left_margin = sec.right_margin = Cm(2.2)
-    sec.top_margin = sec.bottom_margin = Cm(2.2)
+    sec.left_margin = sec.right_margin = Cm(2.0)
+    sec.top_margin = sec.bottom_margin = Cm(2.0)
     st = doc.styles["Normal"]
     st.font.name, st.font.size = BODY_FONT, Pt(BODY_PT)
     st.paragraph_format.space_after = Pt(6)
-    st.paragraph_format.line_spacing = 1.15
+    st.paragraph_format.line_spacing = 1.08
     for name, size in [("Title", 20), ("Heading 1", 14), ("Heading 2", 12), ("Heading 3", 11)]:
         s = doc.styles[name]
         s.font.name, s.font.size, s.font.bold = BODY_FONT, Pt(size), True
