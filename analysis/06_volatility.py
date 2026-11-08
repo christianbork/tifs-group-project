@@ -7,6 +7,9 @@
 # 3. Benchmarks: rolling 30-min std, ATR(14 bars), intraday HAR-RV (bar, hour, day).
 # 4. Every forecast for bar t is made at the end of bar t-1. OOS evaluation vs
 #    realised 5-min volatility: RMSE (vol), QLIKE (variance), Mincer-Zarnowitz.
+# 5. v2 (AE Lab 8 steps): before fitting, Ljung-Box on returns and squared returns and
+#    Engle's ARCH-LM test; after fitting, Ljung-Box / ARCH-LM on the standardised residuals
+#    of GARCH and GJR, with normal and Student-t errors (in-sample days only).
 # Output for script 07: data/processed/vol_forecast_5min.parquet (joins to bars_5min on stock + ts).
 
 # %% Setup
@@ -17,7 +20,10 @@ import statsmodels.api as sm
 
 from tifs_group_project import config
 from tifs_group_project.volatility import (
+    arch_lm,
     bar_forecast,
+    garch_diagnostics,
+    ljung_box,
     garch_variance_forecasts,
     mincer_zarnowitz,
     qlike,
@@ -44,7 +50,7 @@ plt.rcParams.update(
 b1 = pd.read_parquet(config.PROCESSED / "bars_1min.parquet")
 
 # %% Forecasts per stock
-out, params, seas = [], [], []
+out, params, seas, diag = [], [], [], []
 for stock in config.STOCKS:
     m1 = b1[b1["stock"] == stock].sort_values("ts").reset_index(drop=True)
     m1["e"] = seasonal_variance(m1)
@@ -64,6 +70,21 @@ for stock in config.STOCKS:
             "sample": g["sample"].first(),
         }
     )
+
+    # AE Lab 8 diagnostics on in-sample deseasonalised returns
+    z_is = z[:n_is]
+    lb_q, lb_p = ljung_box(z_is, 10)
+    lb2_q, lb2_p = ljung_box(z_is**2, 10)
+    lm, lm_p = arch_lm(z_is, 10)
+    diag.append(
+        {"stock": stock, "model": "returns (before)", "pct_zero_returns": 100 * (z_is == 0).mean(), "lb_std_q": lb_q, "lb_std_p": lb_p,
+         "lb_sq_std_q": lb2_q, "lb_sq_std_p": lb2_p, "arch_lm_std": lm, "arch_lm_std_p": lm_p}
+    )
+    for name, gjr in [("garch", False), ("gjr", True)]:
+        for dist in ["normal", "t"]:
+            diag.append(
+                {"stock": stock, "model": f"{name} ({dist})", **garch_diagnostics(z, n_is, gjr, dist)}
+            )
 
     # GARCH / GJR: fixed in-sample parameters, forecasts from every origin
     for name, gjr in [("garch", False), ("gjr", True)]:
@@ -141,6 +162,19 @@ print(
     .drop(columns=[c for c in params if c.startswith(("har_", "atr"))])
     .round(3)
     .to_string(index=False),
+    "\n",
+)
+
+# %% AE diagnostics table
+diag = pd.DataFrame(diag)
+# Student-t fits with nu at the lower bound are degenerate: thin, tick-constrained stocks
+# have a large mass of zero 1-min mid returns, which the t density 'explains' with nu -> 2
+diag["degenerate_t"] = diag["nu"] <= 2.1
+diag.round(4).to_csv(config.TABLES / "06_diagnostics.csv", index=False)
+print(
+    "AE Lab 8 diagnostics, in-sample (Ljung-Box Q(10) and ARCH-LM(10); 'before' = deseasonalised returns,\n"
+    "otherwise standardised residuals; p < 0.05 = structure left):\n",
+    diag[["stock", "model", "pct_zero_returns", "lb_std_p", "lb_sq_std_p", "arch_lm_std_p", "bic", "nu", "degenerate_t"]].round(4).to_string(index=False),
     "\n",
 )
 
