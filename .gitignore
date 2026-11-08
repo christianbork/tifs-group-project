@@ -6,11 +6,11 @@ __pycache__/
 .ruff_cache/
 .ipynb_checkpoints/
 .env
-data/raw/
-data/processed/
-*.parquet
 *.h5
 .DS_Store
 Thumbs.db
 .vscode/
 outputs/*.png
+# data/raw (FactSet exports) and data/processed (parquet) are committed on purpose since 8-Nov-2026
+# so every team member can run the pipeline without re-exporting; ~210 MB, no file above 50 MB.
+report/~$*.docx
