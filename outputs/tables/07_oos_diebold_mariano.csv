@@ -1,45 +1,45 @@
 subset,group,model,vs,mean_loss_diff,dm_stat,p_value,n
-all OOS days,constrained,controls only,IS average,-0.1424,-1.9176,0.0556,665
-all OOS days,constrained,controls only,yesterday,-0.1270,-1.7737,0.0766,665
-all OOS days,constrained,vol only,IS average,-0.1814,-2.2308,0.0260,665
-all OOS days,constrained,vol only,yesterday,-0.1660,-2.3480,0.0192,665
-all OOS days,constrained,impact only,IS average,-0.1551,-2.0053,0.0453,665
-all OOS days,constrained,impact only,yesterday,-0.1397,-1.9524,0.0513,665
-all OOS days,constrained,combined,IS average,-0.1884,-2.2014,0.0281,665
-all OOS days,constrained,combined,yesterday,-0.1730,-2.3940,0.0169,665
-all OOS days,constrained,combined,controls only,-0.0460,-1.2573,0.2091,665
-all OOS days,constrained,combined,vol only,-0.0070,-0.5636,0.5732,665
-all OOS days,constrained,combined,impact only,-0.0334,-1.0838,0.2789,665
-all OOS days,unconstrained,controls only,IS average,-0.4322,-2.9651,0.0031,665
-all OOS days,unconstrained,controls only,yesterday,-0.4443,-2.0077,0.0451,665
-all OOS days,unconstrained,vol only,IS average,-0.4746,-3.1725,0.0016,665
-all OOS days,unconstrained,vol only,yesterday,-0.4868,-2.2052,0.0278,665
-all OOS days,unconstrained,impact only,IS average,-0.6352,-4.1368,0.0000,665
-all OOS days,unconstrained,impact only,yesterday,-0.6473,-2.9071,0.0038,665
-all OOS days,unconstrained,combined,IS average,-0.5447,-3.2728,0.0011,665
-all OOS days,unconstrained,combined,yesterday,-0.5568,-2.4367,0.0151,665
-all OOS days,unconstrained,combined,controls only,-0.1125,-1.1941,0.2329,665
-all OOS days,unconstrained,combined,vol only,-0.0701,-1.0437,0.2970,665
-all OOS days,unconstrained,combined,impact only,0.0905,2.0041,0.0455,665
-ex event days,constrained,controls only,IS average,-0.0524,-0.7911,0.4292,665
-ex event days,constrained,controls only,yesterday,-0.0500,-0.7853,0.4326,665
-ex event days,constrained,vol only,IS average,-0.0578,-0.7968,0.4259,665
-ex event days,constrained,vol only,yesterday,-0.0554,-0.8352,0.4039,665
-ex event days,constrained,impact only,IS average,-0.0700,-1.0190,0.3086,665
-ex event days,constrained,impact only,yesterday,-0.0675,-1.0757,0.2825,665
-ex event days,constrained,combined,IS average,-0.0668,-0.9035,0.3666,665
-ex event days,constrained,combined,yesterday,-0.0643,-0.9858,0.3246,665
-ex event days,constrained,combined,controls only,-0.0144,-0.6488,0.5167,665
-ex event days,constrained,combined,vol only,-0.0090,-0.7093,0.4784,665
-ex event days,constrained,combined,impact only,0.0032,0.2454,0.8062,665
-ex event days,unconstrained,controls only,IS average,-0.4322,-2.9651,0.0031,665
-ex event days,unconstrained,controls only,yesterday,-0.4443,-2.0077,0.0451,665
-ex event days,unconstrained,vol only,IS average,-0.4746,-3.1725,0.0016,665
-ex event days,unconstrained,vol only,yesterday,-0.4868,-2.2052,0.0278,665
-ex event days,unconstrained,impact only,IS average,-0.6352,-4.1368,0.0000,665
-ex event days,unconstrained,impact only,yesterday,-0.6473,-2.9071,0.0038,665
-ex event days,unconstrained,combined,IS average,-0.5447,-3.2728,0.0011,665
-ex event days,unconstrained,combined,yesterday,-0.5568,-2.4367,0.0151,665
-ex event days,unconstrained,combined,controls only,-0.1125,-1.1941,0.2329,665
-ex event days,unconstrained,combined,vol only,-0.0701,-1.0437,0.2970,665
-ex event days,unconstrained,combined,impact only,0.0905,2.0041,0.0455,665
+all OOS days,constrained,controls only,IS average,-0.1348,-1.7406,0.0822,665
+all OOS days,constrained,controls only,yesterday,-0.1194,-1.5727,0.1163,665
+all OOS days,constrained,vol only,IS average,-0.1846,-2.1893,0.0289,665
+all OOS days,constrained,vol only,yesterday,-0.1692,-2.3073,0.0213,665
+all OOS days,constrained,impact only,IS average,-0.1476,-1.8290,0.0678,665
+all OOS days,constrained,impact only,yesterday,-0.1322,-1.7361,0.0830,665
+all OOS days,constrained,combined,IS average,-0.1833,-2.1049,0.0357,665
+all OOS days,constrained,combined,yesterday,-0.1679,-2.2571,0.0243,665
+all OOS days,constrained,combined,controls only,-0.0485,-1.2139,0.2252,665
+all OOS days,constrained,combined,vol only,0.0013,0.1135,0.9097,665
+all OOS days,constrained,combined,impact only,-0.0357,-1.0181,0.3090,665
+all OOS days,unconstrained,controls only,IS average,-0.3974,-2.7439,0.0062,665
+all OOS days,unconstrained,controls only,yesterday,-0.4095,-1.8550,0.0640,665
+all OOS days,unconstrained,vol only,IS average,-0.4598,-3.0549,0.0023,665
+all OOS days,unconstrained,vol only,yesterday,-0.4719,-2.1300,0.0335,665
+all OOS days,unconstrained,impact only,IS average,-0.7433,-4.7669,0.0000,665
+all OOS days,unconstrained,impact only,yesterday,-0.7554,-3.4103,0.0007,665
+all OOS days,unconstrained,combined,IS average,-0.6237,-3.6299,0.0003,665
+all OOS days,unconstrained,combined,yesterday,-0.6358,-2.7443,0.0062,665
+all OOS days,unconstrained,combined,controls only,-0.2263,-2.2236,0.0265,665
+all OOS days,unconstrained,combined,vol only,-0.1639,-2.4184,0.0159,665
+all OOS days,unconstrained,combined,impact only,0.1196,2.5103,0.0123,665
+ex event days,constrained,controls only,IS average,-0.0480,-0.7143,0.4753,665
+ex event days,constrained,controls only,yesterday,-0.0456,-0.7038,0.4818,665
+ex event days,constrained,vol only,IS average,-0.0585,-0.7923,0.4285,665
+ex event days,constrained,vol only,yesterday,-0.0561,-0.8349,0.4041,665
+ex event days,constrained,impact only,IS average,-0.0687,-0.9901,0.3225,665
+ex event days,constrained,impact only,yesterday,-0.0663,-1.0474,0.2953,665
+ex event days,constrained,combined,IS average,-0.0627,-0.8373,0.4027,665
+ex event days,constrained,combined,yesterday,-0.0603,-0.9090,0.3637,665
+ex event days,constrained,combined,controls only,-0.0147,-0.6101,0.5420,665
+ex event days,constrained,combined,vol only,-0.0042,-0.3476,0.7282,665
+ex event days,constrained,combined,impact only,0.0060,0.4626,0.6438,665
+ex event days,unconstrained,controls only,IS average,-0.3974,-2.7439,0.0062,665
+ex event days,unconstrained,controls only,yesterday,-0.4095,-1.8550,0.0640,665
+ex event days,unconstrained,vol only,IS average,-0.4598,-3.0549,0.0023,665
+ex event days,unconstrained,vol only,yesterday,-0.4719,-2.1300,0.0335,665
+ex event days,unconstrained,impact only,IS average,-0.7433,-4.7669,0.0000,665
+ex event days,unconstrained,impact only,yesterday,-0.7554,-3.4103,0.0007,665
+ex event days,unconstrained,combined,IS average,-0.6237,-3.6299,0.0003,665
+ex event days,unconstrained,combined,yesterday,-0.6358,-2.7443,0.0062,665
+ex event days,unconstrained,combined,controls only,-0.2263,-2.2236,0.0265,665
+ex event days,unconstrained,combined,vol only,-0.1639,-2.4184,0.0159,665
+ex event days,unconstrained,combined,impact only,0.1196,2.5103,0.0123,665

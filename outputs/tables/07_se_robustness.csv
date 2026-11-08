@@ -1,0 +1,37 @@
+group,se,var,coef,se_value,t
+constrained,NW L=7 (main),impact_roll_ewm_bps,-0.0452,0.0429,-1.0531
+constrained,NW L=7 (main),impact_prevday_bps,0.1078,0.0825,1.3073
+constrained,NW L=7 (main),log_vol_har,0.5796,0.1440,4.0259
+constrained,NW L=24,impact_roll_ewm_bps,-0.0452,0.0411,-1.0990
+constrained,NW L=24,impact_prevday_bps,0.1078,0.0927,1.1625
+constrained,NW L=24,log_vol_har,0.5796,0.1601,3.6200
+constrained,NW L=95 (1 day),impact_roll_ewm_bps,-0.0452,0.0357,-1.2676
+constrained,NW L=95 (1 day),impact_prevday_bps,0.1078,0.0619,1.7419
+constrained,NW L=95 (1 day),log_vol_har,0.5796,0.1701,3.4082
+constrained,Driscoll-Kraay L=24,impact_roll_ewm_bps,-0.0452,0.0413,-1.0954
+constrained,Driscoll-Kraay L=24,impact_prevday_bps,0.1078,0.0983,1.0963
+constrained,Driscoll-Kraay L=24,log_vol_har,0.5796,0.1664,3.4834
+constrained,cluster stock-day,impact_roll_ewm_bps,-0.0452,0.0611,-0.7406
+constrained,cluster stock-day,impact_prevday_bps,0.1078,0.0679,1.5888
+constrained,cluster stock-day,log_vol_har,0.5796,0.1850,3.1333
+constrained,cluster day,impact_roll_ewm_bps,-0.0452,0.0592,-0.7637
+constrained,cluster day,impact_prevday_bps,0.1078,0.0735,1.4671
+constrained,cluster day,log_vol_har,0.5796,0.1859,3.1177
+unconstrained,NW L=7 (main),impact_roll_ewm_bps,0.1325,0.0529,2.5059
+unconstrained,NW L=7 (main),impact_prevday_bps,-0.0045,0.1413,-0.0318
+unconstrained,NW L=7 (main),log_vol_har,2.3861,0.4240,5.6280
+unconstrained,NW L=24,impact_roll_ewm_bps,0.1325,0.0663,1.9984
+unconstrained,NW L=24,impact_prevday_bps,-0.0045,0.2100,-0.0214
+unconstrained,NW L=24,log_vol_har,2.3861,0.5410,4.4104
+unconstrained,NW L=95 (1 day),impact_roll_ewm_bps,0.1325,0.0662,2.0003
+unconstrained,NW L=95 (1 day),impact_prevday_bps,-0.0045,0.3182,-0.0141
+unconstrained,NW L=95 (1 day),log_vol_har,2.3861,0.7047,3.3859
+unconstrained,Driscoll-Kraay L=24,impact_roll_ewm_bps,0.1325,0.0643,2.0617
+unconstrained,Driscoll-Kraay L=24,impact_prevday_bps,-0.0045,0.1893,-0.0237
+unconstrained,Driscoll-Kraay L=24,log_vol_har,2.3861,0.5691,4.1926
+unconstrained,cluster stock-day,impact_roll_ewm_bps,0.1325,0.0708,1.8698
+unconstrained,cluster stock-day,impact_prevday_bps,-0.0045,0.3622,-0.0124
+unconstrained,cluster stock-day,log_vol_har,2.3861,0.8070,2.9567
+unconstrained,cluster day,impact_roll_ewm_bps,0.1325,0.0711,1.8635
+unconstrained,cluster day,impact_prevday_bps,-0.0045,0.3287,-0.0137
+unconstrained,cluster day,log_vol_har,2.3861,0.9673,2.4666

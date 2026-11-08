@@ -1,0 +1,7 @@
+stock,QLR,break_date,mean_before,mean_after,sig_10pct,sig_5pct,sig_1pct,break_in_oos
+Novo,7.592,2026-10-21,1.45,1.328,True,False,False,False
+DSV,13.44,2026-10-22,3.15,2.794,True,True,True,True
+Vestas,12.189,2026-10-16,2.99,2.442,True,True,True,False
+Pandora,23.118,2026-10-20,4.846,3.376,True,True,True,False
+GN,8.116,2026-10-07,6.394,7.558,True,False,False,False
+ISS,8.521,2026-10-27,4.954,5.442,True,False,False,True

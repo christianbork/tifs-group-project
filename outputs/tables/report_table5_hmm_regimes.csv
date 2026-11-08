@@ -1,7 +1,7 @@
-group,var,calm_coef,calm_t,stressed_coef,stressed_t,diff_t,pct_bars_stressed
-constrained,impact_roll_ewm_bps,0.018,0.434,0.023,0.575,0.113,46.177
-constrained,impact_prevday_bps,0.085,1.079,0.173,2.314,1.344,46.177
-constrained,log_vol_har,-0.068,-0.488,0.46,3.143,2.956,46.177
-unconstrained,impact_roll_ewm_bps,0.204,3.038,0.198,3.443,-0.088,48.359
-unconstrained,impact_prevday_bps,-0.207,-1.339,-0.086,-0.545,1.67,48.359
-unconstrained,log_vol_har,1.278,2.614,2.319,4.752,1.787,48.359
+group,var,lowvol_coef,lowvol_t,highvol_coef,highvol_t,diff_t,pct_bars_highvol
+constrained,impact_roll_ewm_bps,0.006,0.14,0.005,0.129,-0.012,46.177
+constrained,impact_prevday_bps,0.061,0.84,0.152,2.111,1.305,46.177
+constrained,log_vol_har,0.05,0.382,0.508,3.696,2.768,46.177
+unconstrained,impact_roll_ewm_bps,0.196,2.962,0.213,3.699,0.265,48.359
+unconstrained,impact_prevday_bps,-0.033,-0.248,0.076,0.554,1.468,48.359
+unconstrained,log_vol_har,1.467,2.909,2.339,4.677,1.489,48.359

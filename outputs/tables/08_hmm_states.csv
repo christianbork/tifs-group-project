@@ -1,5 +1,8 @@
-hmm,state,hmm_vol,stay_prob,hmm_turnover,hmm_spread
-vol only (main),calm,-0.4444,0.8176,,
-vol only (main),stressed,0.5007,0.7936,,
-"vol, turnover, spread",calm,-0.3160,0.7364,-0.4363,0.2318
-"vol, turnover, spread",stressed,0.1588,0.8678,0.2185,-0.1157
+hmm,state,hmm_vol,stay_prob,expected_spell_bars,hmm_turnover,hmm_spread
+vol only (main),low-vol,-0.4444,0.8176,5.4822,,
+vol only (main),high-vol,0.5007,0.7936,4.8453,,
+"vol only, 3 states",mid-vol,0.3521,0.6406,2.7823,,
+"vol only, 3 states",low-vol,-0.7094,0.5866,2.4189,,
+"vol only, 3 states",high-vol,0.7766,0.9219,12.8112,,
+"vol, turnover, spread",low-vol,-0.3160,0.7364,3.7938,-0.4363,0.2318
+"vol, turnover, spread",high-vol,0.1588,0.8678,7.5632,0.2185,-0.1157

@@ -1,16 +1,16 @@
 sample,decomp,n,pearson,spearman
-all,impact_1m_bps,120,0.824,0.854
-all,impact_5m_bps,120,0.868,0.895
-Novo,impact_1m_bps,22,0.233,0.49
-Novo,impact_5m_bps,22,0.353,0.465
-DSV,impact_1m_bps,22,0.8,0.728
-DSV,impact_5m_bps,22,0.371,0.224
-Vestas,impact_1m_bps,22,0.706,0.612
-Vestas,impact_5m_bps,22,0.505,0.361
-Pandora,impact_1m_bps,18,0.842,0.752
-Pandora,impact_5m_bps,18,0.914,0.926
-GN,impact_1m_bps,18,-0.069,-0.137
-GN,impact_5m_bps,18,0.183,0.127
-ISS,impact_1m_bps,18,0.965,0.835
-ISS,impact_5m_bps,18,0.482,0.748
-within-stock (demeaned),impact_5m_bps,120,0.35,0.458
+all,impact_1m_bps,120,0.843,0.861
+all,impact_5m_bps,120,0.873,0.907
+Novo,impact_1m_bps,22,0.29,0.329
+Novo,impact_5m_bps,22,0.358,0.372
+DSV,impact_1m_bps,22,0.859,0.796
+DSV,impact_5m_bps,22,0.458,0.348
+Vestas,impact_1m_bps,22,0.635,0.588
+Vestas,impact_5m_bps,22,0.632,0.618
+Pandora,impact_1m_bps,18,0.829,0.744
+Pandora,impact_5m_bps,18,0.885,0.868
+GN,impact_1m_bps,18,0.138,0.199
+GN,impact_5m_bps,18,0.372,0.441
+ISS,impact_1m_bps,18,0.975,0.907
+ISS,impact_5m_bps,18,0.466,0.777
+within-stock (demeaned),impact_5m_bps,120,0.401,0.535
