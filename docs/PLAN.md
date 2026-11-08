@@ -32,7 +32,7 @@ What drives bid-ask spreads on Nasdaq Copenhagen stocks, **informed trading (adv
 - **U-shape mainly at the open:** first 15 min spread 1.7–2.5× midday and 1-min vol 2.8–3.6× midday; both settle by ~10:00. After that, spreads stay flat even when vol moves (Novo at the US open: vol ~3×, spread ~1.2×). Last 15 min: spreads ~0.85× midday.
 - **Tick constraint (% of time spread = 1 tick):** ISS 62%, Novo 58%, DSV 53%, Vestas 22%, GN 8%, Pandora 4%. Tick size in bps: Novo 2.0, ISS 6.8, DSV 4.2, Vestas 2.6, GN 4.7, Pandora 2.4.
 - **US-open clock shift:** Novo turnover spike at 15:30 CPH on 1–23 Oct (3.4× normal) moves to **14:30** on 26–30 Oct (3.0×), because EU DST ended 25-Oct and US DST ends 1-Nov.
-- **Big vol days barely move spreads:** DSV 21-Oct earnings had RV z≈9.8 and turnover z≈32, but the spread rose only ~7%. ISS 29-Oct (OOS) had RV z≈15 and turnover z≈18 (news event? check).
+- **Big vol days barely move spreads:** DSV 21-Oct earnings had RV z≈9.8 and turnover z≈32, but the spread rose only ~7%. ISS 29-Oct (OOS) had RV z≈15 and turnover z≈18 (Wang Fuk Court fire inquiry, see below).
 - **OOS drift:** spreads lower in the OOS period (Pandora ~9–10 → 6–7 bps; DSV and Vestas eased).
 - **Interval activity at 5 min:** Novo/DSV/Vestas ~0% empty; Pandora 6% with <5 trades; GN/ISS ~28% with <5 trades (~8% empty).
 
@@ -136,7 +136,7 @@ Others: order-book depth / broker IDs for PIN; adding inventory.
 
 ## Open decisions
 - Main informed-trading measure: Hasbrouck VAR (recommended), with the decomposition as a cross-check.
-- Check what happened to ISS on 29-Oct (results/news?).
+- ~~Check what happened to ISS on 29-Oct~~ Done: Hong Kong Wang Fuk Court fire inquiry partly blamed ISS's subsidiary; Danish news 15:20 CPH.
 - Due date: Student Guide says Fri 20-Oct-2026 but that is a Tuesday; Week 10 Friday is 20-Nov-2026 → confirm with Shane. Convenor approval for the Appendix E angle.
 - Broker IDs: the FactSet export has Buy ID / Sell ID columns but Nasdaq Copenhagen post-trade is anonymous (all "001"), so a PIN-style measure from broker IDs is not possible with this data.
 
@@ -160,6 +160,8 @@ Review: `docs/REVIEW_V1.md`; full list of changes and before/after numbers: `CHA
     the no-driver rule in both weeks (paired t = 2.3 OOS, 2.5 forward); LightGBM does not. Every rule still loses
     at a 5-min markout: realised spreads ≈ 0, consistent with HFT competition (Week 8).
 - **Merged with the forward test (8-Nov, v2.1):** see CHANGELOG; scripts 12 (AE checks) and 13 (quote timing).
-- **Still open:** source of the ISS 29-Oct sell-off (FactSet news ~15:20 CPH / 10:20 ET); due date and
+- **ISS 29-Oct identified (8-Nov):** Hong Kong inquiry into the Wang Fuk Court fire (released 29-Oct, HK morning) partly blamed ISS
+  EastPoint; first Danish report (MarketWire) 15:20 CPH = start of the sell-off.
+- **Still open:** due date and
   Convenor approval; report write-up (≤ 2,500 words), AI transparency statement, team roles.
 

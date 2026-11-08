@@ -39,7 +39,7 @@ Realised volatility from mid returns depends on the sampling interval: quote fli
 
 ### 2.5 Event days
 
-On DSV's Q3 report day (21 October) volatility was ten robust standard deviations above its in-sample median and turnover 32 above, but the spread only 6% wider. ISS fell 3.5% between 15:20 and 15:35 on 29 October, with about 400 trades in one 5-minute bar and the half-spread at 18.6 bps against a normal 4 to 5 (Figure 8); we have not found the news behind it.
+On DSV's Q3 report day (21 October) volatility was ten robust standard deviations above its in-sample median and turnover 32 above, but the spread only 6% wider. ISS fell 3.5% between 15:20 and 15:35 on 29 October, with about 400 trades in one 5-minute bar and a half-spread of 18.6 bps, normally 4 to 5 (Figure 8). That morning a Hong Kong inquiry partly blamed an ISS subsidiary for the Wang Fuk Court fire; Danish media reported it at 15:20 (MarketWire, 2026).
 
 *[Figure 1: report_fig1_intraday_tick.png.]*
 
@@ -193,5 +193,6 @@ Glosten, L. R. and Milgrom, P. R. (1985). Bid, ask and transaction prices in a s
 Granger, C. W. J. (1969). Investigating causal relations by econometric models and cross-spectral methods. *Econometrica*, 37(3), 424–438.
 Hasbrouck, J. (1991). Measuring the information content of stock trades. *Journal of Finance*, 46(1), 179–207.
 Ho, T. and Stoll, H. R. (1981). Optimal dealer pricing under transactions and return uncertainty. *Journal of Financial Economics*, 9(1), 47–73.
+MarketWire (2026). ISS får del af skylden for dødsbrand: Medarbejder slukkede brandalarmer. Proinvestor.com, 29 October 2026, 15:20 CET. https://proinvestor.com/nyheder/iss-faar-del-af-skylden-for-doedsbrand-medarbejder-slukkede-brandalarmer-1793283616537
 Lee, C. M. C. and Ready, M. J. (1991). Inferring trade direction from intraday data. *Journal of Finance*, 46(2), 733–746.
 Newey, W. K. and West, K. D. (1987). A simple, positive semi-definite, heteroskedasticity and autocorrelation consistent covariance matrix. *Econometrica*, 55(3), 703–708.

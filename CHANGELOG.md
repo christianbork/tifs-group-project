@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.2 (8-Nov-2026): ISS 29-Oct event identified
+- The 15:20-15:35 sell-off followed the Hong Kong Wang Fuk Court fire inquiry, which partly blamed ISS EastPoint (staff switched off the fire alarms). The report was public from the Hong Kong morning (~09:00 CPH); the first Danish report (MarketWire) came at 15:20 CPH, when the sell-off starts.
+- `config.EVENT_DAYS` label, report Section 2.5 (+1 reference), CLAUDE.md and docs/PLAN.md updated. No numbers change.
+
 ## v2.1 (8-Nov-2026): v2 merged with the forward test, quoting simulation and volatility surface
 `main` had moved on from `v1-draft` in parallel (Emanuel: forward test on 2-6 Nov, quoting simulation,
 volatility surface, code-review fixes, data in git, report drafts 1-5). v2 was merged into it, then:
