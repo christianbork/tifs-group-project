@@ -49,9 +49,7 @@ plt.rcParams.update(
 )
 
 panel = build_panel("5min")
-g = panel.groupby("stock")
-panel["lag_quoted_hs"] = g["quoted_hs_bps"].shift(1)
-panel["lag_ofi"] = g["ofi"].shift(1).fillna(0.0)
+# lag_quoted_hs (last observed spread) and lag_ofi (within the day) come from build_panel, as in 07/08
 panel["bucket"] = coarse_bucket(panel["minute_of_day"], panel["min_since_us_open"])
 is_ = panel[panel["sample"] == "IS"]
 L = nw_lags(int(is_.groupby("stock").size().median()))

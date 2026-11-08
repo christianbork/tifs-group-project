@@ -99,3 +99,32 @@ def summarise(trades: pd.DataFrame, f: pd.DataFrame) -> dict:
         "max_abs_inventory_dkk": float(inv.abs().max()),
         "days": int(pnl_day.size),
     }
+
+
+def scale_to_is_width(pred_is: pd.Series, target_is: pd.Series) -> float:
+    """Scale factor so a rule's in-sample average quote equals the in-sample average spread.
+
+    Used by the equal-width timing test (script 13): with every rule scaled to the same
+    in-sample average width, P&L differences come from WHEN a rule widens, not from how
+    wide it quotes on average (wider quotes alone fill less and lose less per fill). In-sample
+    rows only, so the out-of-sample quotes stay free of look-ahead.
+    """
+    ok = pred_is.notna() & target_is.notna()
+    return float(target_is[ok].mean() / pred_is[ok].mean())
+
+
+def paired_daily_test(pnl_a: pd.Series, pnl_b: pd.Series) -> dict:
+    """Paired t-test across stock-days of the daily P&L difference (rule a minus rule b).
+
+    pnl_a / pnl_b: daily DKK P&L indexed by (stock, date); a stock-day with no fills counts as 0.
+    """
+    keys = pnl_a.index.union(pnl_b.index)
+    d = (pnl_a.reindex(keys, fill_value=0.0) - pnl_b.reindex(keys, fill_value=0.0)).to_numpy()
+    n = len(d)
+    se = d.std(ddof=1) / np.sqrt(n) if n > 1 else np.nan
+    return {
+        "mean_diff_dkk": float(d.mean()),
+        "t": float(d.mean() / se) if se else np.nan,
+        "n_stock_days": n,
+        "share_days_better": float((d > 0).mean()),
+    }

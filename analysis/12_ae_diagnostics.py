@@ -1,5 +1,5 @@
 # %% [markdown]
-# # 09 Applied Econometrics diagnostics (report appendix)
+# # 12 Applied Econometrics diagnostics (report appendix)
 # The checks from the Applied Econometrics blueprint (AE Blueprint Final.R) that the
 # main pipeline did not run in v1, implemented in Python:
 # 1. ADF unit-root tests (urca::ur.df, drift, IC lag choice) on the spread and the drivers:
@@ -7,8 +7,8 @@
 # 2. Granger-style causality (linearHypothesis on lag blocks): do the drivers add to an
 #    AR(3) of the spread (with time-of-day, stock FE and activity controls)?
 # 3. QLR structural-break test (sup-F over trimmed break dates) on each stock's daily spread:
-#    is the out-of-sample drift a break? Ex-post diagnostic on all 22 days (not used to
-#    choose any model).
+#    is the out-of-sample drift a break? Ex-post diagnostic on the 22 October days (not used
+#    to choose any model; the 2-6 Nov forward week is left out).
 # 4. One appendix table that also collects the AE checks run elsewhere: Newey-West lag rule
 #    (07), VAR lag choice and bootstrap CIs (05), ARCH-LM / Ljung-Box (06).
 # Reads the panel built by scripts 05-06 (via build_panel) and tables from 05-07.
@@ -54,7 +54,7 @@ for s in config.STOCKS:
              "decision_5pct": "reject unit root" if stat < cv["5%"] else "fail to reject"}
         )
 adf = pd.DataFrame(adf_rows)
-adf.round(4).to_csv(config.TABLES / "09_adf.csv", index=False)
+adf.round(4).to_csv(config.TABLES / "12_adf.csv", index=False)
 print("ADF tests (H0: unit root):\n", adf.round(3).to_string(index=False), "\n")
 
 # %% 2. Granger-style tests: drivers added to an AR(3) of the spread (lags within the day)
@@ -72,13 +72,14 @@ for grp, stocks in GROUPS.items():
                             ("vol forecast -> spread", VOL), ("all drivers -> spread", KEY)]:
             g_rows.append({"group": grp, "se": se_label, "test": test, "n": int(res.nobs), **wald(res, terms)})
 granger = pd.DataFrame(g_rows)
-granger.round(4).to_csv(config.TABLES / "09_granger.csv", index=False)
+granger.round(4).to_csv(config.TABLES / "12_granger.csv", index=False)
 print("Granger-style Wald tests (AR(3) + time-of-day + stock FE + activity controls):\n",
       granger.round(4).to_string(index=False), "\n")
 
 # %% 3. QLR break test on each stock's daily time-weighted half-spread (22 days)
 day = (
-    panel.groupby(["stock", "date"])
+    panel[panel["sample"] != "FWD"]
+    .groupby(["stock", "date"])
     .apply(lambda x: np.average(x["quoted_hs_bps"].fillna(0), weights=x["q_sec"]), include_groups=False)
     .rename("hs")
     .reset_index()
@@ -107,7 +108,7 @@ for s in config.STOCKS:
          "break_in_oos": tau_hat > pd.Timestamp(config.IS_END)}
     )
 qlr = pd.DataFrame(q_rows)
-qlr.round(3).to_csv(config.TABLES / "09_qlr.csv", index=False)
+qlr.round(3).to_csv(config.TABLES / "12_qlr.csv", index=False)
 print("QLR test for a mean shift in the daily half-spread (AR(1) model, 15% trimming; "
       f"critical values {QLR_CV}):\n", qlr.round(2).to_string(index=False), "\n")
 
@@ -126,7 +127,7 @@ fig.supylabel("F-statistic (candidate break)")
 fig.suptitle("QLR test for a break in the daily half-spread (vertical line = start of OOS)", x=0.01, ha="left", fontsize=11)
 fig.autofmt_xdate()
 fig.tight_layout()
-fig.savefig(config.FIGURES / "09_qlr.png", dpi=150)
+fig.savefig(config.FIGURES / "12_qlr.png", dpi=150)
 plt.close(fig)
 
 # %% 4. Appendix summary: every AE check in one table
@@ -144,14 +145,14 @@ rows = [
     ("Driver significance across SE choices", "07",
      "; ".join(f"{g[:5]} {v.replace('_bps', '').replace('impact_', 'imp_')}: min|t| {t:.2f}" for (g, v), t in min_t.items()),
      "Volatility robust in both groups; rolling impact robust only in the dynamic spec (07_dynamic.csv)"),
-    ("ADF unit root (ur.df, drift, AIC)", "09",
+    ("ADF unit root (ur.df, drift, AIC)", "12",
      f"{(adf['decision_5pct'] == 'reject unit root').sum()} of {len(adf)} series reject a unit root at 5%",
      "Levels regressions are valid"),
-    ("Granger causality (linearHypothesis)", "09",
+    ("Granger causality (linearHypothesis)", "12",
      "; ".join(f"{r.group[:5]} {r.test.split(' ->')[0]} p={r.p_value:.3f}" for r in granger[granger["se"] == "Driscoll-Kraay L=24"].itertuples()
                if r.test in ("impact (both) -> spread", "vol forecast -> spread")),
      "Drivers add information beyond the spread's own lags in the unconstrained group"),
-    ("QLR structural break", "09",
+    ("QLR structural break", "12",
      "; ".join(f"{r.stock} {r.QLR:.1f}{'*' if r.sig_5pct else ''} ({r.break_date})" for r in qlr.itertuples()),
      "* = significant at 5%; the OOS drift is tested ex post, not used for model choice"),
     ("VAR lag selection (VARselect / BIC)", "05",
@@ -172,6 +173,6 @@ rows = [
      + " because of the mass of zero 1-min mid returns"),
 ]
 appendix = pd.DataFrame(rows, columns=["AE check", "script", "result", "implication"])
-appendix.to_csv(T / "09_ae_appendix.csv", index=False)
+appendix.to_csv(T / "12_ae_appendix.csv", index=False)
 with pd.option_context("display.max_colwidth", 200):
     print("Applied Econometrics appendix:\n", appendix.to_string(index=False))

@@ -70,3 +70,15 @@ def test_orders_collapse_fills():
     o = orders(t)
     assert len(o) == 3 and o["vol"].tolist() == [150, 7, 10]  # time order; A/0 uses the first fill's quote
     assert o.loc[0, "eff_bps"] == 1.0 and o.loc[0, "fills_in_order"] == 2
+
+
+def test_scale_and_paired_daily_test():
+    from tifs_group_project.quoting import paired_daily_test, scale_to_is_width
+
+    assert np.isclose(scale_to_is_width(pd.Series([1.0, 3.0]), pd.Series([4.0, 4.0])), 2.0)
+    idx = pd.MultiIndex.from_tuples([("A", "d1"), ("A", "d2"), ("B", "d1")], names=["stock", "date"])
+    a = pd.Series([10.0, 12.0, 9.0], index=idx)
+    b = pd.Series([8.0, 9.0], index=idx[:2])  # B-d1 had no fills under rule b -> 0
+    out = paired_daily_test(a, b)
+    assert out["n_stock_days"] == 3 and np.isclose(out["mean_diff_dkk"], (2 + 3 + 9) / 3)
+    assert out["share_days_better"] == 1.0 and out["t"] > 0
