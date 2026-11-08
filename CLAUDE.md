@@ -1,7 +1,7 @@
 # tifs-group-project
 FINS5566 group project: what drives bid-ask spreads on Nasdaq Copenhagen stocks, informed trading (price impact) vs volatility.
 
-- Run tests: `pytest`
+- Run tests: `pytest` (Mac: `.venv/bin/pytest`; the venv is created with `python3.12 -m venv .venv`, LightGBM needs `brew install libomp`)
 - Format: `ruff format .`
 - Data source: FactSet trade exports (trades with the bid/ask at each trade), 6 CSE stocks (NOVO.B, DSV, VWS, PNDORA, GN, ISS), 22 days 1–30 Oct 2026, 08:45–17:20 local. One file per stock-day in data/raw/<stock>/; busy days split as -part1/-part2 (export cap ~25k rows, truncation drops the morning silently). data/raw/quotes_sample/ = ISS 30-Oct full quotes file (validation only).
 - Full process, methods and assumptions: docs/PLAN.md (read first)
@@ -9,12 +9,19 @@ FINS5566 group project: what drives bid-ask spreads on Nasdaq Copenhagen stocks,
   - Use local Copenhagen time from `Time (ms)`; files are newest-first.
   - Drop IND rows (auction indicative prices). AUC = auction prints, CLS = close, MPM = dark midpoint (venue DCSE).
   - In-sample 1–21 Oct, out-of-sample 22–30 Oct. DSV 21-Oct = earnings day.
+  - Forward test (sample label `FWD`): 2–6 Nov 2026, exported by Emanuel on 8-Nov after all models were fixed (see data/README.md). Evaluated ONCE by `analysis/09_forward_holdout.py`; never tune on it. `config.sample_label()` is the single place that assigns IS / OOS / FWD. Event days flagged: Novo 4-Nov, Pandora 4-Nov, GN 5-Nov (Q3 reports, confirm).
+  - `analysis/10_quoting_rule.py` + `src/tifs_group_project/quoting.py`: quoting-rule simulation (fill if the aggressor paid at least the posted half-spread, floored at half a tick; revenue = h, cost = 5-min impact). 08 saves `predictions_oos.parquet`, 09 saves `predictions_fwd.parquet` for it; without them only the benchmark and oracle rules run.
+  - Running 01–02 with only the November files in data/raw overwrites the October tables in outputs/tables; restore them with `git checkout -- outputs/` or run with the full October + November data.
   - Remove duplicates only in the overlap between -partN files; some files contain genuinely repeated rows.
   - Pipeline = numbered scripts in analysis/; shared functions in src/tifs_group_project/; report figures from notebooks/report_figures.ipynb.
+  - pandas 3 keeps NaN through `astype(str)`; `io._stitch` fills missing trade conditions before building the row key.
+  - Script 02 validates signing against every file in data/raw/quotes_sample (ISS 30-Oct, ISS 5-Nov, GN 5-Nov in two parts, Novo 6-Nov 10:00–11:00) and writes `02_quote_validation.csv`.
   - Signing (02): use the quote attached to each trade (fits better than lagged quotes; matches the prevailing quote 95% of the time on ISS 30-Oct; 99.8% sign agreement). Quote rule, then tick test; ~0% left unsigned.
   - Fills sharing a timestamp = one aggressive order walking the book (order_id); ~2.3 fills per order and 98% of multi-fill orders are one-sided. Trades outside the quote are later fills of these orders, not bad data.
   - After 03 (see docs/PLAN.md §4b): tick-constraint groups = constrained {Novo, DSV, ISS} vs unconstrained {Vestas, Pandora, GN}; model by group.
   - US open in Copenhagen time = 15:30 up to 2026-10-23, 14:30 on 2026-10-26..30 (EU DST ended 25-Oct, US 1-Nov). Time-of-day controls must include minutes-since-US-open, not just clock time.
   - 5-min intervals main, 15-min robustness. Keep the open with time-of-day controls; robustness drops 09:00–09:15.
   - Benchmarks: in-sample average AND yesterday's average spread. Event flags: DSV 2026-10-21 (earnings, IS), ISS 2026-10-29 (news, OOS).
+  - 8-Nov code review fixes: quoting sim counts fills per aggressive order (first fill's quote, order volume), snaps h to the half-tick grid, measures the tick per stock-day and accumulates inventory in DKK in time order; `volatility.seasonal_variance` removes the US-open bump before smoothing (the old order left a spurious 15:28 spike on the 14:30-open days); `io.continuous` uses >= 09:00:00; 03 writes October to `03_daily_stock_day.csv` and the forward week to `03_daily_stock_day_fwd.csv`; descriptive tables in 01/02/03/04/05 are October-only.
+  - Report: `report/REPORT_DRAFT.md` is the source; `report/build_docx.py` builds `Group_Report.docx` (tables rebuilt from outputs/tables, figures from outputs/figures); PDF exported from Word. Word limit 2,500 excluding tables/figures; keep sections 1-7 under 2,400.
   - No look-ahead anywhere: features for interval t use information up to t-1 only; tune on IS days only; touch OOS once.

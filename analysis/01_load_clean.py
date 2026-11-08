@@ -29,9 +29,10 @@ qa.to_csv(config.TABLES / "01_data_quality_stock_day.csv", index=False)
 print("\nStock-days flagged as possibly truncated:")
 print(qa.loc[qa["truncated_flag"], ["stock", "date", "first_ts", "last_ts", "max_file_rows"]].to_string(index=False) or "none")
 
-# %% Summary table for the report (continuous session, lit trades)
+# %% Summary table for the report (continuous session, lit trades; October only, the forward week is described in script 09)
+qa_oct = qa[qa["sample"] != "FWD"]
 summary = (
-    qa.groupby("stock", sort=False)
+    qa_oct.groupby("stock", sort=False)
     .agg(
         days=("date", "count"),
         lit_trades_per_day=("n_continuous", "mean"),
@@ -43,7 +44,7 @@ summary = (
     .round(1)
 )
 kinds = [c for c in qa.columns if c.startswith("n_") and c not in ("n_continuous",)]
-mix = qa.groupby("stock", sort=False)[kinds].sum()
+mix = qa_oct.groupby("stock", sort=False)[kinds].sum()
 mix = (100 * mix.div(mix.sum(axis=1), axis=0)).round(1).add_prefix("pct_")
 summary = summary.join(mix)
 summary.to_csv(config.TABLES / "01_data_summary.csv")

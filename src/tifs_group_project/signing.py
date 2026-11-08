@@ -59,6 +59,7 @@ def rebuild_quotes(q: pd.DataFrame) -> pd.DataFrame:
     """From a FactSet quotes export (one side per update row), rebuild the L1 quote stream."""
     q = q.iloc[::-1].reset_index(drop=True)
     q["ts"] = pd.to_datetime(q["Date"] + " " + q["Time (ms)"], format="%Y/%m/%d %H:%M:%S.%f")
+    q = q.sort_values("ts", kind="stable")  # multi-part exports arrive in file order
     is_trade = q["Exch Time"].notna()
     u = q.loc[~is_trade, ["ts", "Bid", "Ask"]].copy()
     u["bid"] = u["Bid"].replace(0, np.nan).ffill()

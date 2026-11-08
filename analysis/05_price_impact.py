@@ -99,23 +99,24 @@ print("\nBIC lag choice (in-sample):\n", lags.to_string(), "\n")
 
 # %% Impact table + predictor for day t+1 (no look-ahead)
 imp = pd.DataFrame(rows)
-imp["group"] = np.where(
-    imp["stock"].isin(config.CONSTRAINED), "constrained", "unconstrained"
-)
-imp["sample"] = np.where(imp["date"] <= config.IS_END, "IS", "OOS")
 # estimate through day t-1 -> predictor for day t: shift by one trading day within stock
 all_days = pd.DataFrame(
     [(s, t) for s in config.STOCKS for t in sorted(imp["date"].unique())],
     columns=["stock", "date"],
 )
 imp = all_days.merge(imp, on=["stock", "date"], how="left")
+# labels after the merge, so the first days without a rolling estimate are labelled too
+imp["group"] = np.where(
+    imp["stock"].isin(config.CONSTRAINED), "constrained", "unconstrained"
+)
+imp["sample"] = config.sample_label(imp["date"])
 for col in ["var_impact_bps", "var_impact_svol_bps", "impact_5m_bps", "eff_hs_bps"]:
     imp[col.replace("_bps", "_pred_bps")] = imp.groupby("stock")[col].shift(1)
 imp.to_parquet(config.PROCESSED / "impact_daily.parquet", index=False)
 imp.to_csv(config.TABLES / "05_impact_stock_day.csv", index=False, float_format="%.3f")
 
-# %% Summary per stock
-est = imp.dropna(subset=["var_impact_bps"])
+# %% Summary per stock (October only; the forward week is kept out of every descriptive table)
+est = imp[imp["sample"] != "FWD"].dropna(subset=["var_impact_bps"])
 summ = (
     est.groupby("stock")
     .agg(
@@ -293,14 +294,15 @@ roll["roll_window_min"] = roll["roll_window_span"].dt.total_seconds() / 60
 roll[
     ["stock", "ts", "impact_roll_var_bps", "impact_roll_ewm_bps", "roll_window_min"]
 ].to_parquet(config.PROCESSED / "impact_intraday_5min.parquet", index=False)
+roll_oct = roll[roll["sample"] != "FWD"]
 cov = (
-    roll.groupby("stock")
+    roll_oct.groupby("stock")
     .agg(
         pct_bars_raw=("impact_roll_var_bps", lambda x: 100 * x.notna().mean()),
         pct_bars_ewm=("impact_roll_ewm_bps", lambda x: 100 * x.notna().mean()),
         first_estimate=(
             "ts",
-            lambda x: x[roll.loc[x.index, "impact_roll_var_bps"].notna()].min(),
+            lambda x: x[roll_oct.loc[x.index, "impact_roll_var_bps"].notna()].min(),
         ),
         median_window_min=("roll_window_min", "median"),
         pct_windows_span_prev_day=("roll_window_min", lambda x: 100 * (x > 475).mean()),

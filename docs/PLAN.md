@@ -103,6 +103,20 @@ What drives bid-ask spreads on Nasdaq Copenhagen stocks, **informed trading (adv
 - Not doing: deep learning for volatility (too little data; GARCH/HAR are the right benchmarks); ML trade classification (already 99.8% agreement).
 - Extra packages: lightgbm, shap, hmmlearn.
 
+## 8b. Forward test (`09_forward_holdout.py`, added 8-Nov by Emanuel)
+- Why: the OOS window (22–30 Oct) was evaluated three times (07, refinement 1, refinement 2), so it no longer counts as untouched. Lecture 7: out-of-sample data should be used once. Student Guide A.5 rewards forward testing.
+- Data: 2–6 Nov 2026 for all six stocks, exported from FactSet Time & Sales on 8-Nov in the same format (Exchange time zone, Venue column); Novo 4/5/6-Nov split into `-partN` files because of the 25k-row cap. Details in `data/README.md`. Sample label `FWD` from `config.sample_label()`.
+- Method: every model is re-fitted on IS days with the specification and LightGBM hyper-parameters chosen in 07/08 (read from `08_r2_lgbm_cv.csv`); FWD rows are prediction targets only. Same benchmarks (IS average, yesterday, last bar), RMSE + Diebold–Mariano, plus a direction-of-change hit rate vs the last bar (market makers act on widen/tighten, not on the level).
+- Stress: three event days fell in the week — Novo 4-Nov (~12m shares, 3x normal), Pandora 4-Nov (+11%), GN 5-Nov (+12%, 6x volume). Reported all days vs ex event days and per stock-day.
+- Extra validation data: ISS 5-Nov and GN 5-Nov full quote streams and a Novo 10:00–11:00 window on 6-Nov feed the sampling-bias check in 02 (Novo: 3.54 bps time-weighted vs 2.99 trade-weighted in that hour, i.e. the trade-time sample understates the quoted spread of the most liquid stock by ~16%).
+- Rule: read the 09 output once, report it as is, do not go back and change 07/08.
+
+## 8c. Quoting-rule simulation (`10_quoting_rule.py`, added 8-Nov by Emanuel)
+- Why: the rubric asks whether results are economically meaningful; the Week 6 market-making diagram ends in P&L, not RMSE. Also the natural way to present the "negative" forecasting result: a forecast that does not beat persistence in RMSE may still change what a market maker earns, or it may not.
+- Rule: at each 5-min bar post half-spread h_t (a forecast or benchmark), floored at half a tick. A lit trade fills the market maker if the aggressor's effective half-spread e >= h_t (our quote was at least as good as the one hit), up to the stock's median trade size. Revenue h_t, cost = 5-min mid move (05 decomposition), realised = h - impact. Report fills, fill rate, spread captured, adverse selection, realised bps, DKK P&L per day, daily Sharpe, max inventory; frontier plot fill-rate vs realised bps.
+- Rules: IS average, yesterday, last bar, original / refined / log / refined+lag / LightGBM (from 08 and 09 saved predictions), oracle = realised bar spread.
+- Fills are counted per aggressive order (first fill's quote, order's total volume), quotes are snapped to the tick grid, the tick is measured per stock-day, and inventory is accumulated in DKK in time order (fixes from the 8-Nov code review; the first version counted every print as a fill and overstated losses 2-3x). Result on the full data: no rule is profitable. Market-own-spread rules lose 0.45-0.6 bps per fill (constrained) and 3.2-3.8 bps (unconstrained) OOS, 1.0-1.3 and 1.3-2.8 bps in the forward week; model rules quote wider, fill less and lose less (LightGBM constrained OOS: -0.19 bps at 47% fills vs -0.46 at 75% for the last bar). Consistent with 05: adverse selection takes the whole effective spread.
+
 ## 9. Critical reflection — top-3 recommendations
 1. Full L1 quote stream: removes the trade-time sampling bias (ISS evidence ~5%). Blocked by the 25k-row export cap (~220 exports needed).
 2. Consolidated data across all European venues.
@@ -118,4 +132,5 @@ Others: order-book depth / broker IDs for PIN; adding inventory.
 ## Open decisions
 - Main informed-trading measure: Hasbrouck VAR (recommended), with the decomposition as a cross-check.
 - Check what happened to ISS on 29-Oct (results/news?).
-- Due date: likely Fri 20-Nov-2026, 9pm → confirm. Convenor approval for the Appendix E angle.
+- Due date: Student Guide says Fri 20-Oct-2026 but that is a Tuesday; Week 10 Friday is 20-Nov-2026 → confirm with Shane. Convenor approval for the Appendix E angle.
+- Broker IDs: the FactSet export has Buy ID / Sell ID columns but Nasdaq Copenhagen post-trade is anonymous (all "001"), so a PIN-style measure from broker IDs is not possible with this data.
