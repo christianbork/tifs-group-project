@@ -28,9 +28,10 @@ bars = {f: aggregate(m1, k) for f, k in [("1min", 1), ("5min", 5), ("15min", 15)
 for f, b in bars.items():
     b.to_parquet(config.PROCESSED / f"bars_{f}.parquet", index=False)
 
-# %% Checks: shape, coverage, missing values
+# %% Checks: shape, coverage, missing values (October only; the forward week is checked in script 09)
 rows = []
 for f, b in bars.items():
+    b = b[b["sample"] != "FWD"]
     rows.append(
         {
             "freq": f,
@@ -98,8 +99,9 @@ s.round(2).to_csv(config.TABLES / "04_bars_summary_5min.csv")
 print("5-min bars, in-sample medians:\n", s.round(2).to_string(), "\n")
 
 # US-open alignment: bars around the US open, per date regime
-us = b5.assign(
-    us_open_cph=b5["date"]
+b5_oct = b5[b5["sample"] != "FWD"]  # the forward week sits after the US clock change; keep the table on October
+us = b5_oct.assign(
+    us_open_cph=b5_oct["date"]
     .dt.strftime("%Y-%m-%d")
     .map(config.US_OPEN_CPH)
     .fillna(config.US_OPEN_CPH["default"])

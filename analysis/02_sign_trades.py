@@ -26,26 +26,30 @@ for stock in config.STOCKS:
     d = d.merge(prev_ts, on=["date", "ts"], how="left")
 
     c = d[d["continuous"] & d["quote_ok"]].copy()
+    # summary tables describe the October sample only; the forward week (FWD) is signed
+    # and saved below but never enters a descriptive table before script 09
+    oct_ = c["sample"] != "FWD"
     for label, b, a in [("attached", "bid", "ask"), ("previous row", "bid_prev_row", "ask_prev_row"),
                         ("before timestamp", "bid_prev_ts", "ask_prev_ts")]:
-        timing.append({"stock": stock, "quote": label, **quote_fit(c["price"], c[b], c[a])})
+        timing.append({"stock": stock, "quote": label, **quote_fit(c.loc[oct_, "price"], c.loc[oct_, b], c.loc[oct_, a])})
 
     c = add_order_groups(c)
     c["outside"] = (c["price"] > c["ask"]) | (c["price"] < c["bid"])
-    w = c.groupby(np.minimum(c["fill_pos"], 3))["outside"].mean().mul(100).round(1)
+    w = c[oct_].groupby(np.minimum(c.loc[oct_, "fill_pos"], 3))["outside"].mean().mul(100).round(1)
     walk.append({"stock": stock, **{f"fill_{'4+' if k == 3 else k + 1}": v for k, v in w.items()}})
 
     c = sign_trades(c)
-    multi = c[c["fills_in_order"] > 1].groupby("order_id")["side"].nunique()
+    co = c[c["sample"] != "FWD"]
+    multi = co[co["fills_in_order"] > 1].groupby("order_id")["side"].nunique()
     summary.append({
         "stock": stock,
-        "trades": len(c),
-        "orders": c["order_id"].nunique(),
-        "fills_per_order": round(len(c) / c["order_id"].nunique(), 2),
-        "pct_quote_rule": round(100 * (c["sign_rule"] == "quote").mean(), 1),
-        "pct_tick_test": round(100 * (c["sign_rule"] == "tick").mean(), 1),
-        "pct_unsigned": round(100 * (c["sign_rule"] == "unsigned").mean(), 2),
-        "pct_buy_volume": round(100 * c.loc[c["side"] == 1, "vol"].sum() / c.loc[c["side"] != 0, "vol"].sum(), 1),
+        "trades": len(co),
+        "orders": co["order_id"].nunique(),
+        "fills_per_order": round(len(co) / co["order_id"].nunique(), 2),
+        "pct_quote_rule": round(100 * (co["sign_rule"] == "quote").mean(), 1),
+        "pct_tick_test": round(100 * (co["sign_rule"] == "tick").mean(), 1),
+        "pct_unsigned": round(100 * (co["sign_rule"] == "unsigned").mean(), 2),
+        "pct_buy_volume": round(100 * co.loc[co["side"] == 1, "vol"].sum() / co.loc[co["side"] != 0, "vol"].sum(), 1),
         "pct_multi_fill_orders_one_side": round(100 * (multi == 1).mean(), 1),
     })
     keep = ["ts", "date", "stock", "sample", "price", "vol", "bid", "ask", "bid_size", "ask_size", "mid",

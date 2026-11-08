@@ -1,0 +1,5 @@
+stock,date,span,files,quote_updates,trades,pct_attached_quote_equals_prevailing,pct_outside_attached,pct_outside_prevailing,pct_sign_agreement,spread_bps_time_weighted,spread_bps_trade_weighted
+GN,20261105,09:02-17:20,2,15453,11820,93.4,25.6,26.5,98.6,17.3,18.09
+ISS,20261030,09:00-17:20,1,2955,1030,95.1,5.4,5.5,99.8,11.95,11.33
+ISS,20261105,09:00-17:20,1,4178,1652,92.4,8.8,9.0,99.7,11.17,10.96
+Novo,20261106,10:00-10:59,1,5695,1465,92.8,18.4,18.8,99.5,3.54,2.99

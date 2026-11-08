@@ -1,0 +1,17 @@
+group,model,OOS 22-30 Oct,FWD 2-6 Nov,FWD / OOS
+constrained,IS average,1.3831,1.3918,1.0063
+constrained,yesterday,1.3775,1.3916,1.0102
+constrained,last bar,1.3248,1.4190,1.0711
+constrained,original: combined,1.3132,1.2089,0.9206
+constrained,refined: combined,1.2943,1.0068,0.7779
+constrained,log shared: combined,1.2771,1.1049,0.8651
+constrained,refined + lagged spread,1.2153,0.9996,0.8225
+constrained,LightGBM,1.0725,0.9409,0.8773
+unconstrained,IS average,1.8465,2.1565,1.1679
+unconstrained,yesterday,1.8497,2.3800,1.2867
+unconstrained,last bar,1.6571,1.8527,1.1180
+unconstrained,original: combined,1.6925,1.8092,1.0689
+unconstrained,refined: combined,1.6585,1.7727,1.0688
+unconstrained,log shared: combined,1.5847,1.9496,1.2303
+unconstrained,refined + lagged spread,1.4525,1.5761,1.0851
+unconstrained,LightGBM,1.3222,1.4588,1.1033

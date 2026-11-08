@@ -114,8 +114,8 @@ for col in ["var_impact_bps", "var_impact_svol_bps", "impact_5m_bps", "eff_hs_bp
 imp.to_parquet(config.PROCESSED / "impact_daily.parquet", index=False)
 imp.to_csv(config.TABLES / "05_impact_stock_day.csv", index=False, float_format="%.3f")
 
-# %% Summary per stock
-est = imp.dropna(subset=["var_impact_bps"])
+# %% Summary per stock (October only; the forward week is kept out of every descriptive table)
+est = imp[imp["sample"] != "FWD"].dropna(subset=["var_impact_bps"])
 summ = (
     est.groupby("stock")
     .agg(
@@ -293,14 +293,15 @@ roll["roll_window_min"] = roll["roll_window_span"].dt.total_seconds() / 60
 roll[
     ["stock", "ts", "impact_roll_var_bps", "impact_roll_ewm_bps", "roll_window_min"]
 ].to_parquet(config.PROCESSED / "impact_intraday_5min.parquet", index=False)
+roll_oct = roll[roll["sample"] != "FWD"]
 cov = (
-    roll.groupby("stock")
+    roll_oct.groupby("stock")
     .agg(
         pct_bars_raw=("impact_roll_var_bps", lambda x: 100 * x.notna().mean()),
         pct_bars_ewm=("impact_roll_ewm_bps", lambda x: 100 * x.notna().mean()),
         first_estimate=(
             "ts",
-            lambda x: x[roll.loc[x.index, "impact_roll_var_bps"].notna()].min(),
+            lambda x: x[roll_oct.loc[x.index, "impact_roll_var_bps"].notna()].min(),
         ),
         median_window_min=("roll_window_min", "median"),
         pct_windows_span_prev_day=("roll_window_min", lambda x: 100 * (x > 475).mean()),

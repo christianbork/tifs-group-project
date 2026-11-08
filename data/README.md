@@ -1,3 +1,24 @@
+# Raw data: Nasdaq Copenhagen trades, 1-30 October and 2-6 November 2026
+
+Two exports live under `data/raw/<Stock>/` (gitignored, so each machine needs its own copy):
+
+1. **October (1-30 Oct, IS + OOS)**: first exported by Christian; re-exported in full by Emanuel
+   on 8 Nov 2026 with the settings below so the whole pipeline can be re-run on any machine.
+   The re-export reproduces Christian's `01_data_quality_stock_day.csv` exactly on all 132
+   stock-days (same lit-trade counts, first and last timestamps, spreads and turnover; only the
+   raw row count of the two split Novo days differs by the size of the overlap window).
+2. **November (2-6 Nov, FWD)**: the forward-test week, described in the next section.
+
+## October re-export (8 Nov 2026)
+Low-volume stocks were pulled several trading days per download (the file is then named
+`<SYM>-CSE-<first>-<last>-trades.csv`) and split into one file per day with a small script;
+the loader only sees single-day files. Ranges used: Pandora 2-4 days, GN and ISS 5-7 days
+(a 5-day Pandora pull of 12-16 Oct hit the 25,000-row cap and lost the morning of 12 Oct,
+which was re-pulled on its own). Novo, DSV and Vestas were exported one day per file. Days
+above the cap were exported in two time windows: Novo 5 Oct and 15 Oct, DSV 21 Oct
+(`-part1`/`-part2`). `quotes_sample/ISS-CSE-20261030-20261030-quotes.csv` is the ISS
+30 Oct quote stream used by script 02's validation (5,616 rows).
+
 # Forward-test data: Nasdaq Copenhagen, 2-6 November 2026
 
 Exported by Emanuel on 8 Nov 2026 from the FactSet web workstation, Time & Sales app
@@ -39,6 +60,8 @@ All other stock-days fit in one file (largest: GN 5 Nov 13,880 rows, Vestas 4 No
 Check the company announcements to label these (Q3 reports are the obvious candidates).
 
 ## quotes_sample/
+- `ISS-CSE-20261030-20261030-quotes.csv`: ISS quote stream for 30 Oct (OOS), the file Christian's
+  original validation used.
 - `ISS-CSE-20261105-20261105-quotes.csv`: full L1 quote stream for ISS on 5 Nov (one side
   per update row; trade rows carry `Exch Time`), same format as Christian's ISS 30 Oct file.
 - `NOVO.B-CSE-20261106-20261106-quotes-1000-1100.csv`: Novo quote stream 10:00-11:00 on

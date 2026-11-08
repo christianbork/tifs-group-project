@@ -3,39 +3,37 @@
 **FINS5566 Trading in Financial Securities, T3 2026. Group Project.**
 Christian Bork, Emanuel Annvik, Mathilde Sørensen.
 
-> Draft 1 (8 Nov 2026, Emanuel). Target 2,500 words excluding tables, figures and captions. Numbers in square brackets marked TBD come from scripts 09 and 10 and need the October data on one machine. Every other number is taken from the committed tables in `outputs/tables/` (file named in the margin notes). Word budget per section in the headings is a guide, not a rule.
+> Draft 2 (8 Nov 2026, Emanuel). Target 2,500 words excluding tables, figures and captions. Every number is taken from the tables in `outputs/tables/` (file named in the margin notes), regenerated on 8 Nov from a full re-export of the October data plus the 2-6 Nov forward week; scripts 01-08 reproduce Christian's committed tables exactly. Word budget per section in the headings is a guide, not a rule.
 
 ---
 
 ## 1. Introduction and research objective (~250 words)
 
-A market maker earns the spread and loses to two things: inventory it did not want and traders who knew more than it did. The two classic models of the spread put the weight in different places. Ho and Stoll (1981) see the spread as compensation for holding inventory through price moves, so it should widen with volatility. Glosten and Milgrom (1985) see it as compensation for losing to informed traders, so it should widen with the share of informed flow. In the market-making architecture from Lecture 6 both enter the same box, the risk adjustment that sits between the fair-value anchor and the quotes. This project asks which of the two a market maker on Nasdaq Copenhagen should actually watch.
+A market maker earns the spread and loses to two things: inventory it did not want and traders who knew more than it did. The two classic models of the spread put the weight in different places. Ho and Stoll (1981) see the spread as compensation for holding inventory through price moves, so it should widen with volatility. Glosten and Milgrom (1985) see it as compensation for losing to informed traders, so it should widen with the share of informed flow. In the market-making architecture from Lecture 6 both enter the same box, the risk adjustment between fair value and the quotes. This project asks which of the two a market maker on Nasdaq Copenhagen should actually watch.
 
 We study six Copenhagen stocks over 1 to 30 October 2026 and ask three questions. First, which explains the intraday quoted spread better, a measure of informed trading (the permanent price impact of order flow) or a volatility forecast? Second, does either help forecast the spread five minutes ahead out of sample, against the naive benchmark of the spread's own persistence? Third, does any of this change what a market maker earns when the forecasts are turned into quotes?
 
 The design uses the tick size as a natural experiment. Three of the six stocks (Novo Nordisk, DSV, ISS) sit at the one-tick minimum spread more than half of the time, so the economic drivers can only show up in the probability of a two-tick spread. The other three (Vestas, Pandora, GN) are unconstrained. If adverse selection and volatility matter, they should matter most where the tick does not bind.
 
-The report follows the Student Guide: data and background (Section 2), model development (3), testing and validation including a forward test on a week the models never saw (4), economic evaluation through a quoting simulation (5), refinement (6) and critical reflection (7).
-
 ## 2. Data and background analysis (~400 words)
 
-**Source and cleaning.** FactSet Time and Sales exports for NOVO.B, DSV, VWS, PNDORA, GN and ISS on Nasdaq Copenhagen, one file per stock-day, 08:45 to 17:20 local time, with the best bid and ask attached to each print. The export caps at 25,000 rows and silently drops the oldest rows, so busy days were exported in time windows and stitched, removing duplicates only inside the overlap. We drop indicative auction prints, label auction, dark (MPM, venue DCSE), off-book and other-venue prints, and keep continuous-session lit trades with a valid quote: about 720,000 trades over 22 days (Table 1). The in-sample period is 1 to 21 October (15 days), the out-of-sample period 22 to 30 October (7 days). A third sample, 2 to 6 November, was exported on 8 November after every model was fixed and is used exactly once in Section 4.4.
+**Source and cleaning.** FactSet Time and Sales exports for NOVO.B, DSV, VWS, PNDORA, GN and ISS on Nasdaq Copenhagen, one file per stock-day, 08:45 to 17:20 local time, with the best bid and ask attached to each print. Days above the export's 25,000-row cap were exported in time windows and stitched. We drop indicative auction prints, label auction, dark (MPM, venue DCSE), off-book and other-venue prints, and keep continuous-session lit trades with a valid quote: about 720,000 trades over 22 days (Table 1). The in-sample period is 1 to 21 October (15 days), the out-of-sample period 22 to 30 October (7 days). A third sample, 2 to 6 November, was exported on 8 November after every model was fixed and is used exactly once in Section 4.4.
 
 *[Table 1: report_table1_data_summary.csv. Lit trades per day from 1,132 (ISS) to 14,738 (Novo); turnover from DKK 30m to 542m per day; median spread 2.0 bps (Novo) to 13.9 bps (GN); time at one tick 4% (Pandora) to 62% (ISS).]*
 
 **Trade signing.** Trades are signed with the quote rule against the attached mid and the tick test for midpoint prints; 94 to 98% are signed by the quote rule and none are left unsigned. Fills that share a timestamp are one aggressive order walking the book (2.3 fills per order; 98% of multi-fill orders are one-sided), which is why 8 to 32% of prints are outside the attached quote. Against four full quote streams (ISS 30 Oct, ISS 5 Nov, GN 5 Nov, one Novo hour) the attached quote equals the prevailing quote 92 to 95% of the time and the sign agrees 98.6 to 99.8% of the time (`02_quote_validation.csv`).
 
-**Intraday patterns.** Spreads in the first fifteen minutes are 1.7 to 2.5 times the midday level and volatility 2.8 to 3.6 times; both settle by 10:00. In the last fifteen minutes spreads are about 0.85 times midday. Novo's turnover and volatility spike at the US open, and the spike moves from 15:30 to 14:30 Copenhagen time on 26 to 30 October when European clocks changed a week before American ones, so every time-of-day control is keyed to the actual US open rather than the clock (Figure 1).
+**Intraday patterns.** Spreads in the first fifteen minutes are 1.7 to 2.5 times the midday level and volatility 2.8 to 3.6 times; both settle by 10:00. In the last fifteen minutes spreads are about 0.85 times midday. Novo's turnover and volatility spike at the US open, which moved from 15:30 to 14:30 Copenhagen time on 26 to 30 October when European clocks changed a week before American ones, so time-of-day controls are keyed to the actual US open (Figure 1).
 
 **Tick constraint.** Novo, DSV and ISS sit at one tick 53 to 62% of the time; Vestas 22%, GN 8%, Pandora 4%. This defines the two groups used throughout.
 
-**Event days.** DSV reported Q3 on 21 October (realised volatility 9.8 robust standard deviations above its in-sample median, turnover 32 above), yet its spread rose only 7%. ISS had an unexplained volatility shock on 29 October. The forward week contains the Novo (4 Nov), Pandora (4 Nov) and GN (5 Nov) report days.
+**Event days.** DSV reported Q3 on 21 October (realised volatility 9.8 robust standard deviations above its in-sample median, turnover 32 above), yet its spread rose only 7%. ISS had an unexplained volatility shock on 29 October.
 
 *[Figure 1: report_fig1_intraday_tick.png.]*
 
 ## 3. Strategy and model development (~500 words)
 
-Three building blocks feed one regression, and the regression feeds a quoting rule. Every input for bar t is known before bar t starts.
+Three building blocks feed one regression, which feeds a quoting rule. Every input for bar t is known before bar t starts.
 
 **3.1 Informed trading: permanent price impact.** Following Hasbrouck (1991) we estimate a bivariate VAR in order time for each stock-day (rolling five days for the thinner Pandora, GN and ISS),
 
@@ -51,7 +49,7 @@ HalfSpread_it = α_i + β₁ Impact_roll,it + β₂ Impact_prevday,it + γ log(V
 
 estimated separately for the constrained and unconstrained groups with panel Newey-West standard errors, on in-sample days only. The dependent variable is the time-weighted quoted half-spread in basis points; we also fit the effective half-spread and, for the constrained group, a fractional logit for the share of time the spread exceeds one tick. Activity controls are the lagged log trade count, log turnover and absolute order imbalance.
 
-**3.4 Quoting rule.** A forecast is only useful if a market maker can act on it. At the start of each bar the simulated market maker posts a half-spread h_t equal to a forecast or a benchmark, floored at half a tick. A lit trade fills it if the aggressor paid at least h_t, up to the stock's median trade size. Revenue per filled share is h_t; the cost is the five-minute mid move after the trade; realised profit is the difference. Rules compared: in-sample average, yesterday's average, the last bar's spread, each model forecast, and the realised spread of the bar as an oracle.
+**3.4 Quoting rule.** At the start of each bar the simulated market maker posts a half-spread h_t equal to a forecast or a benchmark, floored at half a tick. A lit trade fills it if the aggressor paid at least h_t, up to the stock's median trade size. Revenue per filled share is h_t; the cost is the five-minute mid move after the trade; realised profit is the difference. Rules compared: in-sample average, yesterday's average, the last bar's spread, each model forecast, and the realised spread of the bar as an oracle.
 
 **No look-ahead.** Lag lengths, hyper-parameters, seasonal factors and model coefficients are chosen on in-sample days. The out-of-sample window was touched once by the original model and twice more by the refinements in Section 6, which is why Section 4.4 adds a week that was touched once.
 
@@ -61,7 +59,7 @@ estimated separately for the constrained and unconstrained groups with panel New
 
 **4.1 Adverse selection dominates the spread.** The price impact at five minutes equals 91 to 115% of the effective half-spread in every stock; the realised half-spread is zero or negative (`05_impact_summary.csv`). The VAR impact ranges from 1.4 bps (Novo) to 7.2 bps (GN) and agrees with the decomposition. On Copenhagen, the spread is almost entirely a payment to informed flow, not a dealer margin.
 
-**4.2 In-sample: volatility is the stronger driver, impact matters only where the tick does not bind.** Table 2 reports the key coefficients. In the unconstrained group a one within-stock standard deviation rise in the volatility forecast widens the half-spread by 0.28 bps (t = 5.5) and a one standard deviation rise in rolling impact by 0.14 bps (t = 2.4), against a median half-spread of 2.7 to 7 bps. In the constrained group only volatility is significant (0.09 bps, t = 3.7), and it works through the probability of a two-tick spread (fractional logit, t = 5.7). Results survive 15-minute bars, dropping the first fifteen minutes, log spreads, GJR instead of HAR volatility and longer Newey-West lags.
+**4.2 In-sample: volatility is the stronger driver, impact matters only where the tick does not bind.** In the unconstrained group a one within-stock standard deviation rise in the volatility forecast widens the half-spread by 0.28 bps (t = 5.5) and a one standard deviation rise in rolling impact by 0.14 bps (t = 2.4), against a median half-spread of 2.7 to 7 bps. In the constrained group only volatility is significant (0.09 bps, t = 3.7), and it works through the probability of a two-tick spread (fractional logit, t = 5.7). Results survive 15-minute bars, dropping the first fifteen minutes, log spreads, GJR instead of HAR volatility and longer Newey-West lags.
 
 *[Table 2: report_table2_spread_regressions.csv.]*
 
@@ -69,21 +67,19 @@ estimated separately for the constrained and unconstrained groups with panel New
 
 *[Figure 3 / Table 3: report_fig3_oos_race.png, report_table3_oos_race.csv.]*
 
-**4.4 Forward test (2 to 6 Nov): used once.** [TBD from `09_fwd_rmse.csv`, `09_fwd_diebold_mariano.csv`, `09_fwd_direction.csv`. Report RMSE by group against the OOS window, the direction-of-change hit rate against the last bar, and the three report days separately. State plainly whether the ranking from 4.3 held.]
+**4.4 Forward test (2 to 6 Nov): used once.** The week held the Q3 reports of Novo and Pandora (4 Nov) and GN (5 Nov). In the constrained group every model beat the last bar: RMSE 1.01 bps (stock-by-time controls), 1.00 (with the lagged spread) and 0.94 (LightGBM) against 1.42, Diebold-Mariano −2.6 to −2.8. In the unconstrained group the ranking from 4.3 repeated exactly: the linear driver models did not beat the last bar (1.77 to 1.81 against 1.85 bps, DM −0.4 to −0.6), the lagged-spread model did (1.58, DM −2.4) and LightGBM did most (1.46, DM −2.7). Constrained errors were 12 to 22% lower than in October; every unconstrained model was 7 to 29% worse, because two of its three stocks reported. Direction-of-change hit rates against the last bar are 61 to 67% for every model, so the gain is in size, not sign. On the report days the models failed together: on Pandora's every rule had an RMSE of 2.8 to 3.0 bps, and on Novo's the linear model (0.53) trailed the last bar (0.36) (tables `09_fwd_*.csv`).
 
 ## 5. Evaluation of results (~350 words)
 
 **Economic size.** A one standard deviation volatility shock adds about 9% to a constrained stock's half-spread and about 10% to an unconstrained one; a one standard deviation impact shock adds about 5% in the unconstrained group. These are real but modest next to the intraday pattern itself: the open adds 70 to 150%.
 
-**What the quoting simulation says.** [TBD from `10_quoting_oos.csv` and `10_quoting_fwd.csv`. Preliminary result from the November benchmarks: a market maker that quotes at the market's own half-spread, whether yesterday's, the last bar's or even the realised one, fills 50 to 62% of lit trades and loses 2.4 to 4 bps per fill after the five-minute adverse-selection cost, in both groups. This is the mirror image of 4.1: if informed flow takes the whole spread, matching the market's quote cannot be profitable; the only profitable quotes are wider than the market's or skewed away from the flow. Report whether the model-based rules change this, by how much, and at what fill rate.]
+**What the quoting simulation says.** No rule is profitable (`10_quoting_oos.csv`, `10_quoting_fwd.csv`). Quoting the market's own half-spread, whether yesterday's, the last bar's or the realised one, fills 46 to 62% of lit trades and loses 1.0 to 1.4 bps per fill in the constrained group and 5.9 to 8.8 bps in the unconstrained group out of sample (2.4 to 2.8 and 3.5 to 4.0 bps in the forward week), because the five-minute adverse-selection cost exceeds the half-spread earned. The model-based rules move this only at the margin: in the unconstrained group the lagged-spread model cuts the forward-week loss from 3.97 to 3.09 bps per fill by quoting wider (6.0 against 5.4 bps) and filling less (46 against 50%); in the constrained group all rules sit within 0.1 bps of each other because the tick fixes the quote. This is the mirror image of 4.1: if informed flow takes the whole spread, a quote at the market's spread cannot pay, however well it is forecast; only a wider quote, or one skewed away from the flow, can.
 
 **Stability.** The volatility coefficient is stable across robustness specifications; the rolling impact coefficient is significant only in the unconstrained group and only in the specifications with stock-by-time controls. Spreads drifted lower in the out-of-sample week (Pandora from 9 to 10 bps to 6 to 7 bps), which is why beating yesterday's spread is the fairer benchmark and why the forward week matters.
 
-**Event days.** On DSV's report day volatility rose by ten standard deviations and the spread by 7%. [TBD: the same comparison for Novo, Pandora and GN in the forward week, and the realised quoting P&L on those days.]
+**Event days.** On DSV's report day volatility rose by ten standard deviations and the spread by 7%. In the forward week Novo's report day had volatility 21 standard deviations above its in-sample mean and a spread 43% wider (4.2 against 3.0 bps); Pandora's had volatility 6.5 up and a spread 74% wider (15.6 against 9.0 bps); GN's had turnover 48 up and a spread inside its normal range (`03_daily_stock_day.csv`). The forward-filtered HMM called 93% of Pandora's and 99% of GN's bars stressed that day but only 28% of Novo's, where the volume came as a wall of small orders and the one-tick spread mostly held (`08_hmm_stressed_share.csv`).
 
 ## 6. Model and strategy refinement (~300 words)
-
-Three refinements were tried; each is compared with the original.
 
 **Stock-by-time controls.** Replacing shared time-of-day dummies and stock fixed effects with stock-by-coarse-bucket dummies lifts in-sample R² from 0.69 to 0.77 (constrained) and 0.66 to 0.70 (unconstrained), strengthens the rolling impact coefficient in the unconstrained group (0.23 bps per standard deviation, t = 3.9) and shrinks the volatility coefficient in the constrained group. Out of sample it changes RMSE by 0.02 to 0.03 bps, not significantly.
 
@@ -95,14 +91,14 @@ Three refinements were tried; each is compared with the original.
 
 ## 7. Critical reflection and recommendations (~350 words)
 
-**Strengths.** Trade signing validated against full quote streams (98.6 to 99.8% agreement). Every regressor known before the bar starts. The tick constraint as a natural experiment. An out-of-sample window plus a week that was used once, with the number of looks at each stated. A negative result stated as such: the drivers are real but do not forecast five minutes ahead better than the spread itself.
+**Strengths.** Trade signing validated against full quote streams (98.6 to 99.8% agreement). Every regressor known before the bar starts. The tick constraint as a natural experiment. An out-of-sample window plus a week used once, with the number of looks at each stated. A negative result stated as such: the drivers are real but do not forecast five minutes ahead better than the spread itself.
 
-**Limitations, with evidence.** Quotes are observed only at trades, so time-weighted spreads carry a sampling bias of about 5% on ISS and 16% on Novo in the sampled hour (`02_quote_validation.csv`). Only the primary lit venue is observed; Cboe Europe, Aquis and Turquoise quotes are missing, and the other-venue prints we do see are 1 to 2% of trades. Twenty-two plus five days is a short sample with three report days in the last week. Post-trade data on Nasdaq Copenhagen is anonymous (every broker field reads 001), so a PIN-style measure from broker identity is not possible. The quoting simulation assumes the market maker is first in the queue when its quote is at least as good and charges the full five-minute impact; both lean against the market maker.
+**Limitations, with evidence.** Quotes are observed only at trades, so time-weighted spreads carry a sampling bias of about 5% on ISS and 16% on Novo in the sampled hour (`02_quote_validation.csv`). Only the primary lit venue is observed; Cboe Europe, Aquis and Turquoise quotes are missing. Twenty-two plus five days is a short sample with three report days in the last week. Post-trade data on Nasdaq Copenhagen is anonymous (every broker field reads 001), so a PIN-style measure from broker identity is not possible. The quoting simulation assumes the market maker is first in the queue when its quote is at least as good and charges the full five-minute impact; both lean against the market maker.
 
 **Three recommendations for a real implementation.**
-1. Subscribe to the full L1 quote stream rather than trade-attached quotes. The bias is small in thin stocks and large in the most liquid one, which is exactly where a market maker trades most. The FactSet export cap (25,000 rows, roughly 220 exports for a month of Novo quotes) is the practical obstacle.
+1. Subscribe to the full L1 quote stream rather than trade-attached quotes. The bias is small in thin stocks and large in the most liquid one, which is where a market maker trades most.
 2. Consolidate across venues. With the primary venue only, the competition for the quote is understated and the fill model is optimistic.
-3. Run the quoting rule live without executing, as a forward test, for several weeks, and use the regime state to decide when to widen: the evidence says volatility matters in stress and that quoting at the touch loses to informed flow in calm markets too.
+3. Run the quoting rule live without executing for several weeks and use the regime state to decide when to widen: volatility matters in stress, and quoting at the touch loses to informed flow even in calm markets.
 
 ---
 
