@@ -117,6 +117,11 @@ What drives bid-ask spreads on Nasdaq Copenhagen stocks, **informed trading (adv
 - Rules: IS average, yesterday, last bar, original / refined / log / refined+lag / LightGBM (from 08 and 09 saved predictions), oracle = realised bar spread.
 - Fills are counted per aggressive order (first fill's quote, order's total volume), quotes are snapped to the tick grid, the tick is measured per stock-day, and inventory is accumulated in DKK in time order (fixes from the 8-Nov code review; the first version counted every print as a fill and overstated losses 2-3x). Result on the full data: no rule is profitable. Market-own-spread rules lose 0.45-0.6 bps per fill (constrained) and 3.2-3.8 bps (unconstrained) OOS, 1.0-1.3 and 1.3-2.8 bps in the forward week; model rules quote wider, fill less and lose less (LightGBM constrained OOS: -0.19 bps at 47% fills vs -0.46 at 75% for the last bar). Consistent with 05: adverse selection takes the whole effective spread.
 
+## 8d. Volatility surface (`11_vol_surface.py`, added 8-Nov by Emanuel)
+- Volatility signature (Andersen, Bollerslev, Diebold, Labys 2000) per in-sample day and hour: realised variance per minute of trade-attached mid returns on grids from 5 s to 30 min. Outputs `11_vol_signature.csv`, `11_vol_surface_by_hour.csv`, `11_vol_surface.png`.
+- Results: signature flattens between 2 and 15 min; noise share of 1-min variance 20-27% (Novo, Vestas, Pandora, ISS), 12% (DSV), 0% (GN, spread wide vs tick). Novo's excess per 5-s sample is 1.1 bps = its half-spread (pure bounce). Open hour: 5-s sigma 2.1-2.8x midday vs 1.3-2.2x at 15 min, so part of the opening volatility is transitory.
+- Use in the report: Section 2.4 + Figure 8 + Table 6; limitation that the 1-min volatility regressor contains a spread-driven component.
+
 ## 9. Critical reflection — top-3 recommendations
 1. Full L1 quote stream: removes the trade-time sampling bias (ISS evidence ~5%). Blocked by the 25k-row export cap (~220 exports needed).
 2. Consolidated data across all European venues.

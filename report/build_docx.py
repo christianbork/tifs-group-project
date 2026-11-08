@@ -121,7 +121,24 @@ def table5() -> tuple[pd.DataFrame, str]:
                "Source: 10_quoting_oos.csv, 10_quoting_fwd.csv.")
 
 
-TABLES = {1: table1, 2: table2, 3: table3, 4: table4, 5: table5}
+def table6() -> tuple[pd.DataFrame, str]:
+    d = pd.read_csv(T / "11_vol_signature.csv").set_index("stock")
+    out = pd.DataFrame({
+        "Stock": d.index,
+        "σ 5s": d["5s"].round(1).values, "σ 1min": d["1min"].round(1).values, "σ 5min": d["5min"].round(1).values,
+        "σ 15min": d["15min"].round(1).values, "σ 30min": d["30min"].round(1).values,
+        "Noise share at 1min (%)": d["noise_share_1min_pct"].round(0).astype(int).values,
+        "Flattens at": d["flattens_at"].values,
+        "Excess per 5s sample (bps)": d["excess_rms_5s_bps"].round(2).values,
+        "Half-spread (bps)": d["half_spread_bps"].round(2).values,
+    })
+    return out, ("Table 6. Volatility signature, in-sample days: realised volatility of mid returns in bps per √minute by sampling "
+                 "interval. Noise share = 1 − σ²(15min)/σ²(1min). 'Flattens at' = first interval within 5% of the 15-minute level. "
+                 "Excess per 5-second sample = RMS of the variance above the 15-minute level, to compare with the median half-spread. "
+                 "Source: 11_vol_signature.csv.")
+
+
+TABLES = {1: table1, 2: table2, 3: table3, 4: table4, 5: table5, 6: table6}
 FIGURES = {
     1: ("report_fig1_intraday_tick.png", "Figure 1. Intraday pattern of spread, turnover and volatility (in-sample days, indexed to each "
                                          "stock's daily mean) and the share of time the spread sits at one tick."),
@@ -135,6 +152,9 @@ FIGURES = {
                            "(colour, used once)."),
     7: ("10_quoting_frontier.png", "Figure 7. Quoting rules: fill rate against realised half-spread per fill, net of five-minute adverse "
                                    "selection. No rule is above zero."),
+    8: ("11_vol_surface.png", "Figure 8. Intraday volatility surface: realised volatility per √minute by sampling interval (5 seconds to "
+                              "30 minutes) and hour of day, in-sample days, relative to each stock's whole-day 15-minute level. "
+                              "Short intervals and the opening hour carry the transitory (bid-ask bounce) part."),
 }
 
 
