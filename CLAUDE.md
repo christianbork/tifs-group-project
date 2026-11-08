@@ -18,3 +18,6 @@ FINS5566 group project: what drives bid-ask spreads on Nasdaq Copenhagen stocks,
   - 5-min intervals main, 15-min robustness. Keep the open with time-of-day controls; robustness drops 09:00–09:15.
   - Benchmarks: in-sample average AND yesterday's average spread. Event flags: DSV 2026-10-21 (earnings, IS), ISS 2026-10-29 (news, OOS).
   - No look-ahead anywhere: features for interval t use information up to t-1 only; tune on IS days only; touch OOS once.
+  - v2 (8-Nov, branch v2; review in docs/REVIEW_V1.md, changes in CHANGELOG.md): activity controls lagged WITHIN the day (lag_within_day); lag_quoted_hs = last observed spread (incl. previous close). VAR p fixed at 20 (BIC never stops falling; impact stable). Report a driver as significant only if it survives NW 7/24/95, Driscoll-Kraay and clusters (07_se_robustness.csv). HMM states = low-/high-vol, not stress.
+  - Quote-rule simulation (10): one fill per aggressive order (deepest level reached), markout from the first fill's pre-trade mid; rules scaled to equal in-sample average width.
+  - OOS has now been evaluated 4 times (07, 08 r1, 08 r2, v2 re-run): treat OOS results as confirmatory.

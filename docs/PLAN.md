@@ -119,3 +119,25 @@ Others: order-book depth / broker IDs for PIN; adding inventory.
 - Main informed-trading measure: Hasbrouck VAR (recommended), with the decomposition as a cross-check.
 - Check what happened to ISS on 29-Oct (results/news?).
 - Due date: likely Fri 20-Nov-2026, 9pm → confirm. Convenor approval for the Appendix E angle.
+
+## 10. v2 review round (8-Nov-2026)
+Review: `docs/REVIEW_V1.md`; full list of changes and before/after numbers: `CHANGELOG.md`.
+- **New scripts:** `09_ae_diagnostics.py` (ADF, Granger-style Wald, QLR, AE appendix table) and
+  `10_quote_rule.py` (quote-widening rule scored by markout P&L; ISS 29-Oct event study).
+- **Design decisions:**
+  - Activity controls lagged within the day; the lagged spread stays "last observed" (includes the previous close).
+  - Hasbrouck VAR p = 20 (BIC never stops falling at this n; impact stable from p = 20).
+  - Main SEs stay Newey–West (AE lag rule, L = 7) but a driver is only called robust if |t| > 1.96 under
+    NW 7/24/95, Driscoll–Kraay and stock-day / day clusters.
+  - HMM states are low-/high-volatility, not calm/stressed.
+- **Story after v2:**
+  - Volatility is the robust driver in both groups (min |t| 3.1 constrained, 2.5 unconstrained).
+  - Informed trading (rolling impact) matters only in the unconstrained group, and only robustly once spread
+    persistence is modelled (dynamic spec, DK t = 2.2; Granger p = 0.03); nothing in the tick-constrained group.
+  - Forecasting power is mostly persistence and time of day (drop-column); LightGBM beats last bar's spread for
+    4 of 6 stocks.
+  - As a quoting rule, conditioning on volatility reduces a market maker's adverse-selection losses
+    (paired t = 2.3 vs the no-driver rule), but at a 5-min markout passive quoting loses money in every rule:
+    realised spreads ≈ 0, consistent with HFT competition (Week 8).
+- **Still open:** source of the ISS 29-Oct sell-off (FactSet news ~15:20 CPH / 10:20 ET); due date and
+  Convenor approval; report write-up (≤ 2,500 words), AI transparency statement, team roles.
