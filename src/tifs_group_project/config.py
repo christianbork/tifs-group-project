@@ -34,7 +34,7 @@ EXPORT_CAP = 25_000  # FactSet export row cap; truncation drops the morning
 
 EVENT_DAYS = {
     ("DSV", "2026-10-21"): "Q3 earnings",
-    ("ISS", "2026-10-29"): "news (check)",
+    ("ISS", "2026-10-29"): "intraday sell-off 15:20",
 }
 
 CONSTRAINED = ["Novo", "DSV", "ISS"]  # spread at 1 tick >50% of the time

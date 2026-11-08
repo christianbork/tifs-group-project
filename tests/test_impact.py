@@ -112,3 +112,12 @@ def test_rolling_impact_window_spans_previous_day():
         out["impact_roll_var_bps"].notna().iloc[1]
     )  # day 2 early: window reaches into day 1
     assert out["roll_window_span"].iloc[1] > pd.Timedelta("1D") - pd.Timedelta("1h")
+
+
+def test_bootstrap_impact_ci_covers_simulated_impact():
+    from tifs_group_project.impact import bootstrap_impact
+
+    ev = _sim_orders([f"2026-10-{d:02d}" for d in range(1, 11)], 300, seed=3)
+    out = bootstrap_impact(ev, "sign", p=2, h=5, n_boot=100, seed=1)
+    # each buy moves the mid by 2 bps in the simulation
+    assert out["ci_low"] < 2.0 < out["ci_high"] and out["boot_se"] > 0

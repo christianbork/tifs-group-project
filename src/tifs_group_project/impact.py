@@ -170,3 +170,44 @@ def rolling_impact(
             span = pd.Timestamp(tau) - ev["ts"].iloc[w[0]]
         out.append((tau, imp, span))
     return pd.DataFrame(out, columns=["ts", "impact_roll_var_bps", "roll_window_span"])
+
+
+def bootstrap_impact(
+    ev: pd.DataFrame,
+    x: str,
+    p: int,
+    h: int,
+    n_boot: int = 500,
+    seed: int = 0,
+    level: float = 0.95,
+) -> dict:
+    """Day-block bootstrap of the h-order cumulative IRF (permanent impact) of a pooled VAR.
+
+    Whole trading days are resampled with replacement, so the within-day dependence of
+    order flow and returns is kept (the AE blueprint's `irf(..., boot = TRUE)` resamples
+    residuals instead; day blocks are the safer choice for intraday data). The VAR design
+    is built once per day, and lags never cross days, so resampled days simply stack.
+    """
+    days = sorted(ev["date"].unique())
+    per_day = []
+    for dday in days:
+        Xr, rt, Xx, xt, ok = var_design(ev[ev["date"] == dday], x, p)
+        per_day.append((Xr[ok], rt[ok], Xx[ok], xt[ok]))
+    point = cum_irf(
+        fit_design(*[np.concatenate([d[k] for d in per_day]) for k in range(4)], p), h
+    )[h]
+    rng = np.random.default_rng(seed)
+    draws = np.empty(n_boot)
+    for b in range(n_boot):
+        pick = rng.integers(0, len(days), len(days))
+        parts = [np.concatenate([per_day[i][k] for i in pick]) for k in range(4)]
+        draws[b] = cum_irf(fit_design(*parts, p), h)[h]
+    a = (1 - level) / 2
+    return {
+        "impact": point,
+        "boot_se": draws.std(ddof=1),
+        "ci_low": np.quantile(draws, a),
+        "ci_high": np.quantile(draws, 1 - a),
+        "n_days": len(days),
+        "n_boot": n_boot,
+    }
