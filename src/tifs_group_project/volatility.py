@@ -16,36 +16,42 @@ def seasonal_variance(
 ) -> pd.Series:
     """Expected squared 1-min return (bps^2) per row of one stock's 1-min bars.
 
-    v(m): in-sample mean of r^2 by minute of day, smoothed (centred `smooth`-min).
-    The US-open bump = v in the first `us_window` minutes after the in-sample US
-    open relative to the mean of the hour before it; outside that window the
-    pattern is clock time (e.g. the close). The bump is removed from the clock
-    pattern and re-applied at each day's own US open, so on in-sample days this
-    reproduces v(m) exactly.
+    v(m): in-sample mean of r^2 by minute of day. The US-open bump = v in the first
+    `us_window` minutes after the in-sample US open relative to the mean of the hour
+    before it; outside that window the pattern is clock time (e.g. the close). The
+    bump is removed from the raw clock pattern *before* smoothing (centred
+    `smooth`-min window), the two pieces are smoothed separately, and the bump is
+    re-applied at each day's own US open. Removing the bump first matters: smoothing
+    the raw curve first spread the 15:30 spike into 15:28-15:29, which then stayed in
+    the clock pattern and was re-applied on the 14:30-open days (26-30 Oct) as a
+    spurious spike one bar before the real one.
     """
     m1 = m1.assign(us_min=m1["minute_of_day"] - m1["min_since_us_open"])
     is_ = m1[m1["sample"] == "IS"]
-    v = (is_["ret_bps"] ** 2).groupby(is_["minute_of_day"]).mean()
-    v = (
-        v.reindex(range(m1["minute_of_day"].max() + 1))
-        .rolling(smooth, center=True, min_periods=1)
+    v_raw = (
+        (is_["ret_bps"] ** 2)
+        .groupby(is_["minute_of_day"])
         .mean()
+        .reindex(range(m1["minute_of_day"].max() + 1))
+        .ffill()
         .bfill()
     )
     us_is = int(is_["us_min"].mode().iloc[0])
     assert (is_["us_min"] == us_is).all(), "in-sample days must share one US-open time"
-    base = v.iloc[us_is - 60 : us_is].mean()
+    base = v_raw.iloc[us_is - 60 : us_is].mean()
+    bump_raw = v_raw.iloc[us_is : us_is + us_window].to_numpy() / base
+    bump_s = pd.Series(bump_raw).rolling(smooth, center=True, min_periods=1).mean().to_numpy()
 
-    def bump(k: np.ndarray) -> np.ndarray:
+    def bump(k: np.ndarray, vals: np.ndarray) -> np.ndarray:
         k = np.asarray(k)
-        inside = (k >= 0) & (k < us_window)
-        return np.where(
-            inside, v.to_numpy()[np.clip(us_is + k, 0, len(v) - 1)] / base, 1.0
-        )
+        inside = (k >= 0) & (k < len(vals))
+        return np.where(inside, vals[np.clip(k, 0, len(vals) - 1)], 1.0)
 
+    idx = np.arange(len(v_raw))
+    clock = pd.Series(v_raw.to_numpy() / bump(idx - us_is, bump_raw))
+    clock = clock.rolling(smooth, center=True, min_periods=1).mean().to_numpy()
     m = m1["minute_of_day"].to_numpy()
-    clock = v.to_numpy()[m] / bump(m - us_is)
-    return pd.Series(clock * bump(m - m1["us_min"].to_numpy()), index=m1.index)
+    return pd.Series(clock[m] * bump(m - m1["us_min"].to_numpy(), bump_s), index=m1.index)
 
 
 def garch_variance_forecasts(

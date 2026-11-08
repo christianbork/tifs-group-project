@@ -1,5 +1,5 @@
 stock,tick_dkk,median_price,tick_bps,median_spread_bps,median_spread_ticks,pct_trades_1tick,pct_time_1tick,pct_time_2tick,pct_time_3plus
-Novo,0.05,253.72,1.97,2.02,1.0,56.71,57.95,38.76,3.29
+Novo,0.05,253.72,1.97,2.02,1.0,56.7,57.95,38.76,3.29
 DSV,0.5,1180.5,4.24,7.38,2.0,44.46,53.32,43.85,2.83
 Vestas,0.05,189.5,2.64,5.33,2.0,19.31,22.45,47.59,29.95
 Pandora,0.2,817.8,2.45,9.6,4.0,3.24,4.12,17.26,78.62

@@ -6,9 +6,11 @@
 #
 # - at the start of each 5-min bar the market maker posts a half-spread h_t (bps) around
 #   the prevailing mid, floored at half a tick;
-# - each aggressive lit trade is a potential fill: if the aggressor paid at least h_t
-#   (its effective half-spread e >= h_t) the market maker's quote was at least as good as
-#   the one that was hit, so it takes the trade up to its quote size;
+# - each aggressive lit *order* (the fills sharing a timestamp are one order walking the
+#   book) is a potential fill: if the aggressor paid at least h_t on its first fill
+#   (effective half-spread e >= h_t) the market maker's quote was at least as good as the
+#   one that was hit, so it takes the order up to its quote size; h_t is snapped to the
+#   tick grid because e is always a whole number of half-ticks;
 # - revenue per filled share = h_t; adverse-selection cost = the 5-min mid move after the
 #   trade (decomposition from script 05); realised = revenue - adverse selection.
 #
@@ -27,7 +29,7 @@ import pandas as pd
 from tifs_group_project import config
 from tifs_group_project.bars import tick_size
 from tifs_group_project.impact import decomposition
-from tifs_group_project.quoting import fills, summarise
+from tifs_group_project.quoting import fills, orders, summarise
 
 GROUPS = {"constrained": config.CONSTRAINED, "unconstrained": config.UNCONSTRAINED}
 GROUP_COLORS = {"constrained": "#2a78d6", "unconstrained": "#eb6834"}
@@ -52,11 +54,13 @@ for stock in config.STOCKS:
     )
     dec = decomposition(d)
     d["eff_bps"], d["impact_5m_bps"] = dec["eff_bps"], dec["impact_5m_bps"]
-    d["half_tick_bps"] = tick_size(d["bid"], d["ask"]) / 2 / d["mid"] * 1e4
+    # tick per stock-day: Vestas crosses a price band in October, so its tick is not constant
+    tick_day = d.groupby("date", sort=False).apply(lambda x: tick_size(x["bid"], x["ask"]), include_groups=False)
+    d["half_tick_bps"] = d["date"].map(tick_day) / 2 / d["mid"] * 1e4
     d["bar_ts"] = d["ts"].dt.floor("5min")
     d["stock"] = stock
     frames.append(d)
-trades = pd.concat(frames, ignore_index=True)
+trades = orders(pd.concat(frames, ignore_index=True))  # one row per aggressive order
 trades = trades[
     (trades["side"] != 0) & trades["impact_5m_bps"].notna() & (trades["eff_bps"] >= 0)
 ].copy()
@@ -66,7 +70,7 @@ trades["group"] = np.where(
 is_trades = trades[trades["sample"] == "IS"]
 quote_size = (is_trades if len(is_trades) else trades).groupby("stock")["vol"].median()
 print(
-    "Quote size per stock (median lit trade, shares):\n",
+    "Quote size per stock (median lit order, shares):\n",
     quote_size.round(0).to_string(),
     "\n",
 )
@@ -127,7 +131,7 @@ tr = trades.merge(
     rules[["stock", "ts", *RULES]].rename(columns={"ts": "bar_ts"}),
     on=["stock", "bar_ts"],
     how="inner",
-)
+).sort_values("ts", kind="stable").reset_index(drop=True)  # time order, so group inventory accumulates across stocks
 
 # %% Simulate every rule, per sample, per group and stock
 results, daily = [], []

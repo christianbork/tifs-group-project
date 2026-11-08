@@ -99,16 +99,17 @@ print("\nBIC lag choice (in-sample):\n", lags.to_string(), "\n")
 
 # %% Impact table + predictor for day t+1 (no look-ahead)
 imp = pd.DataFrame(rows)
-imp["group"] = np.where(
-    imp["stock"].isin(config.CONSTRAINED), "constrained", "unconstrained"
-)
-imp["sample"] = config.sample_label(imp["date"])
 # estimate through day t-1 -> predictor for day t: shift by one trading day within stock
 all_days = pd.DataFrame(
     [(s, t) for s in config.STOCKS for t in sorted(imp["date"].unique())],
     columns=["stock", "date"],
 )
 imp = all_days.merge(imp, on=["stock", "date"], how="left")
+# labels after the merge, so the first days without a rolling estimate are labelled too
+imp["group"] = np.where(
+    imp["stock"].isin(config.CONSTRAINED), "constrained", "unconstrained"
+)
+imp["sample"] = config.sample_label(imp["date"])
 for col in ["var_impact_bps", "var_impact_svol_bps", "impact_5m_bps", "eff_hs_bps"]:
     imp[col.replace("_bps", "_pred_bps")] = imp.groupby("stock")[col].shift(1)
 imp.to_parquet(config.PROCESSED / "impact_daily.parquet", index=False)

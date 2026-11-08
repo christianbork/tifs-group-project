@@ -115,8 +115,9 @@ def table5() -> tuple[pd.DataFrame, str]:
     d = pd.DataFrame(rows)
     d.loc[d["Group"].duplicated(), "Group"] = ""
     return d, ("Table 5. Quoting-rule simulation. The market maker posts the rule's half-spread at the start of each 5-minute bar "
-               "(floored at half a tick); a lit trade fills it if the aggressor paid at least that much. Realised = half-spread "
-               "earned minus the 5-minute mid move after the fill, per filled trade. OOS = 22 to 30 Oct, FWD = 2 to 6 Nov. "
+               "(snapped to the tick grid, never below half a tick); an aggressive lit order fills it if the aggressor paid at least that "
+               "much on its first print. Fill rate = share of aggressive orders filled. Realised = half-spread earned minus the "
+               "5-minute mid move after the fill, per filled order. OOS = 22 to 30 Oct, FWD = 2 to 6 Nov. "
                "Source: 10_quoting_oos.csv, 10_quoting_fwd.csv.")
 
 

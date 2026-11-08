@@ -171,7 +171,14 @@ for col in ["spread_bps_tw", "rv_5min_bps", "dkk_turnover_m"]:
         daily["stock"].map(ref.apply(lambda x: (x - x.median()).abs().median())),
     )
     daily[f"z_{col}"] = (daily[col] - med) / (1.4826 * mad)
+# descriptive tables and figures use October only; the forward week's daily stats (z-scored
+# against the same in-sample reference) go to a separate file for the event-day discussion in 09
+daily_all = daily
+daily = daily_all[daily_all["sample"] != "FWD"].copy()
 daily.to_csv(config.TABLES / "03_daily_stock_day.csv", index=False, float_format="%.3f")
+daily_all[daily_all["sample"] == "FWD"].to_csv(
+    config.TABLES / "03_daily_stock_day_fwd.csv", index=False, float_format="%.3f"
+)
 
 zcols = [c for c in daily if c.startswith("z_")]
 unusual = daily[(daily[zcols].abs() > 3).any(axis=1) | (daily["event"] != "")]

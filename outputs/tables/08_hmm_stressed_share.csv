@@ -10,14 +10,14 @@ vol only (main),ISS 2026-10-29 (news (check)),,,41.05,57.37
 vol only (main),Novo 2026-11-04 (Q3 report (check)),,,28.42,44.52
 vol only (main),Pandora 2026-11-04 (Q3 report (check)),,,92.63,52.67
 vol only (main),GN 2026-11-05 (Q3 report (check)),,,98.95,57.09
-"vol, turnover, spread",Novo,60.67,58.80,,
+"vol, turnover, spread",Novo,60.74,58.80,,
 "vol, turnover, spread",DSV,66.08,73.68,,
 "vol, turnover, spread",Vestas,62.36,55.04,,
 "vol, turnover, spread",Pandora,85.74,83.76,,
-"vol, turnover, spread",GN,85.32,86.62,,
+"vol, turnover, spread",GN,85.39,86.62,,
 "vol, turnover, spread",ISS,86.10,75.19,,
 "vol, turnover, spread",DSV 2026-10-21 (Q3 earnings),,,9.47,70.13
 "vol, turnover, spread",ISS 2026-10-29 (news (check)),,,73.68,86.10
-"vol, turnover, spread",Novo 2026-11-04 (Q3 report (check)),,,1.05,60.67
+"vol, turnover, spread",Novo 2026-11-04 (Q3 report (check)),,,1.05,60.74
 "vol, turnover, spread",Pandora 2026-11-04 (Q3 report (check)),,,29.47,85.74
-"vol, turnover, spread",GN 2026-11-05 (Q3 report (check)),,,87.37,85.32
+"vol, turnover, spread",GN 2026-11-05 (Q3 report (check)),,,87.37,85.39
