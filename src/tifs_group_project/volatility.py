@@ -9,6 +9,7 @@ import numpy as np
 import pandas as pd
 import statsmodels.api as sm
 from arch import arch_model
+from statsmodels.stats.diagnostic import acorr_ljungbox, het_arch
 
 
 def seasonal_variance(
@@ -104,4 +105,43 @@ def mincer_zarnowitz(rv2: pd.Series, f2: pd.Series, lags: int = 12) -> dict:
         "mz_b": res.params[1],
         "mz_r2": res.rsquared,
         "mz_p_unbiased": float(w.pvalue),
+    }
+
+
+def ljung_box(x: np.ndarray, lag: int = 10) -> tuple[float, float]:
+    """Ljung-Box Q(lag) statistic and p-value (H0: no autocorrelation up to `lag`)."""
+    r = acorr_ljungbox(np.asarray(x), lags=[lag])
+    return float(r["lb_stat"].iloc[0]), float(r["lb_pvalue"].iloc[0])
+
+
+def arch_lm(x: np.ndarray, lags: int = 10) -> tuple[float, float]:
+    """Engle's ARCH-LM test (H0: no ARCH effects up to `lags`): LM statistic and p-value."""
+    lm, lm_p, _, _ = het_arch(np.asarray(x), nlags=lags)
+    return float(lm), float(lm_p)
+
+
+def garch_diagnostics(z: np.ndarray, n_is: int, gjr: bool, dist: str = "normal", lag: int = 10) -> dict:
+    """AE Lab 8 checks for a (GJR-)GARCH(1,1) fitted on the first n_is observations.
+
+    Before: ARCH effects in the (deseasonalised) returns. After: the standardised
+    residuals e/sigma and their squares should look like white noise; a remaining
+    ARCH-LM rejection means the variance model has not captured all clustering.
+    """
+    am = arch_model(z[:n_is], mean="Zero", vol="GARCH", p=1, o=int(gjr), q=1, dist=dist, rescale=False)
+    res = am.fit(disp="off")
+    std = np.asarray(res.std_resid)
+    std = std[np.isfinite(std)]
+    lb_q, lb_p = ljung_box(std, lag)
+    lb2_q, lb2_p = ljung_box(std**2, lag)
+    lm, lm_p = arch_lm(std, lag)
+    return {
+        "loglik": float(res.loglikelihood),
+        "bic": float(res.bic),
+        "nu": float(res.params["nu"]) if "nu" in res.params else np.nan,
+        "lb_std_q": lb_q,
+        "lb_std_p": lb_p,
+        "lb_sq_std_q": lb2_q,
+        "lb_sq_std_p": lb2_p,
+        "arch_lm_std": lm,
+        "arch_lm_std_p": lm_p,
     }

@@ -1,0 +1,10 @@
+AE check,script,result,implication
+Newey-West HAC lag rule (Lab 7),07,L = 7 = floor(0.75 T^(1/3)) - 1 with T = 1425 bars per stock,"Residual ACF at lag 1 is 0.3-0.7, so L = 7 is short; 07 reports NW 24/95, Driscoll-Kraay and clusters"
+Driver significance across SE choices,07,const imp_prevday: min|t| 1.10; const imp_roll_ewm: min|t| 0.74; const log_vol_har: min|t| 3.12; uncon imp_prevday: min|t| 0.01; uncon imp_roll_ewm: min|t| 1.86; uncon log_vol_har: min|t| 2.47,Volatility robust in both groups; rolling impact robust only in the dynamic spec (07_dynamic.csv)
+"ADF unit root (ur.df, drift, AIC)",09,18 of 18 series reject a unit root at 5%,Levels regressions are valid
+Granger causality (linearHypothesis),09,const impact (both) p=0.114; const vol forecast p=0.283; uncon impact (both) p=0.031; uncon vol forecast p=0.006,Drivers add information beyond the spread's own lags in the unconstrained group
+QLR structural break,09,Novo 7.6 (2026-10-21); DSV 13.4* (2026-10-22); Vestas 12.2* (2026-10-16); Pandora 23.1* (2026-10-20); GN 8.1 (2026-10-07); ISS 8.5 (2026-10-27),"* = significant at 5%; the OOS drift is tested ex post, not used for model choice"
+VAR lag selection (VARselect / BIC),05,BIC minimum at p = 40 (largest tried) for every stock,BIC over-selects at n ~ 1e4-1e5; p = 20 fixed where impact is stable (< 5% change to p = 40)
+IRF bootstrap CIs (irf boot = TRUE),05,"Novo 1.32 [1.24, 1.41]; DSV 2.93 [2.44, 3.36]; Vestas 2.79 [2.51, 3.01]; Pandora 5.14 [4.67, 5.56]; GN 6.02 [5.33, 6.79]; ISS 3.78 [3.16, 4.42]","Day-block bootstrap, 500 resamples; all impacts clearly above zero"
+ARCH effects before GARCH (Lab 8),06,ARCH-LM p < 0.05 for 6 of 6 stocks,"Volatility clustering present, so GARCH-type models are appropriate"
+Standardised GARCH residuals (Lab 8),06,"ARCH-LM on standardised residuals p > 0.05 for 4 of 6 stocks (left: DSV, ISS); Ljung-Box (mean) p < 0.05 for Novo","GARCH(1,1) removes most clustering; Student-t fits degenerate (nu at 2.05) for GN, ISS because of the mass of zero 1-min mid returns"

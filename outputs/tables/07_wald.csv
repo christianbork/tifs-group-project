@@ -1,0 +1,17 @@
+group,spec,se,test,q,chi2,F,p_value
+constrained,static,NW L=7,impact (both) = 0,2,3.6392,1.8196,0.1621
+constrained,static,NW L=7,all drivers = 0,3,20.5319,6.8440,0.0001
+constrained,static,Driscoll-Kraay L=24,impact (both) = 0,2,3.2220,1.6110,0.1997
+constrained,static,Driscoll-Kraay L=24,all drivers = 0,3,15.1294,5.0431,0.0017
+constrained,dynamic,NW L=7,impact (both) = 0,2,3.5753,1.7876,0.1674
+constrained,dynamic,NW L=7,all drivers = 0,3,17.2752,5.7584,0.0006
+constrained,dynamic,Driscoll-Kraay L=24,impact (both) = 0,2,3.5736,1.7868,0.1675
+constrained,dynamic,Driscoll-Kraay L=24,all drivers = 0,3,13.1130,4.3710,0.0044
+unconstrained,static,NW L=7,impact (both) = 0,2,6.2797,3.1399,0.0433
+unconstrained,static,NW L=7,all drivers = 0,3,53.8795,17.9598,0.0000
+unconstrained,static,Driscoll-Kraay L=24,impact (both) = 0,2,4.2619,2.1310,0.1187
+unconstrained,static,Driscoll-Kraay L=24,all drivers = 0,3,29.1520,9.7173,0.0000
+unconstrained,dynamic,NW L=7,impact (both) = 0,2,6.5190,3.2595,0.0384
+unconstrained,dynamic,NW L=7,all drivers = 0,3,37.9242,12.6414,0.0000
+unconstrained,dynamic,Driscoll-Kraay L=24,impact (both) = 0,2,4.9658,2.4829,0.0835
+unconstrained,dynamic,Driscoll-Kraay L=24,all drivers = 0,3,25.1718,8.3906,0.0000

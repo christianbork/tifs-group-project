@@ -4,10 +4,16 @@
 #    mid at order k's first fill to the mid at order k+1's first fill (same day).
 # 2. Hasbrouck (1991) VAR: mid return + order flow (sign; signed volume as a
 #    robustness check), order flow ordered first, lags within the day only.
-#    Lag length chosen by BIC in 5..10 on in-sample days, then fixed.
+#    Lag length (v2): v1 chose p by BIC in 5..10 and every stock hit the upper bound.
+#    BIC keeps falling up to p = 40 (n ~ 10^4-10^5 orders makes BIC favour ever longer
+#    lags), so p is fixed at 20, where the in-sample impact has stabilised: moving to
+#    p = 40 changes it by < 5% for every stock. The BIC path and this sensitivity are
+#    saved in 05_lag_choice.csv (in-sample days only).
 # 3. Permanent impact = cumulative mid response to a one-unit buy shock after
 #    20 orders (bps). Per stock-day for VAR_DAILY stocks; rolling ROLL_DAYS-day
 #    window (ending on day t) for VAR_ROLLING stocks.
+# 3b. v2: day-block bootstrap 95% CI for each stock's in-sample permanent impact
+#    (AE blueprint: irf(..., boot = TRUE)); 500 resamples of whole days.
 # 4. Cross-check: effective = realised + price impact half-spread at +1 / +5 min,
 #    averaged over the same windows; correlation of the two impact measures.
 # Output for script 07: data/processed/impact_daily.parquet, where `impact_pred`
@@ -20,6 +26,7 @@ import pandas as pd
 
 from tifs_group_project import config
 from tifs_group_project.impact import (
+    bootstrap_impact,
     cum_irf,
     decomposition,
     fit_var,
@@ -29,7 +36,9 @@ from tifs_group_project.impact import (
 )
 
 H = 20  # IRF horizon in orders
-LAGS = range(5, 11)
+LAGS = [5, 10, 15, 20, 30, 40]  # lag-sensitivity grid
+P_FIXED = 20
+N_BOOT = 500
 COLORS = dict(
     zip(
         config.STOCKS,
@@ -48,7 +57,7 @@ plt.rcParams.update(
 )
 
 # %% Events, lag choice (in-sample only), VAR per window
-rows, irfs, lag_rows = [], [], []
+rows, irfs, lag_rows, boot_rows = [], [], [], []
 for stock in config.STOCKS:
     d = pd.read_parquet(config.PROCESSED / f"signed_{stock}.parquet")
     ev = order_events(d)
@@ -56,14 +65,21 @@ for stock in config.STOCKS:
     # signed volume in units of the stock's median order size (in-sample), so x = +1 is a typical buy
     ev["svol"] = ev["signed_vol"] / ev.loc[is_days, "vol"].median()
 
-    bic = {p: fit_var(ev[is_days], "sign", p)["bic"] for p in LAGS}
-    p = min(bic, key=bic.get)
+    fits = {k: fit_var(ev[is_days], "sign", k) for k in LAGS}
+    p = P_FIXED
     lag_rows.append(
         {
             "stock": stock,
             "chosen_p": p,
-            **{f"bic_p{k}": round(v, 1) for k, v in bic.items()},
+            "bic_min_at": min(fits, key=lambda k: fits[k]["bic"]),
+            **{f"bic_p{k}": round(v["bic"], 1) for k, v in fits.items()},
+            **{f"impact_p{k}": round(cum_irf(v, max(H, k))[H], 3) for k, v in fits.items()},
         }
+    )
+
+    # bootstrap CI for the pooled in-sample permanent impact (sign VAR, chosen p)
+    boot_rows.append(
+        {"stock": stock, "lags": p, **bootstrap_impact(ev[is_days], "sign", p, H, n_boot=N_BOOT, seed=0)}
     )
 
     dec = decomposition(d)
@@ -95,7 +111,21 @@ for stock in config.STOCKS:
 
 lags = pd.DataFrame(lag_rows).set_index("stock")
 lags.to_csv(config.TABLES / "05_lag_choice.csv")
-print("\nBIC lag choice (in-sample):\n", lags.to_string(), "\n")
+imp_cols = [f"impact_p{k}" for k in LAGS]
+print("\nLag choice (in-sample): BIC minimum and impact (bps) by lag length:\n",
+      lags[["bic_min_at", *imp_cols]].to_string(), "\n")
+rel = (lags[f"impact_p{P_FIXED}"] / lags[f"impact_p{max(LAGS)}"] - 1).abs()
+print(f"Max relative change in impact from p={P_FIXED} to p={max(LAGS)}: {100 * rel.max():.1f}%\n")
+assert rel.max() < 0.05, "impact not yet stable at P_FIXED"
+
+
+boot = pd.DataFrame(boot_rows).set_index("stock")
+boot.round(3).to_csv(config.TABLES / "05_impact_bootstrap.csv")
+print(
+    f"Pooled in-sample permanent impact with day-block bootstrap 95% CI ({N_BOOT} resamples, bps):\n",
+    boot.round(2).to_string(),
+    "\n",
+)
 
 # %% Impact table + predictor for day t+1 (no look-ahead)
 imp = pd.DataFrame(rows)
@@ -266,6 +296,25 @@ ax.set_title("Two impact measures per window (dashed = 45°)", loc="left", fonts
 ax.legend(frameon=False, fontsize=9)
 fig.tight_layout()
 fig.savefig(config.FIGURES / "05_var_vs_decomposition.png", dpi=150)
+plt.close(fig)
+
+fig, ax = plt.subplots(figsize=(7, 3.4))
+y = np.arange(len(boot))[::-1]
+ax.errorbar(
+    boot["impact"],
+    y,
+    xerr=[boot["impact"] - boot["ci_low"], boot["ci_high"] - boot["impact"]],
+    fmt="D",
+    color="#2a78d6",
+    ecolor="#8a8984",
+    capsize=3,
+)
+ax.set_yticks(y, boot.index)
+ax.set_xlabel("Permanent impact of a buy order (bps), 95% day-block bootstrap CI")
+ax.set_xlim(0, None)
+ax.set_title("Hasbrouck VAR impact, pooled in-sample days", loc="left", fontsize=11)
+fig.tight_layout()
+fig.savefig(config.FIGURES / "05_impact_bootstrap.png", dpi=150)
 plt.close(fig)
 
 # %% [markdown]

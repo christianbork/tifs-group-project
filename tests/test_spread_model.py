@@ -43,3 +43,55 @@ def test_coarse_bucket_keyed_to_us_open():
         "afternoon",
         "last15",
     ]
+
+
+def _panel(seed=0, n_days=6, n_bars=40):
+    rng = np.random.default_rng(seed)
+    rows = []
+    for s in ["A", "B", "C"]:
+        for d in pd.date_range("2026-10-01", periods=n_days, freq="D"):
+            for k in range(n_bars):
+                rows.append({"stock": s, "date": d, "ts": d + pd.Timedelta(minutes=540 + 5 * k), "x": rng.standard_normal()})
+    p = pd.DataFrame(rows)
+    p["y"] = 1 + 0.5 * p["x"] + rng.standard_normal(len(p))
+    p["tod"] = "12:00"
+    return p
+
+
+def test_lag_within_day_never_crosses_days():
+    from tifs_group_project.spread_model import lag_within_day
+
+    p = _panel(n_days=2, n_bars=3).sort_values(["stock", "ts"])
+    lag = lag_within_day(p, "x")
+    first = p.groupby(["stock", "date"]).cumcount() == 0
+    assert lag[first].isna().all() and lag[~first].notna().all()
+    assert np.allclose(lag[~first], p.groupby(["stock", "date"])["x"].shift(1)[~first])
+
+
+def test_fit_ols_cov_choices_same_coefficients():
+    from tifs_group_project.spread_model import fit_ols
+
+    p = _panel()
+    fits = {c: fit_ols(p, "y", ["x"], 5, cov=c)[0] for c in ["nw", "dk", "cluster_stockday", "cluster_day"]}
+    b = [r.params["x"] for r in fits.values()]
+    assert np.allclose(b, b[0]) and abs(b[0] - 0.5) < 0.1
+    assert all(r.bse["x"] > 0 for r in fits.values())
+
+
+def test_wald_matches_t_squared_for_one_term():
+    from tifs_group_project.spread_model import fit_ols, wald
+
+    res, _ = fit_ols(_panel(), "y", ["x"], 5)
+    assert np.isclose(wald(res, ["x"])["chi2"], res.tvalues["x"] ** 2)
+
+
+def test_long_run_effect_and_residual_acf():
+    from tifs_group_project.spread_model import fit_ols, long_run, residual_acf
+
+    p = _panel()
+    p["lag_quoted_hs"] = p.groupby("stock")["y"].shift(1)
+    res, d = fit_ols(p, "y", ["x", "lag_quoted_hs"], 5)
+    lr = long_run(res, ["x"]).iloc[0]
+    assert np.isclose(lr["long_run"], res.params["x"] / (1 - res.params["lag_quoted_hs"]))
+    acf = residual_acf(res, d, lags=(1, 2))
+    assert len(acf) == 3 and acf["acf_1"].abs().max() < 0.2  # iid errors

@@ -50,7 +50,7 @@ EXPORT_CAP = 25_000  # FactSet export row cap; truncation drops the morning
 
 EVENT_DAYS = {
     ("DSV", "2026-10-21"): "Q3 earnings",
-    ("ISS", "2026-10-29"): "news (check)",
+    ("ISS", "2026-10-29"): "intraday sell-off 15:20",
     # forward-test window (2-6 Nov): flagged from volume / price moves in the exports, confirm the announcements
     ("Novo", "2026-11-04"): "Q3 report (check)",
     ("Pandora", "2026-11-04"): "Q3 report (check)",

@@ -44,6 +44,14 @@ def tod_bucket(minute_of_day: pd.Series, min_since_us_open: pd.Series) -> pd.Ser
     return pd.Series(out, index=minute_of_day.index)
 
 
+def lag_within_day(df: pd.DataFrame, col: str, k: int = 1) -> pd.Series:
+    """Value of `col` k bars earlier in the same stock-day (NaN for the first k bars of a day).
+
+    Rows must be sorted by stock then time.
+    """
+    return df.groupby(["stock", "date"])[col].shift(k)
+
+
 def build_panel(freq: str = "5min") -> pd.DataFrame:
     """Bars + impact + volatility forecasts + lagged controls + benchmarks, one row per stock-bar."""
     p = config.PROCESSED
@@ -76,12 +84,20 @@ def build_panel(freq: str = "5min") -> pd.DataFrame:
     b["log_vol_har"] = np.log(b["vol_fc_har_ratio"])
     b["log_vol_gjr"] = np.log(b["vol_fc_gjr_ratio"])
 
-    g = b.groupby("stock")
-    b["lag_log_trades"] = np.log1p(g["trades"].shift(1))
-    b["lag_log_turnover"] = np.log1p(g["dkk_turnover"].shift(1))
-    b["lag_abs_ofi"] = (
-        g["ofi"].shift(1).abs().fillna(0.0)
-    )  # no trades last bar -> no imbalance
+    # activity controls: lagged one bar WITHIN the day (v2; v1 let the first bar of a
+    # day take the previous day's last bar). The first bar of each day has no previous
+    # bar, so it gets the stock's in-sample mean (a constant known in advance); the
+    # 09:00 time-of-day dummy absorbs any level difference.
+    is_rows = b["sample"] == "IS"
+    for col, src in [("lag_log_trades", "trades"), ("lag_log_turnover", "dkk_turnover")]:
+        b[col] = np.log1p(lag_within_day(b, src))
+        b[col] = b[col].fillna(b["stock"].map(b.loc[is_rows].groupby("stock")[col].mean()))
+    b["lag_ofi"] = lag_within_day(b, "ofi").fillna(0.0)  # no prior bar / no trades -> no imbalance
+    b["lag_abs_ofi"] = b["lag_ofi"].abs()
+    # last observed spread: the previous bar's spread, and for the first bar of a day the
+    # last bar of the previous day (what a market maker knows at the open); NaN on day 1
+    b["lag_quoted_hs"] = b.groupby("stock")["quoted_hs_bps"].shift(1)
+    b["first_bar"] = (b.groupby(["stock", "date"]).cumcount() == 0).astype(int)
     b["tod"] = tod_bucket(b["minute_of_day"], b["min_since_us_open"])
     b["event_day"] = (b["event"] != "").astype(int)
     b["p_gt_1tick"] = 1 - b["pct_time_1tick"] / 100
@@ -153,17 +169,93 @@ def nw_lags(t: int) -> int:
     return int(np.floor(4 * (t / 100) ** (2 / 9)))
 
 
+SE_TYPES = {
+    "nw": "Newey-West within stock (AE Lab 7 lag rule)",
+    "cluster_stockday": "clustered by stock-day",
+    "cluster_day": "clustered by day (common shocks across stocks)",
+    "dk": "Driscoll-Kraay (HAC on cross-sectional sums by bar)",
+}
+
+
 def fit_ols(
-    df: pd.DataFrame, y: str, xvars: list[str], lags: int, stock_tod: bool = False
+    df: pd.DataFrame,
+    y: str,
+    xvars: list[str],
+    lags: int,
+    stock_tod: bool = False,
+    cov: str = "nw",
 ):
-    """OLS with panel Newey-West SEs (HAC within stock, rows sorted by stock then time)."""
-    d = df.dropna(subset=[y, *xvars]).sort_values(["stock", "ts"])
+    """OLS with a choice of standard errors (see SE_TYPES).
+
+    nw  = panel Newey-West: HAC within stock, rows sorted by stock then time (main, as v1).
+    dk  = Driscoll-Kraay: HAC on the cross-sectional sum of scores per bar, robust to
+          correlation across stocks at the same time and over time (rows sorted by time).
+    cluster_* = cluster-robust; few clusters (45 stock-days / 15 days), so read as a check.
+    Coefficients are identical across choices; only the covariance changes.
+    """
+    d = df.dropna(subset=[y, *xvars])
+    d = d.sort_values(["ts", "stock"] if cov == "dk" else ["stock", "ts"])
     X = design(d, xvars, stock_tod)
-    groups = pd.factorize(d["stock"])[0]
-    res = sm.OLS(d[y], X).fit(
-        cov_type="hac-panel", cov_kwds={"groups": groups, "maxlags": lags}
-    )
+    model = sm.OLS(d[y], X)
+    if cov == "nw":
+        res = model.fit(
+            cov_type="hac-panel",
+            cov_kwds={"groups": pd.factorize(d["stock"])[0], "maxlags": lags},
+        )
+    elif cov == "dk":
+        res = model.fit(
+            cov_type="hac-groupsum",
+            cov_kwds={"time": pd.factorize(d["ts"])[0], "maxlags": lags},
+        )
+    elif cov == "cluster_stockday":
+        g = pd.factorize(d["stock"].astype(str) + "|" + d["date"].astype(str))[0]
+        res = model.fit(cov_type="cluster", cov_kwds={"groups": g})
+    elif cov == "cluster_day":
+        res = model.fit(cov_type="cluster", cov_kwds={"groups": pd.factorize(d["date"])[0]})
+    else:
+        raise ValueError(f"unknown cov {cov!r}; choose from {list(SE_TYPES)}")
     return res, d
+
+
+def residual_acf(res, d: pd.DataFrame, lags=(1, 6, 12, 24, 95)) -> pd.DataFrame:
+    """Autocorrelation of the regression residuals per stock, within the stock's own time order.
+
+    Lag 95 = the same 5-min bar on the previous trading day. Large values mean the
+    Newey-West lag window is too short (or the model misses persistence).
+    """
+    e = pd.Series(np.asarray(res.resid), index=d.index)
+    rows = []
+    for s, dd in d.sort_values(["stock", "ts"]).groupby("stock", sort=False):
+        x = e.loc[dd.index].to_numpy()
+        x = x - x.mean()
+        den = x @ x
+        rows.append(
+            {"stock": s, **{f"acf_{k}": (x[k:] @ x[:-k]) / den for k in lags}}
+        )
+    return pd.DataFrame(rows)
+
+
+def long_run(res, xvars: list[str], rho: str = "lag_quoted_hs") -> pd.DataFrame:
+    """Long-run effects b / (1 - rho) of a dynamic (ADL(1, 0)) spread model, delta-method SEs."""
+    V = res.cov_params()
+    r = res.params[rho]
+    out = []
+    for x in xvars:
+        b = res.params[x]
+        lr = b / (1 - r)
+        grad = np.array([1 / (1 - r), b / (1 - r) ** 2])
+        idx = [x, rho]
+        se = float(np.sqrt(grad @ V.loc[idx, idx].to_numpy() @ grad))
+        out.append({"var": x, "short_run": b, "long_run": lr, "long_run_se": se, "long_run_t": lr / se})
+    return pd.DataFrame(out)
+
+
+def wald(res, terms: list[str]) -> dict:
+    """Joint Wald test that all `terms` are zero (AE `linearHypothesis`), with the model's robust covariance."""
+    w = res.wald_test(", ".join(f"{t} = 0" for t in terms), scalar=True)
+    q = len(terms)
+    chi2 = float(np.squeeze(w.statistic))
+    return {"q": q, "chi2": chi2, "F": chi2 / q, "p_value": float(stats.chi2.sf(chi2, q))}
 
 
 def fit_frac_logit(df: pd.DataFrame, y: str, xvars: list[str], lags: int):

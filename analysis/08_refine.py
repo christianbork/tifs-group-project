@@ -8,8 +8,18 @@
 #    is evaluated a SECOND time for this refinement (07 was the first look).
 # 2. Refinement 2: LightGBM on the same no-look-ahead features + lagged spread,
 #    tuned by forward-chaining whole-day CV on in-sample days only; SHAP.
-# 3. Robustness: 2-state HMM (calm vs stressed) with forward-filtered regimes;
-#    do the drivers change by regime?
+# 3. Robustness: 2-state HMM (low- vs high-volatility state) with forward-filtered
+#    regimes; do the drivers change by regime?
+# v2 (after the review):
+# - LightGBM grid widened (v1's best sat at the grid corner: 7 leaves, min_child 20);
+#   still tuned on in-sample days only. This re-tune is a 4th look at the OOS data (disclosed).
+# - Drop-column importance in the in-sample CV (SHAP alone can credit a feature that is
+#   constant within a stock-day, e.g. previous-day impact, for day-level effects).
+# - Per-stock OOS comparison relative to the last-bar benchmark (group RMSE is dominated
+#   by the most volatile stocks).
+# - HMM states renamed low-vol / high-vol (the 'stressed' state held ~half the bars);
+#   a 3-state version reports a rarer top state.
+# - Saves in- and out-of-sample spread forecasts for the quote-rule script (10).
 
 # %% Setup
 import warnings
@@ -65,9 +75,7 @@ plt.rcParams.update(
 )
 
 panel = build_panel("5min")
-g = panel.groupby("stock")
-panel["lag_quoted_hs"] = g["quoted_hs_bps"].shift(1)
-panel["lag_ofi"] = g["ofi"].shift(1).fillna(0.0)
+# lag_quoted_hs (last observed spread) and lag_ofi (within the day) come from build_panel
 panel["bucket"] = coarse_bucket(panel["minute_of_day"], panel["min_since_us_open"])
 is_ = panel[panel["sample"] == "IS"]
 L = nw_lags(int(is_.groupby("stock").size().median()))
@@ -199,11 +207,12 @@ base = dict(
     force_row_wise=True,
     verbose=-1,
 )
+GRID = {"num_leaves": [3, 5, 7, 15, 31], "min_child_samples": [10, 20, 50, 100], "colsample_bytree": [0.7, 1.0]}
 grid = [
     dict(num_leaves=nl, min_child_samples=mc, colsample_bytree=ff)
-    for nl in [7, 15, 31]
-    for mc in [20, 100]
-    for ff in [0.7, 1.0]
+    for nl in GRID["num_leaves"]
+    for mc in GRID["min_child_samples"]
+    for ff in GRID["colsample_bytree"]
 ]
 cv_rows = []
 for params in grid:
@@ -243,10 +252,51 @@ print(
     cv_sum.head().round(4).to_string(),
     f"\nChosen: {best_params}, n_estimators = {n_iter}\n",
 )
+edge = [k for k in ["num_leaves", "min_child_samples"] if best_params[k] in (min(GRID[k]), max(GRID[k]))]
+print(f"Best config on the grid edge for: {edge or 'none'}\n")
 lgbm = lgb.LGBMRegressor(**{**base, "n_estimators": n_iter}, **best_params).fit(
     X_tr, y_tr, categorical_feature=CATS
 )
-oos["pred_LightGBM"] = lgbm.predict(ml_frame(oos))  # the one OOS look for the ML model
+oos["pred_LightGBM"] = lgbm.predict(ml_frame(oos))  # the OOS look for the ML model
+
+# drop-column importance: CV RMSE (same folds, chosen params) without each feature group
+DROP = {
+    "impact, previous day": ["impact_prevday_bps"],
+    "impact, rolling": ["impact_roll_ewm_bps"],
+    "impact (both)": ["impact_prevday_bps", "impact_roll_ewm_bps"],
+    "vol forecast": ["log_vol_har"],
+    "lagged spread": ["lag_quoted_hs"],
+    "time of day": ["minute_of_day", "min_since_us_open", "bucket"],
+    "activity": ["lag_log_trades", "lag_log_turnover", "lag_ofi", "lag_abs_ofi"],
+}
+
+
+def cv_rmse(cols: list[str]) -> float:
+    out = []
+    for vd in val_days:
+        tr, va = train["date"] < vd, train["date"] == vd
+        m = lgb.LGBMRegressor(**base, **best_params).fit(
+            X_tr.loc[tr, cols],
+            y_tr[tr],
+            eval_set=[(X_tr.loc[va, cols], y_tr[va])],
+            categorical_feature=[c for c in CATS if c in cols],
+            callbacks=[lgb.early_stopping(100, verbose=False)],
+        )
+        out.append(m.best_score_["valid_0"]["l2"] ** 0.5)
+    return float(np.mean(out))
+
+
+full_cv = cv_rmse(FEATS)
+drop = pd.DataFrame(
+    [
+        {"dropped": k, "cv_rmse": (r := cv_rmse([f for f in FEATS if f not in cols])), "increase_bps": r - full_cv,
+         "increase_pct": 100 * (r / full_cv - 1)}
+        for k, cols in DROP.items()
+    ]
+).sort_values("increase_bps", ascending=False)
+drop.round(4).to_csv(config.TABLES / "08_r2_drop_column.csv", index=False)
+print(f"Drop-column importance (in-sample CV RMSE {full_cv:.4f} with all features):\n",
+      drop.round(4).to_string(index=False), "\n")
 
 # linear counterpart with the same lagged-spread information, so the ML gain is not just the lag
 for grp, stocks in GROUPS.items():
@@ -275,6 +325,10 @@ print(
 print(
     "  3rd evaluation: refinement 2 here (LightGBM, and the linear refined + lagged spread model)."
 )
+print(
+    "  4th evaluation (v2): re-run after the review: within-day lagged controls, p = 20 impact VAR,"
+)
+print("     LightGBM re-tuned on a wider in-sample grid. Treat OOS numbers as confirmatory, not pristine.")
 print("=" * 100, "\n")
 MODELS = [
     "IS average",
@@ -318,6 +372,29 @@ print(
     rmse[show].round(3).to_string(),
     "\n",
 )
+
+# per-stock view: RMSE relative to the naive last-bar benchmark (< 1 = better than last bar)
+REL = ["IS average", "yesterday", "original: combined", "refined: combined", "log shared: combined",
+       "refined + lagged spread", "LightGBM"]
+rel = rmse[REL].div(rmse["last bar"], axis=0)
+rel.round(3).to_csv(config.TABLES / "08_oos_relative_to_last_bar.csv")
+print("OOS RMSE relative to the last-bar benchmark (< 1 beats it):\n", rel.round(2).to_string(), "\n")
+fig, axes = plt.subplots(1, 2, figsize=(12, 4.2), sharey=True)
+for ax, subset in zip(axes, ["all OOS days", "ex event days"]):
+    m = rel.loc[subset].loc[[*GROUPS, *config.STOCKS]]
+    im = ax.imshow(m.to_numpy(), cmap="RdBu_r", vmin=0.5, vmax=1.5, aspect="auto")
+    for i in range(m.shape[0]):
+        for j in range(m.shape[1]):
+            ax.text(j, i, f"{m.iat[i, j]:.2f}", ha="center", va="center", fontsize=7.5)
+    ax.set_xticks(range(len(REL)), REL, rotation=35, ha="right", fontsize=8)
+    ax.set_yticks(range(m.shape[0]), m.index)
+    ax.axhline(1.5, color="#52514e", linewidth=0.8)
+    ax.set_title(f"{subset}", loc="left", fontsize=10)
+    ax.grid(False)
+fig.colorbar(im, ax=axes, shrink=0.8, label="RMSE / last-bar RMSE")
+fig.suptitle("Out-of-sample error relative to last bar's spread (blue = better)", x=0.01, ha="left", fontsize=11)
+fig.savefig(config.FIGURES / "08_oos_by_stock.png", dpi=150, bbox_inches="tight")
+plt.close(fig)
 
 L_dm = nw_lags(oos["ts"].nunique())
 pairs = [
@@ -450,16 +527,17 @@ fig.tight_layout()
 fig.savefig(config.FIGURES / "08_shap.png", dpi=150)
 plt.close(fig)
 
-# %% Robustness: 2-state HMM regimes (fit on in-sample days; forward-filtered, inputs lagged one bar)
+# %% Robustness: HMM volatility regimes (fit on in-sample days; forward-filtered, inputs lagged one bar)
 # Inputs are deseasonalised (minus the in-sample stock x time-bucket mean) and scaled by the
 # stock's in-sample SD, so states pick up unusual activity, not the routine intraday pattern.
-# Main = volatility-only regime (calm vs stressed). The 3-input version (vol, turnover, spread)
-# is reported as an alternative: in-sample it splits "quiet and wide" from "active and tight"
-# bars rather than stress, and using the lagged spread to define regimes for a spread
-# regression is partly circular.
+# Main = 2-state volatility-only HMM. v2: its top state holds ~half of all bars with spells of
+# ~25 min, so it is a high- vs low-volatility state, not 'stress'; renamed accordingly. A
+# 3-state version gives a rarer top state. The 3-input version (vol, turnover, spread) splits
+# "quiet and wide" from "active and tight" bars and is partly circular for a spread regression.
 HMM_SPECS = {
-    "vol only (main)": ["hmm_vol"],
-    "vol, turnover, spread": ["hmm_vol", "hmm_turnover", "hmm_spread"],
+    "vol only (main)": (["hmm_vol"], 2),
+    "vol only, 3 states": (["hmm_vol"], 3),
+    "vol, turnover, spread": (["hmm_vol", "hmm_turnover", "hmm_spread"], 2),
 }
 raw = pd.DataFrame(
     {
@@ -480,39 +558,40 @@ dev = dev / dev[in_s].groupby(panel["stock"]).std().reindex(panel["stock"]).to_n
 obs = dev.groupby(panel["stock"]).shift(1)  # bar t sees bar t-1
 
 state_rows, share_rows, reg_rows = [], [], []
-for spec, cols in HMM_SPECS.items():
+for spec, (cols, n_states) in HMM_SPECS.items():
     seqs = {s: obs.loc[(panel["stock"] == s), cols].dropna() for s in config.STOCKS}
     X_is = [x[panel.loc[x.index, "sample"] == "IS"].to_numpy() for x in seqs.values()]
     hmm = GaussianHMM(
-        n_components=2, covariance_type="full", n_iter=300, random_state=SEED
+        n_components=n_states, covariance_type="full", n_iter=300, random_state=SEED
     ).fit(np.vstack(X_is), lengths=[len(x) for x in X_is])
-    hi = int(np.argmax(hmm.means_[:, 0]))  # stressed = the state with higher volatility
-    for k in range(2):
+    order = np.argsort(hmm.means_[:, 0])  # states by volatility, low to high
+    top = int(order[-1])
+    names = {int(k): n for k, n in zip(order, ["low-vol", "mid-vol", "high-vol"] if n_states == 3 else ["low-vol", "high-vol"])}
+    for k in range(n_states):
         state_rows.append(
             {
                 "hmm": spec,
-                "state": "stressed" if k == hi else "calm",
+                "state": names[k],
                 **dict(zip(cols, hmm.means_[k])),
                 "stay_prob": hmm.transmat_[k, k],
+                "expected_spell_bars": 1 / (1 - hmm.transmat_[k, k]),
             }
         )
     p = pd.Series(np.nan, index=panel.index)
     for s, x in seqs.items():
-        p.loc[x.index] = forward_filter(hmm, x.to_numpy())[:, hi]
-    stressed = (p > 0.5).astype(float).where(p.notna())
+        p.loc[x.index] = forward_filter(hmm, x.to_numpy())[:, top]
+    high = (p > 0.5).astype(float).where(p.notna())
     if spec == "vol only (main)":
-        panel["p_stressed"], panel["stressed"] = p, stressed
+        panel["p_highvol"], panel["highvol"] = p, high
 
-    share = (
-        stressed.groupby([panel["stock"], panel["sample"]]).mean().unstack().mul(100)
-    )
+    share = high.groupby([panel["stock"], panel["sample"]]).mean().unstack().mul(100)
     for stock in config.STOCKS:
         share_rows.append(
             {
                 "hmm": spec,
                 "stock": stock,
-                "pct_stressed_IS": share.loc[stock, "IS"],
-                "pct_stressed_OOS": share.loc[stock, "OOS"],
+                "pct_highvol_IS": share.loc[stock, "IS"],
+                "pct_highvol_OOS": share.loc[stock, "OOS"],
             }
         )
     for (s, t), lab in config.EVENT_DAYS.items():
@@ -521,38 +600,38 @@ for spec, cols in HMM_SPECS.items():
             {
                 "hmm": spec,
                 "stock": f"{s} {t} ({lab})",
-                "pct_stressed_event_day": 100
-                * stressed[(panel["stock"] == s) & (panel["date"] == t)].mean(),
-                "pct_stressed_IS_other_days": 100 * stressed[normal].mean(),
+                "pct_highvol_event_day": 100
+                * high[(panel["stock"] == s) & (panel["date"] == t)].mean(),
+                "pct_highvol_IS_other_days": 100 * high[normal].mean(),
             }
         )
 
-    # drivers by regime: refined spec, drivers interacted with the stressed dummy (in-sample)
-    is_r = panel[in_s].assign(stressed=stressed[in_s])
+    # drivers by regime: refined spec, drivers interacted with the high-vol dummy (in-sample)
+    is_r = panel[in_s].assign(highvol=high[in_s])
     for k in KEY:
-        is_r[f"{k}_x_stress"] = is_r[k] * is_r["stressed"]
+        is_r[f"{k}_x_high"] = is_r[k] * is_r["highvol"]
     for grp, stocks in GROUPS.items():
-        xv = KEY + [f"{k}_x_stress" for k in KEY] + ["stressed"] + CONTROLS
+        xv = KEY + [f"{k}_x_high" for k in KEY] + ["highvol"] + CONTROLS
         res, d = fit_ols(
             is_r[is_r["stock"].isin(stocks)], "quoted_hs_bps", xv, L, stock_tod=True
         )
         for k in KEY:
-            calm, strs, diff = (
+            low_t, high_t, diff = (
                 res.t_test(f"{k} = 0"),
-                res.t_test(f"{k} + {k}_x_stress = 0"),
-                res.t_test(f"{k}_x_stress = 0"),
+                res.t_test(f"{k} + {k}_x_high = 0"),
+                res.t_test(f"{k}_x_high = 0"),
             )
             reg_rows.append(
                 {
                     "hmm": spec,
                     "group": grp,
                     "var": k,
-                    "calm_coef": float(calm.effect[0]),
-                    "calm_t": float(calm.tvalue[0][0]),
-                    "stressed_coef": float(strs.effect[0]),
-                    "stressed_t": float(strs.tvalue[0][0]),
+                    "lowvol_coef": float(low_t.effect[0]),
+                    "lowvol_t": float(low_t.tvalue[0][0]),
+                    "highvol_coef": float(high_t.effect[0]),
+                    "highvol_t": float(high_t.tvalue[0][0]),
                     "diff_t": float(diff.tvalue[0][0]),
-                    "pct_bars_stressed": 100 * d["stressed"].mean(),
+                    "pct_bars_highvol": 100 * d["highvol"].mean(),
                 }
             )
 
@@ -560,33 +639,31 @@ states = pd.DataFrame(state_rows)
 shares = pd.DataFrame(share_rows)
 by_regime = pd.DataFrame(reg_rows)
 states.to_csv(config.TABLES / "08_hmm_states.csv", index=False, float_format="%.4f")
-shares.to_csv(
-    config.TABLES / "08_hmm_stressed_share.csv", index=False, float_format="%.2f"
-)
+shares.to_csv(config.TABLES / "08_hmm_highvol_share.csv", index=False, float_format="%.2f")
 by_regime.to_csv(
     config.TABLES / "08_hmm_drivers_by_regime.csv", index=False, float_format="%.4f"
 )
 print(
-    "HMM states (inputs standardised, deseasonalised):\n",
+    "HMM states (inputs standardised, deseasonalised; spell = expected bars in the state):\n",
     states.round(2).to_string(index=False),
     "\n",
 )
 print(
-    "% of bars in the stressed regime:\n", shares.round(1).to_string(index=False), "\n"
+    "% of bars in the high-vol state:\n", shares.round(1).to_string(index=False), "\n"
 )
 print(
-    "Drivers by regime (refined spec, in-sample; diff_t tests stressed = calm):\n",
+    "Drivers by regime (refined spec, in-sample; diff_t tests high-vol = low-vol):\n",
     by_regime.round(3).to_string(index=False),
     "\n",
 )
 
-daily = panel.groupby(["stock", "date"])["stressed"].mean().mul(100).reset_index()
+daily = panel.groupby(["stock", "date"])["highvol"].mean().mul(100).reset_index()
 fig, ax = plt.subplots(figsize=(9, 3.8))
 for stock in config.STOCKS:
     s = daily[daily["stock"] == stock]
     ax.plot(
         s["date"],
-        s["stressed"],
+        s["highvol"],
         color=COLORS[stock],
         marker="o",
         markersize=3,
@@ -604,9 +681,9 @@ ax.axvspan(
     linewidth=0,
 )
 ax.set_ylim(0, 100)
-ax.set_ylabel("% of bars stressed")
+ax.set_ylabel("% of bars in high-vol state")
 ax.set_title(
-    "HMM (volatility) stressed share per stock-day, forward-filtered; shaded = OOS",
+    "HMM (volatility) high-vol share per stock-day, forward-filtered; shaded = OOS",
     loc="left",
     fontsize=11,
 )
@@ -617,3 +694,30 @@ fig.autofmt_xdate()
 fig.tight_layout()
 fig.savefig(config.FIGURES / "08_hmm_regimes.png", dpi=150)
 plt.close(fig)
+
+# %% v2: save in- and out-of-sample spread forecasts for the quote-rule script (10)
+# Each linear model is fitted on in-sample days (refined spec, by group) and predicts every
+# bar of its group; LightGBM is the model chosen above. In-sample predictions are only used
+# to scale quotes to the in-sample average width, never to evaluate.
+fc = panel[["stock", "group", "date", "ts", "sample", "quoted_hs_bps", "lag_quoted_hs", "bench_is_avg", "bench_yday"]].copy()
+FC_MODELS = {
+    "refined: controls only": CONTROLS,
+    "refined: vol only": VOL + CONTROLS,
+    "refined: impact only": IMPACT + CONTROLS,
+    "refined: combined": KEY + CONTROLS,
+}
+for grp, stocks in GROUPS.items():
+    g_is, idx = is_[is_["stock"].isin(stocks)], fc["stock"].isin(stocks)
+    rows_ok = idx & panel[KEY + CONTROLS].notna().all(axis=1)
+    for name, xv in FC_MODELS.items():
+        res, _ = fit_ols(g_is, "quoted_hs_bps", xv, L, stock_tod=True)
+        fc.loc[rows_ok, name] = predict(res, panel[rows_ok], xv, stock_tod=True)
+    xv = KEY + CONTROLS + ["lag_quoted_hs"]
+    res, _ = fit_ols(g_is, "quoted_hs_bps", xv, L, stock_tod=True)
+    ok2 = rows_ok & panel["lag_quoted_hs"].notna()
+    fc.loc[ok2, "refined + lagged spread"] = predict(res, panel[ok2], xv, stock_tod=True)
+fc["LightGBM"] = lgbm.predict(ml_frame(panel))
+fc.to_parquet(config.PROCESSED / "spread_forecasts_5min.parquet", index=False)
+chk = fc[fc["sample"] == "OOS"].merge(oos[["stock", "ts", "pred_LightGBM"]], on=["stock", "ts"])
+assert np.allclose(chk["LightGBM"], chk["pred_LightGBM"])  # same forecasts as the race
+print(f"Saved spread forecasts: {len(fc):,} stock-bars -> data/processed/spread_forecasts_5min.parquet")
