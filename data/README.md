@@ -1,15 +1,25 @@
 # Raw data: Nasdaq Copenhagen trades, 1-30 October and 2-6 November 2026
 
-Two exports live under `data/raw/<Stock>/` (gitignored, so each machine needs its own copy):
+Two exports live under `data/raw/<Stock>/` (committed to the repo since 8 Nov 2026):
 
-1. **October (1-30 Oct, IS + OOS)**: first exported by Christian; re-exported in full by Emanuel
-   on 8 Nov 2026 with the settings below so the whole pipeline can be re-run on any machine.
+1. **October (1-30 Oct, IS + OOS)**: Christian's original exports (16 columns: the default 13
+   plus Exch Time, Venue, Tick). These are the files in the repo. Emanuel re-exported October
+   in full on 8 Nov 2026 with the settings below (21 columns); his re-export stays in git
+   history (commit 6fcc529 and earlier) and was replaced by the originals on 8 Nov.
    The re-export reproduces Christian's `01_data_quality_stock_day.csv` exactly on all 132
    stock-days (same lit-trade counts, first and last timestamps, spreads and turnover; only the
    raw row count of the two split Novo days differs by the size of the overlap window).
 2. **November (2-6 Nov, FWD)**: the forward-test week, described in the next section.
 
-## October re-export (8 Nov 2026)
+## Originals vs re-export (checked 8 Nov 2026)
+On the 16 shared columns, 99 of the 136 files are identical. In 31 files only FactSet's `Tick` flag
+on the first 08:45 auction-indicative (`IND`) row differs; the loader drops IND rows and does not
+use `Tick`. The six split files (Novo 5 and 15 Oct, DSV 21 Oct) are cut at a different time, and
+the originals overlap by 30 rows that `io._stitch` removes. Re-running scripts 01-13 and the
+report notebook on the originals reproduces every table and processed file exactly
+(apart from the source-file name of a few trades in the split days).
+
+## October re-export by Emanuel (8 Nov 2026, in git history)
 Low-volume stocks were pulled several trading days per download (the file is then named
 `<SYM>-CSE-<first>-<last>-trades.csv`) and split into one file per day with a small script;
 the loader only sees single-day files. Ranges used: Pandora 2-4 days, GN and ISS 5-7 days

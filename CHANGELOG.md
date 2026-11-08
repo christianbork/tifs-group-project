@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.3 (8-Nov-2026): Christian's original October exports restored
+- `data/raw` October files (136) replaced by Christian's original FactSet exports; Emanuel's 21-column re-export stays in git history. Differences: 5 extra columns not used by the code, the `Tick` flag on the first IND row (dropped), and the split point of the 6 part-files.
+- Scripts 01-13, the report notebook and the 28 tests re-run on the originals: every number in every table and processed file is identical. Outputs refreshed only for the new ISS event label (03 and 08 tables and figures).
+
 ## v2.2 (8-Nov-2026): ISS 29-Oct event identified
 - The 15:20-15:35 sell-off followed the Hong Kong Wang Fuk Court fire inquiry, which partly blamed ISS EastPoint (staff switched off the fire alarms). The report was public from the Hong Kong morning (~09:00 CPH); the first Danish report (MarketWire) came at 15:20 CPH, when the sell-off starts.
 - `config.EVENT_DAYS` label, report Section 2.5 (+1 reference), CLAUDE.md and docs/PLAN.md updated. No numbers change.

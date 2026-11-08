@@ -6,7 +6,7 @@ vol only (main),Pandora,52.67,44.96,,
 vol only (main),GN,57.09,57.59,,
 vol only (main),ISS,57.37,42.71,,
 vol only (main),DSV 2026-10-21 (Q3 earnings),,,80.00,43.57
-vol only (main),ISS 2026-10-29 (intraday sell-off 15:20),,,41.05,57.37
+vol only (main),ISS 2026-10-29 (Wang Fuk Court fire inquiry (DK news 15:20)),,,41.05,57.37
 vol only (main),Novo 2026-11-04 (Q3 report (check)),,,28.42,44.52
 vol only (main),Pandora 2026-11-04 (Q3 report (check)),,,92.63,52.67
 vol only (main),GN 2026-11-05 (Q3 report (check)),,,98.95,57.09
@@ -17,7 +17,7 @@ vol only (main),GN 2026-11-05 (Q3 report (check)),,,98.95,57.09
 "vol only, 3 states",GN,8.01,7.52,,
 "vol only, 3 states",ISS,7.51,4.66,,
 "vol only, 3 states",DSV 2026-10-21 (Q3 earnings),,,97.89,5.87
-"vol only, 3 states",ISS 2026-10-29 (intraday sell-off 15:20),,,18.95,7.51
+"vol only, 3 states",ISS 2026-10-29 (Wang Fuk Court fire inquiry (DK news 15:20)),,,18.95,7.51
 "vol only, 3 states",Novo 2026-11-04 (Q3 report (check)),,,98.95,14.54
 "vol only, 3 states",Pandora 2026-11-04 (Q3 report (check)),,,93.68,10.81
 "vol only, 3 states",GN 2026-11-05 (Q3 report (check)),,,96.84,8.01
@@ -28,7 +28,7 @@ vol only (main),GN 2026-11-05 (Q3 report (check)),,,98.95,57.09
 "vol, turnover, spread",GN,85.39,86.62,,
 "vol, turnover, spread",ISS,86.10,75.19,,
 "vol, turnover, spread",DSV 2026-10-21 (Q3 earnings),,,9.47,70.13
-"vol, turnover, spread",ISS 2026-10-29 (intraday sell-off 15:20),,,73.68,86.10
+"vol, turnover, spread",ISS 2026-10-29 (Wang Fuk Court fire inquiry (DK news 15:20)),,,73.68,86.10
 "vol, turnover, spread",Novo 2026-11-04 (Q3 report (check)),,,1.05,60.74
 "vol, turnover, spread",Pandora 2026-11-04 (Q3 report (check)),,,29.47,85.74
 "vol, turnover, spread",GN 2026-11-05 (Q3 report (check)),,,87.37,85.39
