@@ -111,6 +111,12 @@ What drives bid-ask spreads on Nasdaq Copenhagen stocks, **informed trading (adv
 - Extra validation data: ISS 5-Nov and GN 5-Nov full quote streams and a Novo 10:00–11:00 window on 6-Nov feed the sampling-bias check in 02 (Novo: 3.54 bps time-weighted vs 2.99 trade-weighted in that hour, i.e. the trade-time sample understates the quoted spread of the most liquid stock by ~16%).
 - Rule: read the 09 output once, report it as is, do not go back and change 07/08.
 
+## 8c. Quoting-rule simulation (`10_quoting_rule.py`, added 8-Nov by Emanuel)
+- Why: the rubric asks whether results are economically meaningful; the Week 6 market-making diagram ends in P&L, not RMSE. Also the natural way to present the "negative" forecasting result: a forecast that does not beat persistence in RMSE may still change what a market maker earns, or it may not.
+- Rule: at each 5-min bar post half-spread h_t (a forecast or benchmark), floored at half a tick. A lit trade fills the market maker if the aggressor's effective half-spread e >= h_t (our quote was at least as good as the one hit), up to the stock's median trade size. Revenue h_t, cost = 5-min mid move (05 decomposition), realised = h - impact. Report fills, fill rate, spread captured, adverse selection, realised bps, DKK P&L per day, daily Sharpe, max inventory; frontier plot fill-rate vs realised bps.
+- Rules: IS average, yesterday, last bar, original / refined / log / refined+lag / LightGBM (from 08 and 09 saved predictions), oracle = realised bar spread.
+- First smoke run on the November week with the benchmarks only: quoting at the market's own half-spread loses ~2.4 to 4 bps per fill net of adverse selection in both groups (the week contains the Novo and Pandora report days). Consistent with 05: adverse selection takes the whole effective spread. To be re-run with the model rules once the October data is on the same machine.
+
 ## 9. Critical reflection — top-3 recommendations
 1. Full L1 quote stream: removes the trade-time sampling bias (ISS evidence ~5%). Blocked by the 25k-row export cap (~220 exports needed).
 2. Consolidated data across all European venues.

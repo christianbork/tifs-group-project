@@ -259,6 +259,12 @@ for grp, stocks in GROUPS.items():
         res, oos[idx], xv, stock_tod=True
     )
 
+# %% Save the OOS predictions for the quoting-rule simulation (script 10)
+pred_cols = [c for c in oos.columns if c.startswith("pred_")]
+oos[["stock", "group", "date", "ts", "sample", "event", "quoted_hs_bps", "lag_quoted_hs", *pred_cols]].to_parquet(
+    config.PROCESSED / "predictions_oos.parquet", index=False
+)
+
 # %% OOS race: original vs refined vs alternatives
 print("=" * 100)
 print("NOTE on out-of-sample (22-30 Oct) use:")

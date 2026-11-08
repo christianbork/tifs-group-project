@@ -10,6 +10,7 @@ FINS5566 group project: what drives bid-ask spreads on Nasdaq Copenhagen stocks,
   - Drop IND rows (auction indicative prices). AUC = auction prints, CLS = close, MPM = dark midpoint (venue DCSE).
   - In-sample 1–21 Oct, out-of-sample 22–30 Oct. DSV 21-Oct = earnings day.
   - Forward test (sample label `FWD`): 2–6 Nov 2026, exported by Emanuel on 8-Nov after all models were fixed (see data/README.md). Evaluated ONCE by `analysis/09_forward_holdout.py`; never tune on it. `config.sample_label()` is the single place that assigns IS / OOS / FWD. Event days flagged: Novo 4-Nov, Pandora 4-Nov, GN 5-Nov (Q3 reports, confirm).
+  - `analysis/10_quoting_rule.py` + `src/tifs_group_project/quoting.py`: quoting-rule simulation (fill if the aggressor paid at least the posted half-spread, floored at half a tick; revenue = h, cost = 5-min impact). 08 saves `predictions_oos.parquet`, 09 saves `predictions_fwd.parquet` for it; without them only the benchmark and oracle rules run.
   - Running 01–02 with only the November files in data/raw overwrites the October tables in outputs/tables; restore them with `git checkout -- outputs/` or run with the full October + November data.
   - Remove duplicates only in the overlap between -partN files; some files contain genuinely repeated rows.
   - Pipeline = numbered scripts in analysis/; shared functions in src/tifs_group_project/; report figures from notebooks/report_figures.ipynb.

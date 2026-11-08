@@ -12,7 +12,7 @@ pip install -e .
 Raw data is not in the repo. Put the FactSet exports in `data/raw/<Stock>/` (DSV, GN, ISS, Novo, Pandora, Vestas) and the quote-stream samples in `data/raw/quotes_sample/`. October (1–30 Oct, in-sample + out-of-sample) comes from Christian's exports; the November forward-test week (2–6 Nov) is documented in `data/README.md`.
 
 ## Run order
-Run the scripts in `analysis/` in number order from the project root, e.g. `python analysis/01_load_clean.py`. Scripts 01–08 are the original study (in-sample 1–21 Oct, out-of-sample 22–30 Oct); `09_forward_holdout.py` evaluates the frozen models once on the untouched 2–6 Nov week.
+Run the scripts in `analysis/` in number order from the project root, e.g. `python analysis/01_load_clean.py`. Scripts 01–08 are the original study (in-sample 1–21 Oct, out-of-sample 22–30 Oct); `09_forward_holdout.py` evaluates the frozen models once on the untouched 2–6 Nov week; `10_quoting_rule.py` turns every forecast and benchmark into a market-maker quoting rule and simulates fills, spread capture, adverse selection and P&L on the trade feed (reads the predictions saved by 08 and 09).
 
 ## Structure
 ```

@@ -169,6 +169,21 @@ fwd["pred_LightGBM"] = lgbm.predict(ml_frame(fwd))
 MODELS = ["IS average", "yesterday", "last bar", *SPECS, "LightGBM"]
 for m in MODELS:
     fwd[f"se_{m}"] = (fwd["quoted_hs_bps"] - fwd[f"pred_{m}"]) ** 2
+fwd[
+    [
+        "stock",
+        "group",
+        "date",
+        "ts",
+        "sample",
+        "event",
+        "quoted_hs_bps",
+        "lag_quoted_hs",
+        *[f"pred_{m}" for m in MODELS],
+    ]
+].to_parquet(
+    config.PROCESSED / "predictions_fwd.parquet", index=False
+)  # consumed by script 10 (quoting-rule simulation)
 
 # %% RMSE by group and stock, all days and ex event days
 rows = []
