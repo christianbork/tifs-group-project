@@ -199,6 +199,8 @@ for sample in res["sample"].unique():
 daily = pd.concat(daily, ignore_index=True) if daily else pd.DataFrame()
 
 # %% Figures: fill rate vs realised spread (the trade-off), and daily P&L by rule
+LABELLED = {"IS average", "yesterday", "last bar", "oracle (realised bar spread)", "original: combined",
+            "refined: combined", "refined + lagged spread", "LightGBM"}  # the others overlap; all rules are in the tables
 if not res.empty:
     samples = [s for s in SAMPLES if s in res["sample"].unique()]
     fig, axes = plt.subplots(
@@ -215,9 +217,17 @@ if not res.empty:
                 s=40,
                 zorder=3,
             )
+            short = {
+                "oracle (realised bar spread)": "realised (oracle)",
+                "original: combined": "linear (original)",
+                "refined: combined": "linear (refined)",
+                "refined + lagged spread": "linear + lagged spread",
+            }
             for _, row in r.iterrows():
+                if row["rule"] not in LABELLED:
+                    continue
                 ax.annotate(
-                    row["rule"],
+                    short.get(row["rule"], row["rule"]),
                     (row["fill_rate_pct"], row["realised_bps"]),
                     fontsize=7,
                     xytext=(4, 3),
