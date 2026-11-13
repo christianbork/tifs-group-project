@@ -12,3 +12,5 @@ python-dotenv
 lightgbm
 shap
 hmmlearn
+python-docx
+nbconvert
