@@ -21,7 +21,11 @@ from docx.shared import Cm, Pt, RGBColor
 
 ROOT = Path(__file__).resolve().parents[1]
 T, F = ROOT / "outputs" / "tables", ROOT / "outputs" / "figures"
-SRC, OUT = ROOT / "report" / "REPORT_DRAFT.md", ROOT / "report" / "Group_Report.docx"
+import sys
+
+_APPX = len(sys.argv) > 1 and sys.argv[1] == "appendices"
+SRC = ROOT / "report" / ("APPENDICES.md" if _APPX else "REPORT_DRAFT.md")
+OUT = ROOT / "report" / ("Group_Report_Appendices.docx" if _APPX else "Group_Report.docx")
 
 BODY_FONT, BODY_PT = "Calibri", 10.5
 GREY = RGBColor(0x55, 0x55, 0x55)
@@ -210,6 +214,69 @@ def table6() -> tuple[pd.DataFrame, str]:
 
 
 TABLES = {1: table1, 2: table6, 3: table2, 4: race_combined, 5: table5, 6: table7, 7: table8}
+def c_table1():
+    d = pd.read_csv(T / "report_table1_data_summary.csv")
+    d["Group"] = d["Group"].str.replace("unconstrained", "U").str.replace("constrained", "C")
+    d = d[["Stock", "Group", "Lit trades per day", "Median spread (bps)", "Time at 1 tick (%)"]]
+    d.columns = ["Stock", "Group", "Trades/day", "Spread (bps)", "At 1 tick (%)"]
+    return d, "Table 1. Lit continuous trades, October 2026. C = tick-constrained, U = unconstrained."
+
+
+def c_table2():
+    c = pd.read_csv(T / "08_r1_coefficients.csv").query("spec == 'original'")
+    se = pd.read_csv(T / "07_se_robustness.csv")
+    names = {"impact_roll_ewm_bps": "Rolling impact", "impact_prevday_bps": "Yesterday's impact", "log_vol_har": "Volatility forecast"}
+    rows = []
+    for grp in ["constrained", "unconstrained"]:
+        for v, lab in names.items():
+            x = c[(c.group == grp) & (c["var"] == v)].iloc[0]
+            mint = se[(se.group == grp) & (se["var"] == v)]["t"].abs().min()
+            rows.append({"Group": grp[0].upper(), "Driver": lab, "Coef": f"{x.coef:.2f}", "t": f"{x.t:.1f}",
+                         "+1 SD (bps)": f"{x.effect_1sd:.2f}", "Lowest |t|": f"{mint:.1f}"})
+    return pd.DataFrame(rows), ("Table 2. In-sample regressions of the 5-minute quoted half-spread (bps). "
+                                "Lowest |t| is over six standard-error choices.")
+
+
+def c_table3():
+    d, _ = race_combined()
+    d.columns = ["Rule", "Oct C", "Nov C", "DM C (Oct/Nov)", "Oct U", "Nov U", "DM U (Oct/Nov)"]
+    return d, ("Table 3. Forecast RMSE (bps) in the two test weeks. DM = Diebold-Mariano against the last bar; "
+               "negative favours the rule.")
+
+
+def c_table4():
+    d, _ = table7()
+    d = d.iloc[:, :7]
+    d.columns = ["Week", "Group", "RMSE without", "RMSE with drivers", "DM", "Clark-West z", "DM (LightGBM)"]
+    d["Group"] = d["Group"].str[0].str.upper()
+    return d, ("Table 4. Adding volatility and impact to a model that already has the lagged spread. "
+               "Negative DM or z above 1.645 favours the drivers.")
+
+
+def c_table5():
+    oos = pd.read_csv(T / "10_quoting_oos.csv").set_index(["unit", "rule"])
+    fwd = pd.read_csv(T / "10_quoting_fwd.csv").set_index(["unit", "rule"])
+    lab = {"last bar": "last bar", "refined: combined": "linear", "refined + lagged spread": "linear + lag", "LightGBM": "LightGBM"}
+    rows = []
+    for grp in ["constrained", "unconstrained"]:
+        for rule, l in lab.items():
+            o, f = oos.loc[(grp, rule)], fwd.loc[(grp, rule)]
+            rows.append({"Group": grp[0].upper(), "Rule": l, "Oct fills (%)": f"{o.fill_rate_pct:.0f}", "Oct bps/fill": f"{o.realised_bps:.2f}",
+                         "Nov fills (%)": f"{f.fill_rate_pct:.0f}", "Nov bps/fill": f"{f.realised_bps:.2f}"})
+    return pd.DataFrame(rows), "Table 5. Quoting simulation: share of orders filled and profit per fill after five minutes."
+
+
+CTABLES = {1: c_table1, 2: c_table2, 3: c_table3, 4: c_table4, 5: c_table5, 9: lambda: table8()}
+CFIGURES = {
+    1: ("report_fig1_intraday_tick.png", "Figure 1. Spread, turnover and volatility through the day, and time spent at one tick.", 14),
+    2: ("11_vol_surface.png", "Figure 2. Volatility by sampling interval and hour, relative to each stock's 15-minute level.", 14),
+    3: ("report_fig2_impact_by_stock.png", "Figure 3. Price impact against the effective half-spread.", 11),
+    4: ("09_fwd_rmse.png", "Figure 4. Forecast error by rule: October test week (grey) and November (colour).", 13),
+    5: ("10_quoting_frontier.png", "Figure 5. Quoting rules: fill rate against profit per fill. No rule is above zero.", 11.5),
+    6: ("report_fig4_shap.png", "Figure 6. What LightGBM relies on: SHAP values and the cost of dropping each feature group.", 13),
+}
+
+
 FIGURES = {  # number: (file, caption, width in cm)
     1: ("report_fig1_intraday_tick.png", "Figure 1. Intraday pattern of spread, turnover and volatility (in-sample days, indexed to each "
                                          "stock's daily mean) and the share of time the spread sits at one tick.", 15),
@@ -330,6 +397,8 @@ def add_markdown_runs(p, text: str) -> None:
 
 # ----------------------------------------------------------------------------- build
 def build() -> Path:
+    global TABLES, FIGURES
+    TABLES, FIGURES = CTABLES, CFIGURES  # compact exhibits (whole document near 2,500 words)
     doc = Document()
     sec = doc.sections[0]
     sec.page_height, sec.page_width = Cm(29.7), Cm(21.0)

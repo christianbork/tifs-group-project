@@ -1,5 +1,8 @@
 # Changelog
 
+## v2.5 (18-Nov-2026): short report
+- Report cut to about 2,340 words in Word's own count (text, tables, captions and references together), 7 pages, 5 compact tables and 6 figures. Appendices (AI transparency, contributions, Applied Econometrics checks) moved to `report/APPENDICES.md` -> `Group_Report_Appendices.docx/.pdf`, submitted alongside. Build: `python report/build_docx.py` and `python report/build_docx.py appendices`. Detailed tables dropped from the report remain in `outputs/tables/`.
+
 ## v2.4 (18-Nov-2026): review of the merged version, nested tests in the report, report draft 7
 - **Script 14 (Mathilde's nested driver tests):** Clark-West (2007) tests added for the linear family (`14_nested_driver_clark_west.csv`). Diebold-Mariano is biased against the larger of two nested models; Clark-West shows the drivers carry information in both test weeks (combined vs controls-only z = 2.6 / 3.9 OOS, 4.0 / 3.8 FWD) although they do not improve the forecast as it stands (DM -1.6 to -0.6). Predictions parquet now committed.
 - **Script 13 (quote timing):** "equal width" is equal in-sample width only; in the test weeks the volatility rules quote wider and fill less. New `13_quote_timing_robustness.csv` with (a) a day-level paired test (`quoting.day_level_test`, t with n_days - 1 df) and (b) the same test with widths matched inside the test week. Vol + impact vs controls only: OOS t = 3.2 (p = 0.02, 7 of 7 days), width-matched 2.9; FWD t = 2.2 (p = 0.09), width-matched 0.4. The timing result therefore holds in October only; report Sections 5.2, 7.2 and 7.3 reworded.
