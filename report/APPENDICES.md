@@ -2,17 +2,9 @@
 
 **FINS5566 Trading in Financial Securities, T3 2026.** Christian Bork, Emanuel Annvik, Mathilde Sørensen. Submitted alongside the report and the code.
 
-## Appendix A. AI transparency statement 
+## Appendix A. AI transparency statement
 
-We used generative AI in this project and this is how.
-
-Emanuel used Claude (Anthropic, Claude Code) for: drafting and debugging the forward-test script (`analysis/09_forward_holdout.py`), the quoting-rule simulation (`analysis/10_quoting_rule.py`, `src/tifs_group_project/quoting.py`) and their unit tests; driving the FactSet Time and Sales exports for 1 to 30 October and 2 to 6 November and checking each file for the 25,000-row cap; re-running the full pipeline and comparing the regenerated tables with the committed ones; an independent code review of all scripts, which found and fixed three errors in the first version of the quoting simulation (fills counted per print instead of per order, quotes not snapped to the tick grid, a wrong inventory figure); drafting the report text from the output tables, and editing it for length and language. Every number in the report was checked against the table it comes from, and the tables were produced by the scripts in the repository, not by the model.
-
-[Draft, Christian to confirm:] Christian used Claude (Anthropic, Claude Code) for: writing and debugging the data loader, signing, bars, price-impact, volatility, spread-model and refinement scripts (01 to 08), their unit tests and the figures notebook; a review of the first draft against the Student Guide and the Applied Econometrics material, which led to the second version (standard-error robustness, a dynamic specification, bootstrap intervals for the impact, GARCH diagnostics, ADF, Granger and QLR tests, the equal-width quote-timing test, scripts 12 and 13); and merging that version with the forward test. Outputs were checked with unit tests, the quote-stream validation, the cross-check of the VAR impact against the spread decomposition, an exact re-run of the previous version before any change, and a reconciliation of every number in the report with the output tables.
-
-[Draft, Mathilde to confirm:] Mathilde used OpenAI Codex to help draft and review the nested driver tests (`analysis/14_nested_driver_tests.py`), which ask whether volatility and impact add forecasting information once the last spread is known. She checked the design, ran the script, audited that every model is scored on identical rows (`14_nested_driver_sample_audit.csv`) and interpreted the results. Emanuel added the Clark-West version of the test with Claude after a review.
-
-The research question, the tick-constraint design, the model specifications, the decision to add a forward week and a quoting simulation, and the interpretation of the results are our own. AI output was treated as a draft to be verified, and we are responsible for all content.
+We used AI coding assistants (Claude Code by Anthropic and OpenAI Codex) to help write, debug and review the Python code in this project, to run and check the data pipeline, and to help draft and edit the report text. All output was checked by us: the code with unit tests, validation against full quote streams and exact re-runs, and every number in the report against the table it comes from. The research question, the design, the choice of models and the interpretation of the results are our own, and we are responsible for all content.
 
 ## Appendix B. Contribution statement 
 
