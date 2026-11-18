@@ -28,7 +28,7 @@ import pandas as pd
 from tifs_group_project import config
 from tifs_group_project.bars import tick_size
 from tifs_group_project.impact import decomposition
-from tifs_group_project.quoting import fills, orders, paired_daily_test, scale_to_is_width, summarise
+from tifs_group_project.quoting import day_level_test, fills, orders, paired_daily_test, scale_to_is_width, summarise
 
 RULES = {
     "constant": "bench_is_avg",
@@ -121,6 +121,46 @@ for sample in SAMPLES:
 
 res = pd.DataFrame(results)
 tst = pd.DataFrame(tests)
+
+# %% Robustness of the timing result (added 18-Nov after review)
+# "Equal width" above is equal IN-SAMPLE width. In the test weeks a rule that follows volatility
+# quotes wider on average (volatility was higher), fills less, and every rule loses per fill, so
+# filling less alone looks like "earning more". Two checks, each rule against controls only:
+#   (a) day-level test: sum the P&L difference over stocks per day, t with n_days - 1 df
+#       (stock-days on one date are not independent);
+#   (b) width-matched: rescale the rule, per stock, so that its average quote over the SAME test
+#       sample equals the controls-only average. This uses test-sample information, so it is a
+#       diagnostic of what drives the result, not a tradable rule.
+def _daily(t_s: pd.DataFrame, h: pd.Series) -> pd.Series:
+    cap = t_s["stock"].map(quote_size).to_numpy(float)
+    f = fills(t_s, h, np.inf, t_s["half_tick_bps"])
+    size = np.where(f["filled"], np.minimum(t_s["vol"].to_numpy(float), cap), 0.0)
+    pnl = pd.Series(np.where(f["filled"], size * t_s["mid"].to_numpy(float) * f["realised_bps"] / 1e4, 0.0), index=t_s.index)
+    return pnl.groupby([t_s["stock"], t_s["date"]]).sum(), float(100 * f["filled"].mean())
+
+
+rob = []
+for sample in SAMPLES:
+    t_s = tr[(tr["sample"] == sample)].dropna(subset=list(RULES)).reset_index(drop=True)
+    if t_s.empty:
+        continue
+    bars_s = quotes[quotes["sample"] == sample]
+    base_pnl, base_fill = _daily(t_s, t_s["controls only"])
+    for rule in ["vol rule", "impact rule", "vol + impact rule", "lagged spread + drivers", "LightGBM"]:
+        a, fill_a = _daily(t_s, t_s[rule])
+        k = (bars_s.groupby("stock")["controls only"].mean() / bars_s.groupby("stock")[rule].mean())  # per stock, test sample
+        a_m, fill_m = _daily(t_s, t_s[rule] * t_s["stock"].map(k))
+        width_ratio = float((bars_s.groupby("stock")[rule].mean() / bars_s.groupby("stock")["controls only"].mean()).mean())
+        rob.append({
+            "sample": sample, "rule": rule, "vs": "controls only",
+            "avg_width_ratio_test_sample": width_ratio, "fill_rate_pct": fill_a, "fill_rate_controls_pct": base_fill,
+            "t_stock_day": paired_daily_test(a, base_pnl)["t"], **day_level_test(a, base_pnl),
+            "fill_rate_matched_pct": fill_m, "t_stock_day_matched": paired_daily_test(a_m, base_pnl)["t"],
+            **{f"{k_}_matched": v for k_, v in day_level_test(a_m, base_pnl).items() if k_ in ("t_day", "p_day", "days_better")},
+        })
+rob = pd.DataFrame(rob)
+rob.round(4).to_csv(config.TABLES / "13_quote_timing_robustness.csv", index=False)
+print("Timing result, robustness (vs controls only, all stocks):\n", rob.round(2).to_string(index=False), "\n")
 res.round(4).to_csv(config.TABLES / "13_quote_timing.csv", index=False)
 tst.round(4).to_csv(config.TABLES / "13_quote_timing_tests.csv", index=False)
 show = ["avg_quote_bps", "fill_rate_pct", "avg_half_spread_bps", "adverse_selection_bps", "realised_bps", "pnl_dkk_per_day"]

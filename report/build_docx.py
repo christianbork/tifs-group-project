@@ -155,25 +155,34 @@ def table5() -> tuple[pd.DataFrame, str]:
 
 
 def table7() -> tuple[pd.DataFrame, str]:
-    """Quote timing at equal in-sample average width (script 13)."""
-    res = pd.read_csv(T / "13_quote_timing.csv")
-    tst = pd.read_csv(T / "13_quote_timing_tests.csv").query("vs == 'controls only' and unit == 'all'")
-    rules = ["constant", "last bar", "controls only", "vol rule", "impact rule", "vol + impact rule", "LightGBM"]
+    """Do the drivers add anything once the last spread is known? Nested tests (script 14) and quote timing (script 13)."""
+    rm = pd.read_csv(T / "14_nested_driver_rmse.csv").set_index(["sample", "unit"])
+    dm = pd.read_csv(T / "14_nested_driver_diebold_mariano.csv")
+    cw = pd.read_csv(T / "14_nested_driver_clark_west.csv")
+    rob = pd.read_csv(T / "13_quote_timing_robustness.csv").query("rule == 'vol + impact rule'").set_index("sample")
     rows = []
-    for rule in rules:
-        r = {"Rule (equal average width)": rule}
-        for smp, lab in [("OOS", "OOS"), ("FWD", "FWD")]:
-            for grp, g in [("constrained", "C"), ("unconstrained", "U")]:
-                x = res[(res["sample"] == smp) & (res["unit"] == grp) & (res["rule"] == rule)]
-                r[f"{lab} realised {g} (bps)"] = f"{x['realised_bps'].iloc[0]:.2f}" if len(x) else ""
-            t = tst[(tst["sample"] == smp) & (tst["rule"] == rule)]["t"]
-            r[f"{lab} t vs controls only"] = f"{t.iloc[0]:.1f}" if len(t) else ""
-        rows.append(r)
+    for smp, lab in [("OOS", "22-30 Oct"), ("FWD", "2-6 Nov")]:
+        for grp in ["constrained", "unconstrained"]:
+            d = dm[(dm["sample"] == smp) & (dm.unit == grp)]
+            c = cw[(cw["sample"] == smp) & (cw.unit == grp)]
+            g = lambda fam, m: d[(d.model == f"{fam}: {m}") & (d.vs == f"{fam}: controls only")]["dm_stat"].iloc[0]
+            rows.append({
+                "Week": lab, "Group": grp,
+                "RMSE, lagged spread + controls": f"{rm.loc[(smp, grp), 'linear + lag: controls only']:.3f}",
+                "RMSE, + vol + impact": f"{rm.loc[(smp, grp), 'linear + lag: combined']:.3f}",
+                "DM (linear)": f"{g('linear + lag', 'combined'):.1f}",
+                "Clark-West z (linear)": f"{c[(c.model == 'linear + lag: combined') & (c.vs == 'linear + lag: controls only')]['cw_stat'].iloc[0]:.1f}",
+                "DM (LightGBM)": f"{g('LightGBM', 'combined'):.1f}",
+                "Quote timing t, daily totals": f"{rob.loc[smp, 't_day']:.1f}" if grp == "constrained" else "",
+                "Same, widths matched": f"{rob.loc[smp, 't_day_matched']:.1f}" if grp == "constrained" else "",
+            })
     return pd.DataFrame(rows), (
-        "Table 6. Quote timing: every rule scaled so its in-sample average quote equals the in-sample average spread, so rules "
-        "differ only in when they widen; fills and P&L from the same engine as Table 5. Realised = half-spread earned minus "
-        "the 5-minute mid move, per filled order. t = paired t-test across stock-days of daily DKK P&L against the rule with "
-        "only time-of-day and activity controls (all six stocks). Source: 13_quote_timing.csv, 13_quote_timing_tests.csv.")
+        "Table 6. Do volatility and impact add anything once the last spread is known? Nested comparison with the lagged spread, "
+        "time-of-day and activity controls held fixed. DM = Diebold-Mariano of the larger model against the smaller (negative "
+        "favours adding the drivers; biased against the larger nested model). Clark-West z above 1.645 means the drivers carry "
+        "information (one-sided 5%). Last two columns, all six stocks: paired test on daily P&L totals of the quoting rule with "
+        "the volatility and impact forecasts against the same rule without them, at equal in-sample width and with widths also "
+        "matched inside the test week. Source: 14_nested_driver_*.csv, 13_quote_timing_robustness.csv.")
 
 
 def table8() -> tuple[pd.DataFrame, str]:
@@ -210,15 +219,15 @@ FIGURES = {  # number: (file, caption, width in cm)
     3: ("report_fig2_impact_by_stock.png", "Figure 3. Permanent price impact (Hasbrouck VAR) against the five-minute impact from the spread "
                                            "decomposition and the effective half-spread, medians across days.", 13),
     4: ("09_fwd_rmse.png", "Figure 4. Forecast error by rule: out-of-sample window (grey, used three times) against the forward week "
-                           "(colour, never used for fitting or tuning).", 15),
+                           "(colour, never used for fitting or tuning).", 14),
     5: ("10_quoting_frontier.png", "Figure 5. Quoting rules: fill rate against realised half-spread per fill, net of five-minute adverse "
                                    "selection. No rule is above zero.", 13.5),
-    6: ("report_fig4_shap.png", "Figure 6. What the LightGBM forecast relies on: mean |SHAP| on in-sample bars by group (left) and the "
+    7: ("report_fig4_shap.png", "Figure 7. What the LightGBM forecast relies on: mean |SHAP| on in-sample bars by group (left) and the "
                                 "increase in cross-validated error when a feature group is dropped (right).", 15),
-    7: ("report_fig5_hmm_regimes.png", "Figure 7. Driver coefficients in the low- and high-volatility states (two-state HMM, "
+    8: ("report_fig5_hmm_regimes.png", "Figure 8. Driver coefficients in the low- and high-volatility states (two-state HMM, "
                                        "forward-filtered), with 95% Newey-West intervals.", 15),
-    8: ("13_iss_event.png", "Figure 8. ISS, 29 October: the 15:20 to 15:35 sell-off, the market half-spread and the quotes of three "
-                            "rules set at the start of each 5-minute bar.", 13.5),
+    6: ("13_iss_event.png", "Figure 6. ISS, 29 October: the 15:20 to 15:35 sell-off, the market half-spread and the quotes of three "
+                            "rules set at the start of each 5-minute bar.", 12),
 }
 
 

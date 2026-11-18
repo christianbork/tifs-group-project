@@ -317,6 +317,61 @@ dm.to_csv(
     float_format="%.4f",
 )
 
+# %% Clark-West tests for the nested linear models (added 18-Nov after review)
+# Diebold-Mariano compares the two FORECASTS. When the models are nested it is biased against the
+# larger one: under the null that the extra regressors carry no information, the larger model still
+# estimates their coefficients, and that noise raises its squared error. Clark and West (2007)
+# remove that term: f_t = e_small^2 - [e_big^2 - (yhat_small - yhat_big)^2], and test mean(f) > 0
+# one-sided. DM answers "is the bigger model's forecast better as it stands?"; Clark-West answers
+# "do the drivers carry information?". Reported for the linear family only: the adjustment is
+# derived for linear models estimated by least squares, not for boosted trees.
+from scipy import stats as _stats
+
+cw_rows = []
+for sample in ["OOS", "FWD"]:
+    sample_rows = evaluation[evaluation["sample"] == sample]
+    cw_lags = nw_lags(sample_rows["ts"].nunique())
+    for unit in [*GROUPS, *config.STOCKS]:
+        rows = (
+            sample_rows[sample_rows["group"] == unit]
+            if unit in GROUPS
+            else sample_rows[sample_rows["stock"] == unit]
+        )
+        for model_block, baseline_block in NESTED_PAIRS:
+            big, small = LINEAR_NAMES[model_block], LINEAR_NAMES[baseline_block]
+            y = rows["quoted_hs_bps"]
+            f = (y - rows[f"pred_{small}"]) ** 2 - (
+                (y - rows[f"pred_{big}"]) ** 2 - (rows[f"pred_{small}"] - rows[f"pred_{big}"]) ** 2
+            )
+            f = f.groupby(rows["ts"]).mean().dropna().to_numpy()  # equal weight per stock within a bar
+            t_n = len(f)
+            u = f - f.mean()
+            lrv = u @ u / t_n + 2 * sum(
+                (1 - k / (cw_lags + 1)) * (u[k:] @ u[:-k]) / t_n for k in range(1, cw_lags + 1)
+            )
+            z = f.mean() / np.sqrt(lrv / t_n)
+            cw_rows.append(
+                {
+                    "sample": sample,
+                    "unit": unit,
+                    "model": big,
+                    "vs": small,
+                    "cw_mean": f.mean(),
+                    "cw_stat": z,
+                    "p_one_sided": float(_stats.norm.sf(z)),
+                    "n": t_n,
+                }
+            )
+cw = pd.DataFrame(cw_rows)
+cw.to_csv(
+    config.TABLES / "14_nested_driver_clark_west.csv", index=False, float_format="%.4f"
+)
+print(
+    "Clark-West, linear family, group results (stat > 1.645: the added driver carries information):\n",
+    cw[cw["unit"].isin(GROUPS)].round(3).to_string(index=False),
+    "\n",
+)
+
 # Save only this script's predictions. Existing files used by scripts 10 and 13 are untouched.
 keep = [
     "stock",

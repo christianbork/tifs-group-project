@@ -1,5 +1,13 @@
 # Changelog
 
+## v2.4 (18-Nov-2026): review of the merged version, nested tests in the report, report draft 7
+- **Script 14 (Mathilde's nested driver tests):** Clark-West (2007) tests added for the linear family (`14_nested_driver_clark_west.csv`). Diebold-Mariano is biased against the larger of two nested models; Clark-West shows the drivers carry information in both test weeks (combined vs controls-only z = 2.6 / 3.9 OOS, 4.0 / 3.8 FWD) although they do not improve the forecast as it stands (DM -1.6 to -0.6). Predictions parquet now committed.
+- **Script 13 (quote timing):** "equal width" is equal in-sample width only; in the test weeks the volatility rules quote wider and fill less. New `13_quote_timing_robustness.csv` with (a) a day-level paired test (`quoting.day_level_test`, t with n_days - 1 df) and (b) the same test with widths matched inside the test week. Vol + impact vs controls only: OOS t = 3.2 (p = 0.02, 7 of 7 days), width-matched 2.9; FWD t = 2.2 (p = 0.09), width-matched 0.4. The timing result therefore holds in October only; report Sections 5.2, 7.2 and 7.3 reworded.
+- **Report (draft 7):** Sections 1-7 rewritten in plain language (2,408 words); new Section 4.5 and Table 6 (nested tests and timing robustness, replacing the old timing table); figures in order of appearance (ISS event = Figure 6, SHAP 7, HMM 8); QLR described as descriptive (21 daily observations); Clark and West (2007) added; Appendix A paragraph for Mathilde drafted from the script header (to confirm); Appendix B row for Mathilde and commit counts updated (to confirm).
+- **Reproducibility:** scripts 01-14 and the 28 tests re-run from a clean checkout on macOS; all tables reproduce to the 4th decimal (06 GARCH tables differ in the last digit).
+- **Disclosed:** script 14 scores the forward week again (8 nested models). Nothing is fitted or tuned on it.
+- **Known, not changed:** cluster-robust t-statistics in 07 use normal critical values with 14 day clusters (t(13) gives vol p = 0.03, rolling impact p = 0.09 in the unconstrained group; conclusions unchanged); `requirements.txt` is unpinned (versions in the v2 notes below).
+
 ## v2.3 (8-Nov-2026): Christian's original October exports restored
 - `data/raw` October files (136) replaced by Christian's original FactSet exports; Emanuel's 21-column re-export stays in git history. Differences: 5 extra columns not used by the code, the `Tick` flag on the first IND row (dropped), and the split point of the 6 part-files.
 - Scripts 01-13, the report notebook and the 28 tests re-run on the originals: every number in every table and processed file is identical. Outputs refreshed only for the new ISS event label (03 and 08 tables and figures).

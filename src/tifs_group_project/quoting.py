@@ -128,3 +128,27 @@ def paired_daily_test(pnl_a: pd.Series, pnl_b: pd.Series) -> dict:
         "n_stock_days": n,
         "share_days_better": float((d > 0).mean()),
     }
+
+
+def day_level_test(pnl_a: pd.Series, pnl_b: pd.Series) -> dict:
+    """Paired test on DAILY totals (summed across stocks), the conservative version of paired_daily_test.
+
+    Stock-days on the same date share the market's mood, so they are not independent draws. Summing
+    over stocks first leaves one observation per day and a t distribution with n_days - 1 degrees of
+    freedom. Ties (stocks where the tick grid makes two rules identical) no longer count as losses.
+    """
+    from scipy import stats
+
+    keys = pnl_a.index.union(pnl_b.index)
+    d = pnl_a.reindex(keys, fill_value=0.0) - pnl_b.reindex(keys, fill_value=0.0)
+    by_day = d.groupby(level="date").sum().to_numpy()
+    n = len(by_day)
+    se = by_day.std(ddof=1) / np.sqrt(n) if n > 1 else np.nan
+    t = float(by_day.mean() / se) if se else np.nan
+    return {
+        "mean_diff_dkk_per_day": float(by_day.mean()),
+        "t_day": t,
+        "n_days": n,
+        "p_day": float(2 * stats.t.sf(abs(t), df=n - 1)) if n > 1 and np.isfinite(t) else np.nan,
+        "days_better": int((by_day > 0).sum()),
+    }

@@ -1,0 +1,11 @@
+sample,rule,vs,avg_width_ratio_test_sample,fill_rate_pct,fill_rate_controls_pct,t_stock_day,mean_diff_dkk_per_day,t_day,n_days,p_day,days_better,fill_rate_matched_pct,t_stock_day_matched,t_day_matched,p_day_matched,days_better_matched
+OOS,vol rule,controls only,1.0197,56.1928,61.6972,1.8689,3092.0357,2.2806,7,0.0627,7,58.5394,1.5905,1.7248,0.1353,5
+OOS,impact rule,controls only,0.9968,61.3479,61.6972,0.8737,522.8536,0.7709,7,0.47,4,60.8288,1.4197,1.1467,0.2951,5
+OOS,vol + impact rule,controls only,1.0184,56.4058,61.6972,2.3248,3415.8643,3.2031,7,0.0185,7,58.6854,2.8203,2.875,0.0282,7
+OOS,lagged spread + drivers,controls only,0.9921,58.7773,61.6972,1.7968,2893.2821,1.4526,7,0.1965,4,58.4389,2.0946,1.6052,0.1596,5
+OOS,LightGBM,controls only,0.959,67.8256,61.6972,-0.5696,-1109.9607,-0.6477,7,0.5412,2,64.1963,0.6321,0.7839,0.4629,5
+FWD,vol rule,controls only,1.0593,60.137,65.7175,2.0842,5458.425,3.234,5,0.0319,5,66.2276,0.5245,0.4107,0.7023,2
+FWD,impact rule,controls only,1.007,63.6651,65.7175,0.8511,1316.805,1.1078,5,0.3301,4,65.7813,1.172,1.3206,0.2571,3
+FWD,vol + impact rule,controls only,1.0652,58.9503,65.7175,2.4828,6193.53,2.2127,5,0.0914,5,65.5499,0.4796,0.4125,0.7011,2
+FWD,lagged spread + drivers,controls only,1.0647,59.9519,65.7175,1.9111,3295.06,2.3145,5,0.0816,5,66.4137,-1.0692,-0.8935,0.4221,1
+FWD,LightGBM,controls only,1.0303,65.7227,65.7175,0.4093,1046.155,0.5396,5,0.6181,3,69.2312,-0.1305,-0.1376,0.8972,2

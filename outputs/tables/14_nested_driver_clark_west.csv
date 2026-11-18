@@ -1,0 +1,81 @@
+sample,unit,model,vs,cw_mean,cw_stat,p_one_sided,n
+OOS,constrained,linear + lag: vol only,linear + lag: controls only,0.0501,2.3068,0.0105,665
+OOS,constrained,linear + lag: impact only,linear + lag: controls only,0.0225,2.4425,0.0073,665
+OOS,constrained,linear + lag: combined,linear + lag: controls only,0.0653,2.6495,0.0040,665
+OOS,constrained,linear + lag: combined,linear + lag: vol only,0.0046,0.7589,0.2240,665
+OOS,constrained,linear + lag: combined,linear + lag: impact only,0.0311,1.7207,0.0427,665
+OOS,unconstrained,linear + lag: vol only,linear + lag: controls only,0.0716,2.6539,0.0040,665
+OOS,unconstrained,linear + lag: impact only,linear + lag: controls only,0.1406,4.8093,0.0000,665
+OOS,unconstrained,linear + lag: combined,linear + lag: controls only,0.1395,3.9109,0.0000,665
+OOS,unconstrained,linear + lag: combined,linear + lag: vol only,0.0815,4.6940,0.0000,665
+OOS,unconstrained,linear + lag: combined,linear + lag: impact only,-0.0011,-0.0650,0.5259,665
+OOS,Novo,linear + lag: vol only,linear + lag: controls only,-0.0017,-1.4225,0.9226,665
+OOS,Novo,linear + lag: impact only,linear + lag: controls only,0.0004,0.8897,0.1868,665
+OOS,Novo,linear + lag: combined,linear + lag: controls only,-0.0011,-0.8353,0.7982,665
+OOS,Novo,linear + lag: combined,linear + lag: vol only,0.0004,0.9334,0.1753,665
+OOS,Novo,linear + lag: combined,linear + lag: impact only,-0.0022,-1.9519,0.9745,665
+OOS,DSV,linear + lag: vol only,linear + lag: controls only,0.0033,0.7693,0.2208,665
+OOS,DSV,linear + lag: impact only,linear + lag: controls only,-0.0098,-1.9902,0.9767,665
+OOS,DSV,linear + lag: combined,linear + lag: controls only,-0.0073,-0.9682,0.8335,665
+OOS,DSV,linear + lag: combined,linear + lag: vol only,-0.0124,-2.4540,0.9929,665
+OOS,DSV,linear + lag: combined,linear + lag: impact only,0.0002,0.0457,0.4818,665
+OOS,Vestas,linear + lag: vol only,linear + lag: controls only,-0.0310,-1.3827,0.9166,665
+OOS,Vestas,linear + lag: impact only,linear + lag: controls only,0.0096,1.1394,0.1273,665
+OOS,Vestas,linear + lag: combined,linear + lag: controls only,-0.0091,-0.4590,0.6769,665
+OOS,Vestas,linear + lag: combined,linear + lag: vol only,0.0751,5.5067,0.0000,665
+OOS,Vestas,linear + lag: combined,linear + lag: impact only,-0.0529,-2.8042,0.9975,665
+OOS,Pandora,linear + lag: vol only,linear + lag: controls only,0.0909,4.3367,0.0000,665
+OOS,Pandora,linear + lag: impact only,linear + lag: controls only,0.2680,9.6821,0.0000,665
+OOS,Pandora,linear + lag: combined,linear + lag: controls only,0.1949,7.0574,0.0000,665
+OOS,Pandora,linear + lag: combined,linear + lag: vol only,0.1130,7.1694,0.0000,665
+OOS,Pandora,linear + lag: combined,linear + lag: impact only,-0.0431,-3.2599,0.9994,665
+OOS,GN,linear + lag: vol only,linear + lag: controls only,0.1549,2.1952,0.0141,665
+OOS,GN,linear + lag: impact only,linear + lag: controls only,0.1441,1.8145,0.0348,665
+OOS,GN,linear + lag: combined,linear + lag: controls only,0.2328,2.4090,0.0080,665
+OOS,GN,linear + lag: combined,linear + lag: vol only,0.0564,1.1449,0.1261,665
+OOS,GN,linear + lag: combined,linear + lag: impact only,0.0928,2.2486,0.0123,665
+OOS,ISS,linear + lag: vol only,linear + lag: controls only,0.1488,2.2889,0.0110,665
+OOS,ISS,linear + lag: impact only,linear + lag: controls only,0.0769,2.8416,0.0022,665
+OOS,ISS,linear + lag: combined,linear + lag: controls only,0.2043,2.7920,0.0026,665
+OOS,ISS,linear + lag: combined,linear + lag: vol only,0.0259,1.5060,0.0660,665
+OOS,ISS,linear + lag: combined,linear + lag: impact only,0.0952,1.7598,0.0392,665
+FWD,constrained,linear + lag: vol only,linear + lag: controls only,0.0277,3.4783,0.0003,475
+FWD,constrained,linear + lag: impact only,linear + lag: controls only,0.0616,3.6631,0.0001,475
+FWD,constrained,linear + lag: combined,linear + lag: controls only,0.0796,3.9939,0.0000,475
+FWD,constrained,linear + lag: combined,linear + lag: vol only,0.0351,2.3720,0.0088,475
+FWD,constrained,linear + lag: combined,linear + lag: impact only,0.0089,1.7515,0.0399,475
+FWD,unconstrained,linear + lag: vol only,linear + lag: controls only,0.2848,3.5819,0.0002,475
+FWD,unconstrained,linear + lag: impact only,linear + lag: controls only,0.0407,1.1161,0.1322,475
+FWD,unconstrained,linear + lag: combined,linear + lag: controls only,0.2534,3.8047,0.0001,475
+FWD,unconstrained,linear + lag: combined,linear + lag: vol only,0.1307,3.3549,0.0004,475
+FWD,unconstrained,linear + lag: combined,linear + lag: impact only,0.2903,4.6193,0.0000,475
+FWD,Novo,linear + lag: vol only,linear + lag: controls only,0.0478,3.8766,0.0001,475
+FWD,Novo,linear + lag: impact only,linear + lag: controls only,0.0036,1.9241,0.0272,475
+FWD,Novo,linear + lag: combined,linear + lag: controls only,0.0439,3.7629,0.0001,475
+FWD,Novo,linear + lag: combined,linear + lag: vol only,-0.0083,-4.4909,1.0000,475
+FWD,Novo,linear + lag: combined,linear + lag: impact only,0.0321,3.0314,0.0012,475
+FWD,DSV,linear + lag: vol only,linear + lag: controls only,0.0042,0.7424,0.2289,475
+FWD,DSV,linear + lag: impact only,linear + lag: controls only,0.0108,2.5591,0.0052,475
+FWD,DSV,linear + lag: combined,linear + lag: controls only,0.0111,1.5965,0.0552,475
+FWD,DSV,linear + lag: combined,linear + lag: vol only,0.0064,1.9662,0.0246,475
+FWD,DSV,linear + lag: combined,linear + lag: impact only,-0.0006,-0.1202,0.5478,475
+FWD,Vestas,linear + lag: vol only,linear + lag: controls only,0.2452,7.5892,0.0000,475
+FWD,Vestas,linear + lag: impact only,linear + lag: controls only,0.0120,0.9938,0.1602,475
+FWD,Vestas,linear + lag: combined,linear + lag: controls only,0.1699,6.5381,0.0000,475
+FWD,Vestas,linear + lag: combined,linear + lag: vol only,-0.0374,-4.6300,1.0000,475
+FWD,Vestas,linear + lag: combined,linear + lag: impact only,0.1451,6.3113,0.0000,475
+FWD,Pandora,linear + lag: vol only,linear + lag: controls only,0.6373,3.5285,0.0002,475
+FWD,Pandora,linear + lag: impact only,linear + lag: controls only,0.2406,3.9181,0.0000,475
+FWD,Pandora,linear + lag: combined,linear + lag: controls only,0.6980,4.0545,0.0000,475
+FWD,Pandora,linear + lag: combined,linear + lag: vol only,0.1460,4.1187,0.0000,475
+FWD,Pandora,linear + lag: combined,linear + lag: impact only,0.4686,3.5629,0.0002,475
+FWD,GN,linear + lag: vol only,linear + lag: controls only,-0.0281,-0.2427,0.5959,475
+FWD,GN,linear + lag: impact only,linear + lag: controls only,-0.1306,-1.4248,0.9229,475
+FWD,GN,linear + lag: combined,linear + lag: controls only,-0.1077,-1.3141,0.9056,475
+FWD,GN,linear + lag: combined,linear + lag: vol only,0.2834,2.7616,0.0029,475
+FWD,GN,linear + lag: combined,linear + lag: impact only,0.2572,2.4170,0.0078,475
+FWD,ISS,linear + lag: vol only,linear + lag: controls only,0.0310,2.0662,0.0194,475
+FWD,ISS,linear + lag: impact only,linear + lag: controls only,0.1705,3.4465,0.0003,475
+FWD,ISS,linear + lag: combined,linear + lag: controls only,0.1839,3.3698,0.0004,475
+FWD,ISS,linear + lag: combined,linear + lag: vol only,0.1073,2.4406,0.0073,475
+FWD,ISS,linear + lag: combined,linear + lag: impact only,-0.0049,-0.6138,0.7303,475
