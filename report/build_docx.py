@@ -266,14 +266,38 @@ def c_table5():
     return pd.DataFrame(rows), "Table 5. Quoting simulation: share of orders filled and profit per fill after five minutes."
 
 
-CTABLES = {1: c_table1, 2: c_table2, 3: c_table3, 4: c_table4, 5: c_table5, 9: lambda: table8()}
+def c_table6():
+    """Refined quoting (script 15): base rule vs inventory control vs inventory control + selective quoting."""
+    q = pd.read_csv(T / "15_refined_quoting.csv")
+    lab = {"last bar (base)": "last bar (base)", "inventory control": "inventory control",
+           "selective + inventory": "selective + inventory"}
+    cols = [("Fills (%)", "fill_rate_pct", "{:.0f}", 1), ("bps/fill", "markout5_bps", "{:.2f}", 1),
+            ("P&L/day (DKK k)", "mtm_pnl_dkk_per_day", "{:.1f}", 1e3), ("SD/day (DKK k)", "mtm_pnl_sd_day", "{:.1f}", 1e3),
+            ("Max position (DKK m)", "max_abs_inv_mdkk", "{:.2f}", 1)]
+    rows = []
+    for grp in ["constrained", "unconstrained"]:
+        for rule, l in lab.items():
+            r = {"Group": grp[0].upper(), "Rule": l}
+            o = q[(q["sample"] == "OOS") & (q.group == grp) & (q.rule == rule)].iloc[0]
+            f = q[(q["sample"] == "FWD") & (q.group == grp) & (q.rule == rule)].iloc[0]
+            for name, c, fmt, div in cols:
+                r[f"{name}, Oct / Nov"] = fmt.format(o[c] / div) + " / " + fmt.format(f[c] / div)
+            rows.append(r)
+    return pd.DataFrame(rows), ("Table 6. Refined quoting, parameters chosen on 1 to 21 October. bps/fill = half-spread earned minus the "
+                                "5-minute mid move; P&L = daily mark-to-market P&L with inventory flattened at the day's last mid "
+                                "(mean and SD across days); max position = largest absolute inventory.")
+
+
+CTABLES = {1: c_table1, 2: c_table2, 3: c_table3, 4: c_table4, 5: c_table5, 6: c_table6, 9: lambda: table8()}
 CFIGURES = {
     1: ("report_fig1_intraday_tick.png", "Figure 1. Spread, turnover and volatility through the day, and time spent at one tick.", 14),
     2: ("11_vol_surface.png", "Figure 2. Volatility by sampling interval and hour, relative to each stock's 15-minute level.", 14),
     3: ("report_fig2_impact_by_stock.png", "Figure 3. Price impact against the effective half-spread.", 11),
     4: ("09_fwd_rmse.png", "Figure 4. Forecast error by rule: October test week (grey) and November (colour).", 13),
-    5: ("10_quoting_frontier.png", "Figure 5. Quoting rules: fill rate against profit per fill. No rule is above zero.", 11.5),
+    5: ("15_markout_curve.png", "Figure 5. Realised half-spread per fill by markout horizon: the market's liquidity providers "
+                                "against our market maker quoting the last bar's spread.", 15),
     6: ("report_fig4_shap.png", "Figure 6. What LightGBM relies on: SHAP values and the cost of dropping each feature group.", 13),
+    7: ("15_refined_pnl.png", "Figure 7. Cumulative mark-to-market P&L of the base rule and the refined rules in the two test weeks.", 14),
 }
 
 
@@ -367,7 +391,7 @@ def add_table(doc: Document, df: pd.DataFrame, caption: str) -> None:
             run = cells[j].paragraphs[0].add_run(txt)
             run.font.size = Pt(8)
             cells[j].paragraphs[0].paragraph_format.space_after = Pt(0)
-            if j > 0:
+            if j > 0 and re.fullmatch(r"[-+−]?[\d.,]+%?( / [-+−]?[\d.,]+)?", txt.strip()):
                 cells[j].paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.RIGHT
     keep_together(t)
     doc.add_paragraph().paragraph_format.space_after = Pt(2)
@@ -468,6 +492,11 @@ def build() -> Path:
                     for r in cs[j].paragraphs[0].runs:
                         r.font.size = Pt(8.5)
             doc.add_paragraph()
+            continue
+        if line.startswith("- "):
+            p = doc.add_paragraph(style="List Bullet")
+            add_markdown_runs(p, line[2:])
+            p.paragraph_format.space_after = Pt(2)
             continue
         if re.match(r"^\d+\. ", line):
             p = doc.add_paragraph(style="List Number")

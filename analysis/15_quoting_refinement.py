@@ -32,6 +32,7 @@ import itertools
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from matplotlib.lines import Line2D
 
 from tifs_group_project import config
 from tifs_group_project.bars import tick_size
@@ -378,7 +379,7 @@ print(tests[(tests["sample"] != "IS")].round(3).to_string(index=False))
 daily_all = pd.concat(daily_all, ignore_index=True)
 
 # %% Figures
-fig, axes = plt.subplots(1, 2, figsize=(10, 3.4), sharey=False)
+fig, axes = plt.subplots(1, 2, figsize=(10, 4.0), sharey=False)
 for ax, grp in zip(axes, GROUPS):
     for sample, ls in [("OOS", "-"), ("FWD", "--")]:
         m = markout[(markout["sample"] == sample) & (markout["group"] == grp)]
@@ -404,8 +405,38 @@ for ax, grp in zip(axes, GROUPS):
     ax.set_title(f"{grp.capitalize()} group", loc="left", fontsize=10)
     ax.set_xlabel("Markout horizon")
     ax.set_ylabel("Realised half-spread per fill (bps)")
-axes[1].legend(frameon=False, fontsize=7, loc="lower left")
-fig.tight_layout()
+
+
+h_ = [
+    Line2D(
+        [],
+        [],
+        color="#52514e",
+        marker="o",
+        ms=3,
+        label="market (all aggressive orders)",
+    ),
+    Line2D(
+        [],
+        [],
+        color=GROUP_COLORS["constrained"],
+        marker="o",
+        ms=3,
+        label="market maker, constrained",
+    ),
+    Line2D(
+        [],
+        [],
+        color=GROUP_COLORS["unconstrained"],
+        marker="o",
+        ms=3,
+        label="market maker, unconstrained",
+    ),
+    Line2D([], [], color="#52514e", ls="-", label="solid: 22-30 Oct"),
+    Line2D([], [], color="#52514e", ls="--", label="dashed: 2-6 Nov"),
+]
+fig.legend(handles=h_, frameon=False, fontsize=8, loc="lower center", ncol=3)
+fig.tight_layout(rect=(0, 0.14, 1, 1))
 fig.savefig(config.FIGURES / "15_markout_curve.png", dpi=150)
 plt.close(fig)
 
@@ -430,8 +461,9 @@ for i, sample in enumerate(["OOS", "FWD"]):
             loc="left",
             fontsize=9,
         )
-axes[0, 1].legend(frameon=False, fontsize=7)
-fig.tight_layout()
+h_, l_ = axes[0, 1].get_legend_handles_labels()
+fig.legend(h_, l_, frameon=False, fontsize=8, loc="lower center", ncol=4)
+fig.tight_layout(rect=(0, 0.05, 1, 1))
 fig.savefig(config.FIGURES / "15_refined_pnl.png", dpi=150)
 plt.close(fig)
 print("Saved 15_markout_curve.png and 15_refined_pnl.png")

@@ -318,19 +318,21 @@ for ax, grp in zip(axes, GROUPS):
         oos.loc[grp, MODELS].to_numpy(dtype=float),
         height=0.36,
         color="#c3c2b7",
-        label="OOS 22-30 Oct (used 3x)",
+        label="22-30 Oct test week",
     )
     ax.barh(
         y - 0.19,
         rmse.loc[("all FWD days", grp), MODELS].to_numpy(dtype=float),
         height=0.36,
         color=GROUP_COLORS[grp],
-        label="Forward 2-6 Nov (used once)",
+        label="2-6 Nov forward week (never fitted)",
     )
     ax.set_yticks(y, MODELS)
     ax.set_xlabel("RMSE (bps)")
     ax.set_title(f"{grp.capitalize()} group", loc="left", fontsize=10)
-axes[0].legend(frameon=False, fontsize=8, loc="lower right")
+axes[0].legend(
+    frameon=False, fontsize=8, loc="upper left", bbox_to_anchor=(0, -0.2), ncol=2
+)
 fig.suptitle(
     "Quoted half-spread forecast error: out-of-sample window vs forward test",
     x=0.01,
