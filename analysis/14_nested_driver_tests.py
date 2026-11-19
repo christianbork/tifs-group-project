@@ -1,10 +1,6 @@
 # %% [markdown]
 # # 14 Nested driver tests: do impact and volatility add forecasting information?
 #
-# Analysis owner: Mathilde Sørensen.
-# AI assistance: OpenAI Codex helped draft and review this script. Mathilde is responsible
-# for checking the design, running it, validating the outputs and interpreting the results.
-#
 # This is a post-review diagnostic requested to answer the project's second research
 # question directly. It is deliberately additive: scripts 01-13 and their output files are
 # not changed. Both the October OOS period and the November forward period have already
