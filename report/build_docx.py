@@ -219,7 +219,7 @@ def c_table1():
     d["Group"] = d["Group"].str.replace("unconstrained", "U").str.replace("constrained", "C")
     d = d[["Stock", "Group", "Lit trades per day", "Median spread (bps)", "Time at 1 tick (%)"]]
     d.columns = ["Stock", "Group", "Trades/day", "Spread (bps)", "At 1 tick (%)"]
-    return d, "Table 1. Lit continuous trades, October 2026. C = tick-constrained, U = unconstrained."
+    return d, "Table 1. Lit trades, October 2026. C = tick-constrained, U = unconstrained."
 
 
 def c_table2():
@@ -233,15 +233,13 @@ def c_table2():
             mint = se[(se.group == grp) & (se["var"] == v)]["t"].abs().min()
             rows.append({"Group": grp[0].upper(), "Driver": lab, "Coef": f"{x.coef:.2f}", "t": f"{x.t:.1f}",
                          "+1 SD (bps)": f"{x.effect_1sd:.2f}", "Lowest |t|": f"{mint:.1f}"})
-    return pd.DataFrame(rows), ("Table 2. In-sample regressions of the 5-minute quoted half-spread (bps). "
-                                "Lowest |t| is over six standard-error choices.")
+    return pd.DataFrame(rows), "Table 2. In-sample spread regressions. Lowest |t| over six standard-error choices."
 
 
 def c_table3():
     d, _ = race_combined()
     d.columns = ["Rule", "Oct C", "Nov C", "DM C (Oct/Nov)", "Oct U", "Nov U", "DM U (Oct/Nov)"]
-    return d, ("Table 3. Forecast RMSE (bps) in the two test weeks. DM = Diebold-Mariano against the last bar; "
-               "negative favours the rule.")
+    return d, "Table 3. Forecast RMSE (bps). DM against the last bar; negative favours the rule."
 
 
 def c_table4():
@@ -249,8 +247,7 @@ def c_table4():
     d = d.iloc[:, :7]
     d.columns = ["Week", "Group", "RMSE without", "RMSE with drivers", "DM", "Clark-West z", "DM (LightGBM)"]
     d["Group"] = d["Group"].str[0].str.upper()
-    return d, ("Table 4. Adding volatility and impact to a model that already has the lagged spread. "
-               "Negative DM or z above 1.645 favours the drivers.")
+    return d, ("Table 4. Adding both drivers to a model with the lagged spread. Negative DM or z > 1.645 favours the drivers.")
 
 
 def c_table5():
@@ -283,21 +280,19 @@ def c_table6():
             for name, c, fmt, div in cols:
                 r[f"{name}, Oct / Nov"] = fmt.format(o[c] / div) + " / " + fmt.format(f[c] / div)
             rows.append(r)
-    return pd.DataFrame(rows), ("Table 6. Refined quoting, parameters chosen on 1 to 21 October. bps/fill = half-spread earned minus the "
-                                "5-minute mid move; P&L = daily mark-to-market P&L with inventory flattened at the day's last mid "
-                                "(mean and SD across days); max position = largest absolute inventory.")
+    return pd.DataFrame(rows), ("Table 5. Quoting simulation: base rule and refinements. bps/fill = half-spread minus 5-minute mid move; "
+                                "P&L = daily mark-to-market, inventory flattened at the close.")
 
 
-CTABLES = {1: c_table1, 2: c_table2, 3: c_table3, 4: c_table4, 5: c_table5, 6: c_table6, 9: lambda: table8()}
+CTABLES = {1: c_table1, 2: c_table2, 3: c_table3, 4: c_table4, 5: c_table6, 9: lambda: table8()}
 CFIGURES = {
-    1: ("report_fig1_intraday_tick.png", "Figure 1. Spread, turnover and volatility through the day, and time spent at one tick.", 14),
-    2: ("11_vol_surface.png", "Figure 2. Volatility by sampling interval and hour, relative to each stock's 15-minute level.", 14),
+    1: ("report_fig1_intraday_tick.png", "Figure 1. Intraday spread, turnover, volatility and time at one tick.", 14),
+    2: ("11_vol_surface.png", "Figure 2. Volatility by sampling interval and hour.", 14),
     3: ("report_fig2_impact_by_stock.png", "Figure 3. Price impact against the effective half-spread.", 11),
-    4: ("09_fwd_rmse.png", "Figure 4. Forecast error by rule: October test week (grey) and November (colour).", 13),
-    5: ("15_markout_curve.png", "Figure 5. Realised half-spread per fill by markout horizon: the market's liquidity providers "
-                                "against our market maker quoting the last bar's spread.", 15),
-    6: ("report_fig4_shap.png", "Figure 6. What LightGBM relies on: SHAP values and the cost of dropping each feature group.", 13),
-    7: ("15_refined_pnl.png", "Figure 7. Cumulative mark-to-market P&L of the base rule and the refined rules in the two test weeks.", 14),
+    4: ("09_fwd_rmse.png", "Figure 4. Forecast error: October (grey) and November (colour).", 13),
+    5: ("15_markout_curve.png", "Figure 5. Realised half-spread per fill by markout horizon.", 15),
+    6: ("report_fig4_shap.png", "Figure 6. LightGBM: SHAP values and drop-column importance.", 13),
+    7: ("15_refined_pnl.png", "Figure 7. Cumulative P&L of the base and refined quoting rules.", 14),
 }
 
 
